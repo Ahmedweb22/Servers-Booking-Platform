@@ -5,18 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Remove="Areas\Customer\Data\**" />
-    <Compile Remove="Areas\Customer\Models\**" />
-    <Content Remove="Areas\Customer\Data\**" />
-    <Content Remove="Areas\Customer\Models\**" />
-    <EmbeddedResource Remove="Areas\Customer\Data\**" />
-    <EmbeddedResource Remove="Areas\Customer\Models\**" />
-    <None Remove="Areas\Customer\Data\**" />
-    <None Remove="Areas\Customer\Models\**" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="ICSharpCode.Decompiler" Version="10.0.1.8346" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.12" />
@@ -43,5 +33,14 @@
     <Folder Include="Services\IServices\" />
     <Folder Include="wwwroot\img\banners\" />
     <Folder Include="wwwroot\img\worker\worker_cv\" />
+    <PackageReference Include="Stripe.net" Version="51.1.0" />
+	  <Folder Include="Areas\Worker\Controllers\" />
+	  <Folder Include="Areas\Worker\Views\" />
+	  <Folder Include="Areas\Customer\Controllers\" />
+	  <Folder Include="Areas\Identity\Controllers\" />
+	  <Folder Include="Areas\Identity\Views\" />
+	  <Folder Include="Services\IServices\" />
+	  <Folder Include="wwwroot\img\banners\" />
+	  <Folder Include="wwwroot\img\worker\worker_cv\" />
   </ItemGroup>
 </Project>

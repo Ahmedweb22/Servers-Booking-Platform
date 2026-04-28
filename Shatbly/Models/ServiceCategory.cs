@@ -24,5 +24,7 @@ namespace Shatbly.Models
         public ICollection<BookingItem>? BookingItems { get; set; }
         public ICollection<Promotion>? Promotions { get; set; }
         public ICollection<Review>? Reviews { get; set; }
+        public string? Name { get; internal set; }
+        public decimal Price { get; internal set; }
     }
 }
