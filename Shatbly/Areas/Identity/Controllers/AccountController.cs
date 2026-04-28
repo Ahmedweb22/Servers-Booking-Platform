@@ -23,6 +23,10 @@ namespace Shatbly.Areas.Identity.Controllers
             _accountService = accountService;
             _otpRepository = otpRepository;
         }
+        public IActionResult Index()
+        { 
+        return  View();
+        }
        [HttpPost]
         public async Task<IActionResult> Logout()
         {

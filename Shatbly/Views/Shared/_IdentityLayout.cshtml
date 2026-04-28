@@ -1,0 +1,328 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shtbly | شطبلي - المنصة الأولى لخدمات الصيانة والتشطيب</title>
+    <link rel="stylesheet" href="~/css/identity.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+            :root {
+                --primary-color: #0A2647;
+                --secondary-color: #144272;
+                --accent-color: #205295;
+                --highlight-color: #2C74B3;
+                --gold-accent: #F2C94C;
+                --bg-color: #F8FAFC;
+            }
+
+            body {
+                font-family: 'Cairo', sans-serif;
+                background-color: var(--bg-color);
+                -webkit-font-smoothing: antialiased;
+                color: #333;
+            }
+
+            /* Hero Section with Glassmorphism */
+            .hero-section {
+                background: linear-gradient(135deg, rgba(10, 38, 71, 0.9), rgba(32, 82, 149, 0.8)), url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070') center/cover no-repeat fixed;
+                padding: 60px 0 100px;
+                color: white;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+                border-bottom-left-radius: 50px;
+                border-bottom-right-radius: 50px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .hero-content {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 40px;
+                border-radius: 30px;
+                display: inline-block;
+                max-width: 800px;
+                animation: fadeInDown 1s ease-out;
+            }
+
+            @@keyframes fadeInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            /* Choice Cards */
+            .cards-section {
+                margin-top: -60px;
+                position: relative;
+                z-index: 10;
+            }
+
+            .login-choice-card {
+                border: none;
+                border-radius: 30px;
+                transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+                cursor: pointer;
+                background: #ffffff;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+                height: 100%;
+                position: relative;
+                overflow: hidden;
+                border: 1px solid rgba(0,0,0,0.03);
+            }
+
+                .login-choice-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+                    z-index: 1;
+                    opacity: 0;
+                    transition: opacity 0.5s ease;
+                }
+
+                .login-choice-card:hover {
+                    transform: translateY(-20px);
+                    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+                }
+
+                    .login-choice-card:hover::before {
+                        opacity: 1;
+                    }
+
+                .login-choice-card.worker-card {
+                    background: linear-gradient(145deg, #1a1a2e, #16213e);
+                    color: white;
+                    border: 1px solid rgba(255,255,255,0.05);
+                }
+
+            .icon-circle {
+                width: 90px;
+                height: 90px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 3rem;
+                margin: 0 auto 25px;
+                transition: transform 0.5s ease;
+                position: relative;
+                z-index: 2;
+            }
+
+            .login-choice-card:hover .icon-circle {
+                transform: scale(1.1) rotate(5deg);
+            }
+
+            .worker-card .icon-circle {
+                background: rgba(242, 201, 76, 0.1);
+                color: var(--gold-accent);
+                box-shadow: 0 0 20px rgba(242, 201, 76, 0.2);
+            }
+
+            .client-card .icon-circle {
+                background: rgba(44, 116, 179, 0.1);
+                color: var(--highlight-color);
+                box-shadow: 0 0 20px rgba(44, 116, 179, 0.2);
+            }
+
+            .btn-custom {
+                border-radius: 15px;
+                padding: 14px 30px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                transition: all 0.3s ease;
+                position: relative;
+                z-index: 2;
+            }
+
+                .btn-custom:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+                }
+
+            .worker-card .btn-warning {
+                background-color: var(--gold-accent);
+                border-color: var(--gold-accent);
+            }
+
+            .worker-card .btn-outline-warning {
+                color: var(--gold-accent);
+                border-color: var(--gold-accent);
+            }
+
+                .worker-card .btn-outline-warning:hover {
+                    background-color: var(--gold-accent);
+                    color: #1a1a2e;
+                }
+
+            /* Features Section */
+            .feature-card {
+                background: white;
+                padding: 40px 30px;
+                border-radius: 25px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+                transition: all 0.4s ease;
+                height: 100%;
+                border: 1px solid rgba(0,0,0,0.02);
+            }
+
+                .feature-card:hover {
+                    transform: translateY(-10px);
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+                    border-color: rgba(44, 116, 179, 0.1);
+                }
+
+            .feature-icon-wrapper {
+                width: 70px;
+                height: 70px;
+                background: linear-gradient(135deg, var(--highlight-color), var(--primary-color));
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 20px;
+                transform: rotate(-5deg);
+                transition: transform 0.4s ease;
+            }
+
+            .feature-card:hover .feature-icon-wrapper {
+                transform: rotate(0deg) scale(1.05);
+            }
+
+            .feature-icon-wrapper i {
+                font-size: 2rem;
+                color: white;
+            }
+
+            /* Footer */
+            footer {
+                background: linear-gradient(180deg, #112B4C 0%, #0A192F 100%);
+                border-top: 4px solid var(--highlight-color);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .footer-glow {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 600px;
+                height: 300px;
+                background: radial-gradient(circle, rgba(44,116,179,0.15) 0%, rgba(0,0,0,0) 70%);
+                pointer-events: none;
+            }
+
+            .hover-link {
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+
+                .hover-link:hover {
+                    color: var(--gold-accent) !important;
+                    transform: translateX(-5px);
+                    opacity: 1 !important;
+                }
+
+            .social-icon {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.05);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+
+                .social-icon:hover {
+                    background: var(--highlight-color);
+                    transform: translateY(-3px);
+                    box-shadow: 0 5px 15px rgba(44, 116, 179, 0.4);
+                    color: white !important;
+                }
+
+    </style>
+</head>
+
+<body>
+
+    <header class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="display-4 fw-bold mb-3">SHTBLY - شطبلي</h1>
+                <p class="lead fs-4 mb-0 opacity-75">المنصة الأسرع والأكثر أماناً للوصول لأشطر الفنيين في مصر</p>
+            </div>
+        </div>
+    </header>
+
+
+    @RenderBody()
+
+
+    <footer class="text-white pt-5 pb-3">
+        <div class="footer-glow"></div>
+        <div class="container position-relative z-1">
+            <div class="row g-4 text-center text-md-end mb-4">
+
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h3 class="fw-bold mb-3" style="color: var(--gold-accent);">SHTBLY</h3>
+                    <p class="text-light opacity-75 pe-md-4">
+                        المنصة الموثوقة لخدمات الصيانة والتشطيب في مصر. نهتم بكل تفصيلة في بيتك لنقدم لك أفضل جودة وأعلى مستوى من الاحترافية.
+                    </p>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5 class="fw-bold mb-4 text-white">روابط سريعة</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>سياسة الخصوصية</a></li>
+                        <li class="mb-3"><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>الشروط والأحكام</a></li>
+                        <li><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>تواصل معنا</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-12">
+                    <h5 class="fw-bold mb-4 text-white">تابعنا على</h5>
+                    <div class="d-flex justify-content-center justify-content-md-start gap-3">
+                        <a href="#" class="text-white fs-5 social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white fs-5 social-icon"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white fs-5 social-icon"><i class="bi bi-whatsapp"></i></a>
+                        <a href="#" class="text-white fs-5 social-icon"><i class="bi bi-twitter-x"></i></a>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="border-light opacity-10 my-4">
+            <div class="text-center">
+                <p class="small text-light opacity-50 mb-0">
+                    &copy; 2026 Shtbly. جميع الحقوق محفوظة. صُمم بحب.
+                </p>
+            </div>
+        </div>
+    </footer>
+	<script src="~/js/identity.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
