@@ -16,6 +16,23 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
+    <PackageReference Include="Stripe.net" Version="51.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+
+    <Folder Include="Areas\Admin\Views\" />
+
+    <Folder Include="Areas\Worker\Controllers\" />
+    <Folder Include="Areas\Worker\Views\" />
+    <Folder Include="Areas\Customer\Controllers\" />
+    <Folder Include="Areas\Identity\Controllers\" />
+
+    <Folder Include="Areas\Identity\Views\" />
+    <Folder Include="ViewModels\" />
+
+    <Folder Include="Services\IServices\" />
+    <Folder Include="wwwroot\img\banners\" />
+    <Folder Include="wwwroot\img\worker\worker_cv\" />
     <PackageReference Include="Stripe.net" Version="51.1.0" />
 	  <Folder Include="Areas\Worker\Controllers\" />
 	  <Folder Include="Areas\Worker\Views\" />

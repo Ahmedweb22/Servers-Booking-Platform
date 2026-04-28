@@ -77,7 +77,7 @@ namespace Shatbly
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}")
+                pattern: "{area=Identity}/{controller=Account}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
