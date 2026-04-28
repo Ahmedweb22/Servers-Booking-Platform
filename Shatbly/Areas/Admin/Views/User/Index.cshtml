@@ -30,128 +30,128 @@
                 </div>
             </div>
 
-        </section>
+    </section>
 
 
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
 
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.Users)
+                    {
                         <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Role</th>
-                            <th scope="col">Actions</th>
-                        </tr>
-                    </thead>
+                            <td>@item.Id</td>
+                            <td>@item.UserName</td>
+                            <td>
+                                <span class="badge bg-secondary">@item.RoleName</span>
+                            </td>
 
-                    <tbody>
-                        @foreach (var item in Model.Users)
-                        {
-                            <tr>
-                                <td>@item.Id</td>
-                                <td>@item.UserName</td>
-                                <td>
-                                    <span class="badge bg-secondary">@item.RoleName</span>
-                                </td>
-                           
-                                @if (User.IsInRole(SD.ROLE_SUPER_ADMIN) || User.IsInRole(SD.ROLE_ADMIN))
-                                {
-                                    <td>
-
-                                        <!-- Update -->
-                                        <a href="/Admin/User/Edit/@item.Id"
-                                               class="btn btn-sm btn-outline-warning">
-                                            Edit
-                                        </a>
-
-                                        <!-- Delete -->
-                                        <a href="/Admin/User/Delete/@item.Id"
-                                               class="btn btn-sm btn-outline-danger">
-                                            Delete
-                                        </a>
-                                    </td>
-                                }
-                                else
-                                {
-                                    <td>
-                                        NoActions!!
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    </tbody>
-
-                </table>
-
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 d-flex justify-content-center">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        @if (Model.CurrentPage > 1)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage - 1)">Previous</a>
-                            </li>
-                        }
-                        @for (int i = 1; i <= Model.TotalPages; i++)
-                        {
-                            if (i == Model.CurrentPage)
+                            @if (User.IsInRole(SD.ROLE_SUPER_ADMIN) || User.IsInRole(SD.ROLE_ADMIN))
                             {
-                                <li class="page-item active">
-                                    <a class="page-link" href="/Admin/User/Index?page=@i">@i</a>
-                                </li>
+                                <td>
+
+                                    <!-- Update -->
+                                    <a href="/Admin/User/Edit/@item.Id"
+                                       class="btn btn-sm btn-outline-warning">
+                                        Edit
+                                    </a>
+
+                                    <!-- Delete -->
+                                    <a href="/Admin/User/Delete/@item.Id"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+                                </td>
                             }
                             else
                             {
-                                <li class="page-item">
-                                    <a class="page-link" href="~/Admin/User/Index?page=@i">@i</a>
-                                </li>
+                                <td>
+                                    NoActions!!
+                                </td>
                             }
-                        }
-                        @if (Model.CurrentPage < Model.TotalPages)
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage - 1)">Previous</a>
+                        </li>
+                    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        if (i == Model.CurrentPage)
                         {
-                            <li class="page-item">
-                                <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage + 1)">Next</a>
+                            <li class="page-item active">
+                                <a class="page-link" href="/Admin/User/Index?page=@i">@i</a>
                             </li>
                         }
-
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const deleteLinks = document.querySelectorAll('a.btn-outline-danger');
-            deleteLinks.forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const url = this.href;
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = url;
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="~/Admin/User/Index?page=@i">@i</a>
+                            </li>
                         }
-                    });
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage + 1)">Next</a>
+                        </li>
+                    }
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const deleteLinks = document.querySelectorAll('a.btn-outline-danger');
+        deleteLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const url = this.href;
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
                 });
             });
         });
-    </script>
-    @section Scripts {
-        <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    });
+</script>
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
 
-    }
+}

@@ -35,5 +35,6 @@ namespace Shatbly.Models
         public ICollection<Referral> ReferralsSent { get; set; }
         public ICollection<Referral> ReferralsReceived { get; set; }
         public ICollection<Banner> banners { get; set; }
+        public string Name { get; internal set; }
     }
 }

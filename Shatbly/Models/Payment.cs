@@ -9,7 +9,8 @@ namespace Shatbly.Models
         DebitCard,
         Wallet,
         Cash,
-        BankTransfer
+        BankTransfer,
+        Card
     }
 
     public enum PaymentStatus

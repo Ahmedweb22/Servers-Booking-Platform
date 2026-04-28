@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.EntityFrameworkCore;
+using Shatbly.Services.BookingSystem;
 using Shatbly.Utilities.Dbintializes;
 
 namespace Shatbly
@@ -51,7 +50,8 @@ namespace Shatbly
             builder.Services.AddScoped<IRepository<Banner>, Repository<Banner>>();
             builder.Services.AddScoped<IRepository<WorkerService>, Repository<WorkerService>>();
             builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
-
+            builder.Services.AddScoped<IBookingSystemService, BookingSystemService>();
+            builder.Services.AddScoped<IRepository<Order>, Repository<Order>>();
             builder.Services.AddScoped<IAccountService, Services.AccountService>();
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();

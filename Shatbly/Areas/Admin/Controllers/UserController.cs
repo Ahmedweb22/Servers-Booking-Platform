@@ -62,19 +62,78 @@ namespace Shatbly.Areas.Admin.Controllers
                 Roles = roles.AsEnumerable()
             });
         }
+        //[HttpPost]
+        //public async Task<IActionResult> Create(CreateUserVM createUserVM)
+        //{
+        //    ModelState.Remove("Id");
+        //    ModelState.Remove("User");
+        //    ModelState.Remove("Roles");
+        //    if (!ModelState.IsValid)
+        //    {
+        //        TempData["error-notification"] = "Invalid Data";
+        //        createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+
+        //        return View(createUserVM);
+        //    }
+        //    var user = new User
+        //    {
+        //        FName = createUserVM.FName,
+        //        LName = createUserVM.LName,
+        //        UserName = createUserVM.UserName,
+        //        Email = createUserVM.Email,
+        //        Phone = createUserVM.Phone
+        //    };
+        //    var result = await _userManager.CreateAsync(user, createUserVM.Password);
+        //    if (!result.Succeeded)
+        //    {
+        //        foreach (var error in result.Errors)
+        //        {
+        //            ModelState.AddModelError(string.Empty, error.Description);
+        //        }
+        //        TempData["error-notification"] = $"Save Failed";
+        //    }
+        //    else
+        //    {
+        //        await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
+        //        await _userManager.UpdateAsync(user);
+        //       TempData["success-notification"] = $"Save Successful";
+        //    }
+
+
+        //    return RedirectToAction(nameof(Index));
+        //}
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserVM createUserVM)
         {
             ModelState.Remove("Id");
             ModelState.Remove("User");
             ModelState.Remove("Roles");
+
             if (!ModelState.IsValid)
             {
+                foreach (var error in ModelState)
+                {
+                    Console.WriteLine(error.Key);
+                    foreach (var subError in error.Value.Errors)
+                    {
+                        Console.WriteLine(subError.ErrorMessage);
+                    }
+                }
+
                 TempData["error-notification"] = "Invalid Data";
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
-
                 return View(createUserVM);
             }
+
+            var existingUser = await _userManager.FindByEmailAsync(createUserVM.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "Email already exists");
+                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+                return View(createUserVM);
+            }
+
             var user = new User
             {
                 FName = createUserVM.FName,
@@ -83,22 +142,27 @@ namespace Shatbly.Areas.Admin.Controllers
                 Email = createUserVM.Email,
                 Phone = createUserVM.Phone
             };
+
             var result = await _userManager.CreateAsync(user, createUserVM.Password);
+
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    ModelState.AddModelError("", error.Description);
                 }
-                TempData["error-notification"] = $"Save Failed";
+
+                TempData["error-notification"] = "Save Failed";
+                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+                return View(createUserVM);
             }
-            else
+
+            if (!string.IsNullOrEmpty(createUserVM.RoleName))
             {
                 await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
-                TempData["success-notification"] = $"Save Successful";
             }
 
-
+            TempData["success-notification"] = "Save Successful";
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
