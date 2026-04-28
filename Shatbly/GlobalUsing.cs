@@ -9,3 +9,6 @@ global using Shatbly.Repositories.IRepositories;
 global using Shatbly.Services;
 global using Shatbly.Services.IServices;
 global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Mvc.Rendering;
+global using System.Text.Json;
+

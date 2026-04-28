@@ -63,5 +63,10 @@ namespace Shatbly.Repositories
                 return 0;
             }
         }
+
+        public void Update(PromotionCode promotionCode)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
