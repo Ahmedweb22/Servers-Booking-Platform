@@ -57,10 +57,22 @@
             <span>Services</span>
         </a>
 
-        <a asp-area="Admin" asp-controller="Order" asp-action="Index"
-           class="nav-item @(currentController == "Order" ? "active" : "")">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span>Orders</span>
+        <a asp-area="Admin" asp-controller="WorkerService" asp-action="Index"
+               class="nav-item @(currentController == "WorkerService" ? "active" : "")">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Worker service</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="WorkerProfile" asp-action="Index"
+               class="nav-item @(currentController == "WorkerProfile" ? "active" : "")">
+            <i class="fa-solid fa-briefcase"></i>
+            <span>Worker profile</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="BookingSystem" asp-action="Create"
+           class="nav-item @(currentController == "BookingSystem" ? "active" : "")">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Booking System</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Report" asp-action="Index"

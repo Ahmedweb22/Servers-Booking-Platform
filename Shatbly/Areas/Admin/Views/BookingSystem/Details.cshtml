@@ -1,0 +1,275 @@
+@model Shatbly.ViewModels.BookingDetailsViewModel
+@using Shatbly.Models
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: linear-gradient(180deg, #faf7f2 0%, #f3ece2 100%);
+        color: #1f2937;
+    }
+
+    .details-shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 32px 20px 44px;
+    }
+
+    .banner, .card {
+        background: #fffdf9;
+        border: 1px solid #e7d7c8;
+        border-radius: 24px;
+        box-shadow: 0 16px 45px rgba(51, 37, 24, 0.08);
+    }
+
+    .banner {
+        padding: 24px;
+        margin-bottom: 22px;
+    }
+
+    .banner h1 {
+        margin: 0 0 8px;
+    }
+
+    .banner p {
+        margin: 0;
+        color: #6b7280;
+        line-height: 1.55;
+    }
+
+    .notice {
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #eef9f3;
+        color: #166534;
+    }
+
+    .error {
+        background: #fef3f2;
+        color: #b42318;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 20px;
+    }
+
+    .card {
+        padding: 22px;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .stat {
+        padding: 14px;
+        border-radius: 18px;
+        background: #faf5ee;
+        border: 1px solid #e7d7c8;
+    }
+
+    .stat label {
+        display: block;
+        margin-bottom: 6px;
+        color: #6b7280;
+        font-size: 0.88rem;
+    }
+
+    .stack {
+        display: grid;
+        gap: 16px;
+    }
+
+    input, textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border-radius: 16px;
+        border: 1px solid #d9c5b2;
+        font: inherit;
+    }
+
+    textarea {
+        min-height: 96px;
+        resize: vertical;
+    }
+
+    .btn-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        border: 0;
+        border-radius: 16px;
+        padding: 12px 16px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: #c26a2d;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background: #b42318;
+        color: #fff;
+    }
+
+    .muted {
+        color: #6b7280;
+    }
+
+    @@media (max-width: 860px) {
+        .grid, .stats {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="details-shell">
+    <section class="banner">
+        <h1>Booking #@Model.Booking.Id confirmed in the system</h1>
+        <p>
+            @* this update *@
+             Service: <strong>@Model.Booking.Service</strong> with <strong>@Model.Booking.Worker?.Name</strong>. 
+            Scheduled for <strong>@Model.Booking.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")</strong>.
+        </p>
+
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="notice">@successMessage</div>
+        }
+
+        @if (TempData["Error"] is string errorMessage)
+        {
+            <div class="notice error">@errorMessage</div>
+        }
+    </section>
+
+    <div class="grid">
+        <section class="card stack">
+            <div>
+                <h2 style="margin-top:0;">Booking details</h2>
+                <p class="muted">Everything created by the 5-step wizard is summarized here, including pricing, recurrence, and worker confirmation timing.</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <label>Status</label>
+                    <strong>@Model.Booking.Status</strong>
+                </div>
+                <div class="stat">
+                    <label>Booking type</label>
+                    <strong>@Model.Booking.BookingType</strong>
+                </div>
+                <div class="stat">
+                    <label>Customer</label>
+                    <strong>@Model.Booking.User?.Name</strong>
+                </div>
+                <div class="stat">
+                    <label>Recurring</label>
+                    <strong>@Model.Booking.RecurrencePattern</strong>
+                </div>
+                <div class="stat">
+                    <label>Payment</label>
+                    <strong>@Model.Booking.PaymentMethod / @Model.Booking.PaymentStatus</strong>
+                </div>
+                <div class="stat">
+                    <label>Confirmation deadline</label>
+                    <strong>@(Model.Booking.WorkerResponseDeadlineUtc?.ToLocalTime().ToString("dd MMM yyyy - hh:mm tt") ?? "Not applicable")</strong>
+                </div>
+                <div class="stat">
+                    <label>Address</label>
+                    <strong>@Model.Booking.AddressLabel</strong>
+                    <div class="muted">@Model.Booking.AddressLine</div>
+                </div>
+                <div class="stat">
+                    <label>Notes</label>
+                    <strong>@(string.IsNullOrWhiteSpace(Model.Booking.Notes) ? "No notes" : Model.Booking.Notes)</strong>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <label>Service price</label>
+                    <strong>EGP @Model.Booking.ServicePrice.ToString("0.00")</strong>
+                </div>
+                <div class="stat">
+                    <label>Convenience fee</label>
+                    <strong>EGP @Model.Booking.ConvenienceFee.ToString("0.00")</strong>
+                </div>
+                <div class="stat">
+                    <label>Discount</label>
+                    <strong>EGP @Model.Booking.DiscountAmount.ToString("0.00")</strong>
+                </div>
+                <div class="stat">
+                    <label>Total</label>
+                    <strong>EGP @Model.Booking.TotalPrice.ToString("0.00")</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="stack">
+            <div class="card">
+                <h3 style="margin-top:0;">Reschedule</h3>
+                <p class="muted">Use a new date and time. If the slot is available, the booking moves to <strong>Rescheduled</strong> and the worker gets another 30-minute response window.</p>
+
+                @if (Model.CanReschedule)
+                {
+                    <form asp-controller="BookingSystem" asp-action="Reschedule" method="post" class="stack">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Booking.Id" />
+                        <div>
+                            <label for="scheduledAt">New slot</label>
+                            <input id="scheduledAt" name="scheduledAt" type="datetime-local" value="@Model.Booking.ScheduledAt.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-primary">Reschedule booking</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <p class="muted">This booking can no longer be rescheduled in its current status.</p>
+                }
+            </div>
+
+            <div class="card">
+                <h3 style="margin-top:0;">Cancel with refund policy</h3>
+                <p class="muted">100% refund for 24+ hours, 50% for 2-24 hours, and no refund in the final 2 hours. Current estimated refund: <strong>EGP @Model.RefundPreview.ToString("0.00")</strong>.</p>
+
+                @if (Model.CanCancel)
+                {
+                    <form asp-controller="BookingSystem" asp-action="Cancel" method="post" class="stack">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Booking.Id" />
+                        <div>
+                            <label for="cancellationReason">Reason</label>
+                            <textarea id="cancellationReason" name="cancellationReason" placeholder="Optional explanation for the customer and operations team."></textarea>
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-danger">Cancel booking</button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <p class="muted">This booking can no longer be cancelled in its current status.</p>
+                }
+            </div>
+        </section>
+    </div>
+</div>

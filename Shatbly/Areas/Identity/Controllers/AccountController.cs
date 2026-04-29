@@ -23,6 +23,10 @@ namespace Shatbly.Areas.Identity.Controllers
             _accountService = accountService;
             _otpRepository = otpRepository;
         }
+        public IActionResult Index()
+        { 
+        return  View();
+        }
        [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -143,7 +147,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 TempData["success-notification"] = $"Welcome back {user.UserName}!";
                 return RedirectToAction("Index", "Home", new { area = "Customer" });
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home" , new { area = "Admin" });
         }
         [HttpGet]
         public IActionResult ResendEmailConfirmation()
