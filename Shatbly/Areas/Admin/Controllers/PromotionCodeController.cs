@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Admin.Controllers
 {
+    [Area(SD.ADMIN_AREA)]
+    //[Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
     public class PromotionCodeController : Controller
     {
         private readonly IRepository<PromotionCode> _promotionCodeRepository;
         private readonly IRepository<Promotion> _promotionRepository;
-        private readonly IRepository<Booking> _bookingRepository;
 
-        public PromotionCodeController(IRepository<PromotionCode> promotionCodeRepository, IRepository<Promotion> promotionRepository, IRepository<Booking> bookingRepository)
+        public PromotionCodeController(IRepository<PromotionCode> promotionCodeRepository, IRepository<Promotion> promotionRepository)
         {
             _promotionCodeRepository = promotionCodeRepository;
             _promotionRepository = promotionRepository;
-            _bookingRepository = bookingRepository;
         }
         public async Task<IActionResult> Index(string? code, int page = 1)
         {
@@ -38,12 +39,12 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var bookings = await _bookingRepository.GetAsync(tracking: false);
+            var promotions = await _promotionRepository.GetAsync(tracking: false);
 
             return View(new PromotionCodeCreateVM
             {
                 PromotionCode = new PromotionCode(),
-                Bookings = bookings.AsEnumerable(),
+                Promotions = promotions.AsEnumerable(),
             });
         }
 
@@ -52,7 +53,7 @@ namespace Shatbly.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                vm.Bookings = await _bookingRepository.GetAsync(tracking: false);
+                vm.Promotions = await _promotionRepository.GetAsync(tracking: false);
                 return View(vm);
             }
             await _promotionCodeRepository.CreateAsync(vm.PromotionCode);
@@ -68,12 +69,12 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (promotionCode is null) return NotFound();
 
-            var bookings = await _bookingRepository.GetAsync(tracking: false);
+            var promotions = await _promotionRepository.GetAsync(tracking: false);
 
             return View(new PromotionCodeUpdateResponseVM
             {
                 PromotionCode = promotionCode,
-                Bookings = bookings.AsEnumerable(),
+                Promotions = promotions.AsEnumerable(),
             });
         }
 
@@ -82,7 +83,7 @@ namespace Shatbly.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                vm.Bookings = await _bookingRepository.GetAsync(tracking: false);
+                vm.Promotions = await _promotionRepository.GetAsync(tracking: false);
                 return View(vm);
             }
 

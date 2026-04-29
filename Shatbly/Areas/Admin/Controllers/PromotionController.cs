@@ -1,8 +1,11 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Admin.Controllers
 {
+    [Area(SD.ADMIN_AREA)]
+    //[Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
     public class PromotionController : Controller
     {
         private readonly IRepository<Promotion> _promotionRepository;
@@ -52,6 +55,14 @@ namespace Shatbly.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
+                foreach (var item in ModelState)
+                {
+                    foreach (var error in item.Value.Errors)
+                    {
+                        Console.WriteLine($"Field: {item.Key} - Error: {error.ErrorMessage}");
+                    }
+                }
+
                 vm.ServiceCategories = await _serviceCategoryRepository.GetAsync(tracking: false);
                 return View(vm);
             }

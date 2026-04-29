@@ -1,0 +1,49 @@
+﻿@model ServiceCategory
+<div class="container">
+    <div class="row mb-3 align-items-center my-3">
+        <div class="col-md-6">
+            <h3 class="display-6">Create new Service Category</h3>
+        </div>
+        <!-- Back -->
+        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
+            <a href="/Admin/ServiceCategory/Index" class="btn btn-danger">
+                >> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col-12">
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label asp-for="NameAr" class="form-label">Name (Ar)</label>
+                    <input asp-for="NameAr" class="form-control" id="NameAr" placeholder="Enter name in Arabic" name="nameAr">
+                    <span asp-validation-for="NameAr" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NameEn" class="form-label">Name (En)</label>
+                    <input asp-for="NameEn" class="form-control" id="NameEn" placeholder="Enter name in English" name="nameEn">
+                    <span asp-validation-for="NameEn" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Icon" class="form-label">Service Category Icon</label>
+                    <input asp-for="Icon" type="file" class="form-control" id="Icon" placeholder="Enter service category icon" name="icon">
+                    <span asp-validation-for="Icon" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="IsActive" class="form-label">Status</label>
+                    <select asp-for="IsActive" class="form-select" id="Status">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <span asp-validation-for="IsActive" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

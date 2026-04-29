@@ -1,0 +1,84 @@
+﻿@model PromotionCreateVM
+
+<div class="container">
+    <div class="row mb-3 align-items-center my-3">
+        <div class="col-md-6">
+            <h3 class="display-6">Create new Promotion</h3>
+        </div>
+        <!-- Back -->
+        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
+            <a href="/Admin/Promotion/Index" class="btn btn-danger">
+                 >> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col-12">
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Promotion.Title" class="form-label">Title</label>
+                    <input asp-for="Promotion.Title" class="form-control" placeholder="Enter title">
+                    <span asp-validation-for="Promotion.Title" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.Description" class="form-label">Description</label>
+                    <input asp-for="Promotion.Description" class="form-control" placeholder="Enter description">
+                    <span asp-validation-for="Promotion.Description" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.DiscountValue" class="form-label">Discount Value</label>
+                    <input asp-for="Promotion.DiscountValue" type="number" step="0.01" class="form-control" placeholder="Enter discount value">
+                    <span asp-validation-for="Promotion.DiscountValue" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.DiscountType" class="form-label">Discount Type</label>
+                    <select asp-for="Promotion.DiscountType" class="form-select">
+                        <option value="Percentage">Percentage</option>
+                        <option value="FixedAmount">Fixed Amount</option>
+                    </select>
+                    <span asp-validation-for="Promotion.DiscountType" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.MinOrderValue" class="form-label">Minimum Order Value</label>
+                    <input asp-for="Promotion.MinOrderValue" type="number" step="0.01" class="form-control" placeholder="Enter minimum order value">
+                    <span asp-validation-for="Promotion.MinOrderValue" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.StartDate" class="form-label"></label>
+                    <input asp-for="Promotion.StartDate" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="Promotion.StartDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.EndDate" class="form-label"></label>
+                    <input asp-for="Promotion.EndDate" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="Promotion.EndDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Service Category</label>
+                    <select asp-for="Promotion.CategoryId" class="form-select">
+                        <option value="">-- Select Service Category --</option>
+                        @foreach (var category in Model.ServiceCategories)
+                        {
+                            <option value="@category.Id">@category.NameEn</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Promotion.CategoryId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Promotion.IsActive" class="form-label">Status</label>
+                    <select asp-for="Promotion.IsActive" class="form-select">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <span asp-validation-for="Promotion.IsActive" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

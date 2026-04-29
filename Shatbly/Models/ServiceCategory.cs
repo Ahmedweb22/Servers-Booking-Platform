@@ -9,14 +9,14 @@ namespace Shatbly.Models
 
         [Required]
         [MaxLength(150)]
-        public string NameAr { get; set; }
+        public string NameAr { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(150)]
-        public string NameEn { get; set; }
+        public string NameEn { get; set; } = string.Empty;
 
         [MaxLength(255)]
-        public string Icon { get; set; }
+        public string Icon { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
         public ICollection<WorkerService>? WorkerServices { get; set; }

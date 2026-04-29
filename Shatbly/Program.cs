@@ -44,10 +44,13 @@ namespace Shatbly
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
             builder.Services.AddScoped<IRepository<WorkerProfile>, Repository<WorkerProfile>>();
             builder.Services.AddScoped<IRepository<Address>, Repository<Address>>();
-             builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
-             builder.Services.AddScoped<IRepository<Coupon>, Repository<Coupon>>();
-             builder.Services.AddScoped<IRepository<PromotionCode>, Repository<PromotionCode>>();
+            builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
+            builder.Services.AddScoped<IRepository<Coupon>, Repository<Coupon>>();
+            builder.Services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();    
+            builder.Services.AddScoped<IRepository<PromotionCode>, Repository<PromotionCode>>();
             builder.Services.AddScoped<IRepository<Banner>, Repository<Banner>>();
+            builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
+
             builder.Services.AddScoped<IRepository<WorkerService>, Repository<WorkerService>>();
             builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
             builder.Services.AddScoped<IBookingSystemService, BookingSystemService>();
