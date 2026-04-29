@@ -33,14 +33,26 @@
             <span>Coupons</span>
         </a>
 
+        <a asp-area="Admin" asp-controller="Promotion" asp-action="Index"
+               class="nav-item @(currentController == "Promotion" ? "active" : "")">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Promotions</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="PromotionCode" asp-action="Index"
+               class="nav-item @(currentController == "PromotionCode" ? "active" : "")">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Promotion Codes</span>
+        </a>
+
         <a asp-area="Admin" asp-controller="Booking" asp-action="Index"
            class="nav-item @(currentController == "Booking" ? "active" : "")">
             <i class="fa-solid fa-calendar-check"></i>
             <span>Booking</span>
         </a>
 
-        <a asp-area="Admin" asp-controller="Service" asp-action="Index"
-           class="nav-item @(currentController == "Service" ? "active" : "")">
+        <a asp-area="Admin" asp-controller="ServiceCategory" asp-action="Index"
+               class="nav-item @(currentController == "ServiceCategory" ? "active" : "")">
             <i class="fa-solid fa-briefcase"></i>
             <span>Services</span>
         </a>

@@ -1,0 +1,85 @@
+﻿@model PromotionCodeUpdateResponseVM
+<div class="container">
+    <div class="row mb-3 align-items-center my-3">
+        <div class="col-md-6">
+            <h3 class="display-6">Edit Promotion Code</h3>
+        </div>
+        <!-- Back -->
+        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
+            <a href="/Admin/PromotionCode/Index" class="btn btn-danger">
+                >> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row my-3">
+        <div class="col-12">
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="@Model.PromotionCode.Id" />
+                <div class="mb-3">
+                    <label asp-for="PromotionCode.Code" class="form-label">Code</label>
+                    <input asp-for="PromotionCode.Code" class="form-control" placeholder="Enter code">
+                    <span asp-validation-for="PromotionCode.Code" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PromotionCode.MaxUses" class="form-label">Max Uses</label>
+                    <input asp-for="PromotionCode.MaxUses" type="number" class="form-control" placeholder="Enter max uses">
+                    <span asp-validation-for="PromotionCode.MaxUses" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PromotionCode.UsedCount" class="form-label">Used Count</label>
+                    <input asp-for="PromotionCode.UsedCount" type="number" class="form-control" placeholder="Enter used count">
+                    <span asp-validation-for="PromotionCode.UsedCount" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Promotion Title</label>
+                    <select asp-for="PromotionCode.PromotionId" class="form-select">
+                        <option value="">-- Select Promotion --</option>
+                        @foreach (var promotion in Model.Promotions)
+                        {
+                            <option value="@promotion.Id" selected="@(promotion.Id == Model.PromotionCode.PromotionId)">
+                                @promotion.Title
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="PromotionCode.PromotionId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PromotionCode.IsActive" class="form-label">Status</label>
+                    <select asp-for="PromotionCode.IsActive" class="form-select">
+                        @if (Model.PromotionCode.IsActive)
+                        {
+                            <option value="true" selected>Active</option>
+                            <option value="false">Inactive</option>
+                        }
+                        else
+                        {
+                            <option value="true">Active</option>
+                            <option value="false" selected>Inactive</option>
+                        }
+                      
+                    </select>
+                    <span asp-validation-for="PromotionCode.IsActive" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-success">Update</button>
+            </form> 
+        </div>
+    </div>
+</div>
+<script>
+    function previewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+</script>
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}
+
