@@ -1,30 +1,34 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
 using Shatbly.Services.BookingSystem;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shatbly.Areas.Customer.Controllers
 {
-    [Area(SD.ADMIN_AREA)]
- 
-    public class BookingSystemController(IBookingSystemService bookingSystemService) : Controller
+    [Area(SD.CUSTOMER_AREA)]
+    public class BookingSystemController : Controller
     {
-        [HttpGet]
-        public async Task<IActionResult> Create()
+        private readonly IBookingSystemService _bookingSystemService;
+        public BookingSystemController(IBookingSystemService bookingSystemService)
         {
-            var model = await bookingSystemService.BuildCreateViewModelAsync();
+            _bookingSystemService = bookingSystemService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateBooking()
+        {
+            var model = await _bookingSystemService.BuildCreateViewModelAsync();
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BookingWizardViewModel model)
+        public async Task<IActionResult> CreateBooking(BookingWizardViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(await bookingSystemService.BuildCreateViewModelAsync(model));
+                return View(await _bookingSystemService.BuildCreateViewModelAsync(model));
             }
 
-            var result = await bookingSystemService.CreateAsync(model);
+            var result = await _bookingSystemService.CreateAsync(model);
             if (!result.Succeeded)
             {
                 foreach (var error in result.ValidationErrors)
@@ -39,13 +43,13 @@ namespace Shatbly.Areas.Admin.Controllers
             }
 
             TempData["Success"] = result.SuccessMessage;
-            return RedirectToAction(nameof(Details), new { id = result.BookingId });
+            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> DetailsBooking(int id)
         {
-            var model = await bookingSystemService.GetDetailsAsync(id);
+            var model = await _bookingSystemService.GetDetailsAsync(id);
             if (model is null)
             {
                 return NotFound();
@@ -58,28 +62,28 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reschedule(int id, string scheduledAt)
         {
-            var result = await bookingSystemService.RescheduleAsync(id, scheduledAt);
+            var result = await _bookingSystemService.RescheduleAsync(id, scheduledAt);
             if (result.NotFound)
             {
                 return NotFound();
             }
 
             TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
-            return RedirectToAction(nameof(Details), new { id = result.BookingId });
+            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id, string? cancellationReason)
         {
-            var result = await bookingSystemService.CancelAsync(id, cancellationReason);
+            var result = await _bookingSystemService.CancelAsync(id, cancellationReason);
             if (result.NotFound)
             {
                 return NotFound();
             }
 
             TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
-            return RedirectToAction(nameof(Details), new { id = result.BookingId });
+            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
     }
 }

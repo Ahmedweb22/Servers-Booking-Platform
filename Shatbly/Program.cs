@@ -70,6 +70,7 @@ namespace Shatbly
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
             var scope = app.Services.CreateScope();
             var Service = scope.ServiceProvider.GetService<IDbintialize>();

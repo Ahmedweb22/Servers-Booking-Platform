@@ -1,8 +1,163 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <!-- 2. Advanced Filter Bar -->
+    <nav class="filter-bar">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
+            <div class="search-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة...">
+            </div>
+            
+            <div class="category-chips">
+                <div class="chip active"><i class="bi bi-grid-fill"></i> الكل</div>
+                <div class="chip"><i class="bi bi-droplet-fill text-info"></i> سباكة</div>
+                <div class="chip"><i class="bi bi-lightning-charge-fill text-warning"></i> كهرباء</div>
+                <div class="chip"><i class="bi bi-brush-fill text-danger"></i> نقاشة</div>
+                <div class="chip"><i class="bi bi-hammer text-secondary"></i> نجارة</div>
+                <div class="chip"><i class="bi bi-snow text-primary"></i> تكييف</div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 ms-3 border-start ps-3">
+            <select class="filter-select">
+                <option selected disabled>المكان</option>
+                <option>الإسكندرية - سموحة</option>
+                <option>الإسكندرية - ميامي</option>
+                <option>القاهرة - التجمع</option>
+            </select>
+            <button class="btn btn-dark fw-bold rounded-3 px-3 py-2"><i class="bi bi-sliders me-1"></i> فلتر</button>
+        </div>
+    </nav>
+
+    <!-- 3. Main Content -->
+    <div class="main-layout">
+        
+        <!-- Sidebar: Workers List -->
+        <aside class="workers-sidebar">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h5 class="mb-0">فنيين متاحين في منطقتك</h5>
+                <span class="text-muted fw-bold small">124 نتيجة</span>
+            </div>
+
+            <!-- Featured Worker Card -->
+            <div class="worker-card featured">
+                <span class="featured-badge"><i class="bi bi-star-fill me-1"></i> مميز</span>
+                
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex gap-3">
+                        <div class="avatar-container">
+                            <img src="https://images.unsplash.com/photo-1540569014015-19a7be504e3a?q=80&w=200&auto=format&fit=crop" class="worker-avatar" alt="Worker">
+                            <span class="online-dot"></span>
+                        </div>
+                        <div>
+                            <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
+                                الأسطى محمود صابر 
+                                <i class="bi bi-patch-check-fill verified-icon ms-1" title="موثق"></i>
+                            </h6>
+                            <p class="text-muted fw-semibold small mb-2">مقاول سباكة وصرف صحي متكامل</p>
+                            <div class="d-flex gap-2">
+                                <span class="tag"><i class="bi bi-tools me-1"></i> تأسيس وتشطيب</span>
+                                <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> يبعد 2.4 كم</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="fav-btn active"><i class="bi bi-heart-fill"></i></button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="price-tag">150 - 250 <span class="fs-6 text-muted fw-semibold">ج.م / معاينة</span></div>
+                    <button class="btn-book">طلب خدمة</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item"><div class="rating-box"><i class="bi bi-star-fill"></i> 4.9</div></div>
+                    <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 142 مهمة مكتملة</div>
+                    <div class="stat-item"><i class="bi bi-reply-fill text-primary fs-6"></i> سرعة الرد: عالي</div>
+                </div>
+            </div>
+
+            <!-- Normal Worker Card 1 -->
+            <div class="worker-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex gap-3">
+                        <div class="avatar-container">
+                            <img src="https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop" class="worker-avatar" alt="Worker">
+                            <span class="online-dot" style="background-color: #f59e0b;"></span> <!-- Busy but available soon -->
+                        </div>
+                        <div>
+                            <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
+                                م. أحمد الدسوقي
+                                <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
+                            </h6>
+                            <p class="text-muted fw-semibold small mb-2">فني كهرباء سمارت هوم</p>
+                            <div class="d-flex gap-2">
+                                <span class="tag"><i class="bi bi-house-gear me-1"></i> سمارت هوم</span>
+                                <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> يبعد 3.1 كم</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="fav-btn"><i class="bi bi-heart-fill"></i></button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">ج.م / معاينة</span></div>
+                    <button class="btn-book bg-light text-dark border">التفاصيل</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item"><div class="rating-box"><i class="bi bi-star-fill"></i> 4.7</div></div>
+                    <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 89 مهمة مكتملة</div>
+                </div>
+            </div>
+
+            <!-- Normal Worker Card 2 -->
+            <div class="worker-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex gap-3">
+                        <div class="avatar-container">
+                            <div class="worker-avatar bg-light d-flex align-items-center justify-content-center border">
+                                <i class="bi bi-person text-muted fs-1"></i>
+                            </div>
+                            <span class="online-dot text-muted bg-secondary"></span>
+                        </div>
+                        <div>
+                            <h6 class="fw-800 mb-1 fs-5">سيد عبد الرحمن</h6>
+                            <p class="text-muted fw-semibold small mb-2">صنايعي نقاشة وديكورات</p>
+                            <div class="d-flex gap-2">
+                                <span class="tag"><i class="bi bi-palette me-1"></i> ديكور حديث</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="fav-btn"><i class="bi bi-heart-fill"></i></button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="price-tag">يحدد بعد المعاينة</div>
+                    <button class="btn-book bg-light text-dark border">التفاصيل</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item"><div class="rating-box text-muted bg-light"><i class="bi bi-star"></i> جديد</div></div>
+                    <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 3 مهام مكتملة</div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Map Area -->
+        <main id="map-container">
+            <div class="map-overlay">
+                <div class="map-badge">
+                    <i class="bi bi-geo-alt-fill fs-1 text-primary mb-2 d-block"></i>
+                    <h4 class="fw-800 mb-1">خريطة الفنيين التفاعلية</h4>
+                    <p class="text-muted fw-semibold mb-0">جاري تحميل الخريطة والمواقع المباشرة للفنيين...</p>
+                </div>
+            </div>
+            
+            <!-- Emergency Button -->
+            <button class="fab-emergency">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                طلب طوارئ سريع
+            </button>
+        </main>
+    </div>

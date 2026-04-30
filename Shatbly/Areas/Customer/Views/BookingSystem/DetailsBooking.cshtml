@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.BookingDetailsViewModel
+﻿@model Shatbly.ViewModels.BookingDetailsViewModel
 @using Shatbly.Models
 
 @{
@@ -31,15 +31,15 @@
         margin-bottom: 22px;
     }
 
-    .banner h1 {
-        margin: 0 0 8px;
-    }
+        .banner h1 {
+            margin: 0 0 8px;
+        }
 
-    .banner p {
-        margin: 0;
-        color: #6b7280;
-        line-height: 1.55;
-    }
+        .banner p {
+            margin: 0;
+            color: #6b7280;
+            line-height: 1.55;
+        }
 
     .notice {
         margin-top: 14px;
@@ -77,12 +77,12 @@
         border: 1px solid #e7d7c8;
     }
 
-    .stat label {
-        display: block;
-        margin-bottom: 6px;
-        color: #6b7280;
-        font-size: 0.88rem;
-    }
+        .stat label {
+            display: block;
+            margin-bottom: 6px;
+            color: #6b7280;
+            font-size: 0.88rem;
+        }
 
     .stack {
         display: grid;
@@ -144,7 +144,7 @@
         <h1>Booking #@Model.Booking.Id confirmed in the system</h1>
         <p>
             @* this update *@
-             Service: <strong>@Model.Booking.Service</strong> with <strong>@Model.Booking.Worker?.Name</strong>. 
+            Service: <strong>@Model.Booking.Service</strong> with <strong>@Model.Booking.Worker?.Name</strong>.
             Scheduled for <strong>@Model.Booking.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")</strong>.
         </p>
 
@@ -273,3 +273,4 @@
         </section>
     </div>
 </div>
+
