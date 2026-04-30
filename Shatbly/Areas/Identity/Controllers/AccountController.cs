@@ -27,7 +27,7 @@ namespace Shatbly.Areas.Identity.Controllers
         { 
         return  View();
         }
-       [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
