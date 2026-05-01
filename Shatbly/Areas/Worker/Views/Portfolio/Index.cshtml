@@ -1,0 +1,63 @@
+﻿@model IReadOnlyList<Shatbly.ViewModels.PortfolioVM>
+
+@{
+    ViewData["Title"] = "Portfolio";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Portfolio</h2>
+        <p class="text-muted mb-0">Show your previous work to customers</p>
+    </div>
+
+    <a asp-action="Upload" class="btn btn-primary">
+        Upload Media
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="page-card p-4 text-center">
+        <h5>No portfolio media yet</h5>
+        <p class="text-muted mb-3">Upload images or videos to build your worker profile.</p>
+        <a asp-action="Upload" class="btn btn-primary">Upload First Item</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-6 col-xl-4">
+                <div class="page-card overflow-hidden h-100">
+                    @if (item.FileType == "Image")
+                    {
+                        <img src="@Url.Content(item.FilePath)"
+                             alt="Portfolio image"
+                             class="w-100"
+                             style="height: 230px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <video class="w-100"
+                               style="height: 230px; object-fit: cover;"
+                               controls>
+                            <source src="@Url.Content(item.FilePath)" type="video/mp4" />
+                        </video>
+                    }
+
+                    <div class="p-3 d-flex justify-content-between align-items-center">
+                        <span class="badge bg-light text-dark border">@item.FileType</span>
+
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

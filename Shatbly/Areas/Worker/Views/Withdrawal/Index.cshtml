@@ -1,0 +1,50 @@
+﻿@model IReadOnlyList<Shatbly.ViewModels.WithdrawalListVM>
+
+@{
+    ViewData["Title"] = "Withdrawals";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Withdrawals</h2>
+        <p class="text-muted mb-0">Track your withdrawal requests</p>
+    </div>
+
+    <a asp-action="Create" class="btn btn-primary">New Request</a>
+</div>
+
+<div class="page-card p-4">
+    @if (!Model.Any())
+    {
+        <p class="text-muted mb-0">No withdrawal requests yet.</p>
+    }
+    else
+    {
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    var badgeClass = item.Status switch
+                    {
+                        "Approved" => "bg-success",
+                        "Rejected" => "bg-danger",
+                        _ => "bg-warning text-dark"
+                    };
+
+                    <tr>
+                        <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><span class="badge @badgeClass">@item.Status</span></td>
+                        <td class="text-end">@item.Amount.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

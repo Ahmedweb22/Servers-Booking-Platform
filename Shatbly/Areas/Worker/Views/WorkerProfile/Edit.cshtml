@@ -1,0 +1,95 @@
+﻿@model Shatbly.ViewModels.EditWorkerProfileVM
+
+@{
+    ViewData["Title"] = "Edit Worker Profile";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Edit Worker Profile</h2>
+            <p class="text-muted mb-0">Update profile information and CV</p>
+        </div>
+
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+            Back to Details
+        </a>
+    </div>
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+
+                <input asp-for="Id" type="hidden" />
+                <input asp-for="ExistingCVPath" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Bio" class="form-label"></label>
+                    <textarea asp-for="Bio" class="form-control" rows="6"></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input asp-for="IsAvailable" class="form-check-input" />
+                    <label asp-for="IsAvailable" class="form-check-label"></label>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="AcceptsOnline" class="form-check-input" />
+                    <label asp-for="AcceptsOnline" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">CV Upload</h5>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ExistingCVPath))
+            {
+                <p>
+                    Current CV:
+                    <a href="@Url.Content(Model.ExistingCVPath)" target="_blank">Download</a>
+                </p>
+            }
+
+            <form asp-action="UploadCv" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <input asp-for="Id" type="hidden" />
+                <input asp-for="Bio" type="hidden" />
+                <input asp-for="IsAvailable" type="hidden" />
+                <input asp-for="AcceptsOnline" type="hidden" />
+                <input asp-for="ExistingCVPath" type="hidden" />
+
+                <div class="mb-3">
+                    <label asp-for="CVFile" class="form-label"></label>
+                    <input asp-for="CVFile" type="file" accept="application/pdf,.pdf" class="form-control" />
+                    <span asp-validation-for="CVFile" class="text-danger"></span>
+                    <div class="form-text">PDF only. Maximum size: 5 MB.</div>
+                </div>
+
+                <button type="submit" class="btn btn-outline-primary">
+                    Upload CV
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
