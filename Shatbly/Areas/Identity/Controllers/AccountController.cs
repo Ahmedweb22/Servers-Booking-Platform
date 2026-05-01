@@ -115,7 +115,7 @@ namespace Shatbly.Areas.Identity.Controllers
             var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
                await _userManager.FindByNameAsync(model.EmailOrUserName);
 
-            if (user == null)
+            if (user is null)
             {
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return View(model);
@@ -140,7 +140,7 @@ namespace Shatbly.Areas.Identity.Controllers
             if (await _userManager.IsInRoleAsync(user, SD.ROLE_WORKER))
             {
                 TempData["success-notification"] = $"Welcome back {user.UserName}!";
-                return RedirectToAction("Index" , "Home" , new {area = "Worker"});
+                return RedirectToAction("Details" , "WorkerProfile", new {area = "Worker"});
             }
             else if (await _userManager.IsInRoleAsync(user, SD.ROLE_CUSTOMER))
             {

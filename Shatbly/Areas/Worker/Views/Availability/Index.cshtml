@@ -1,0 +1,104 @@
+﻿@model IReadOnlyList<Shatbly.ViewModels.AvailabilityVM>
+
+@{
+    ViewData["Title"] = "Weekly Availability";
+    //var workerId = (int)ViewBag.WorkerId;
+    var groupedSchedule = Model.GroupBy(x => x.DayOfWeek).ToDictionary(x => x.Key, x => x.ToList());
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Weekly Availability</h2>
+            <p class="text-muted mb-0">Manage worker schedule</p>
+        </div>
+
+        @* <a asp-action="Create" asp-route-workerId="@workerId" class="btn btn-primary">
+            Add Time Slot
+        </a> *@
+        <a asp-action="Create" class="btn btn-primary">Add Time Slot</a>
+
+    </div>
+
+    @if (TempData["Success"] is not null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row g-3">
+        @foreach (Shatbly.Models.DayOfWeek day in Enum.GetValues<Shatbly.Models.DayOfWeek>())
+        {
+            var slots = groupedSchedule.GetValueOrDefault(day) ?? new List<Shatbly.ViewModels.AvailabilityVM>();
+
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-light">
+                        <strong>@day</strong>
+                    </div>
+
+                    <div class="card-body">
+                        @if (!slots.Any())
+                        {
+                            <p class="text-muted mb-0">No availability</p>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var slot in slots)
+                                {
+                                    <div class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="fw-semibold">
+                                                @slot.StartTime.ToString(@"hh\:mm")
+                                            </span>
+                                            <span class="text-muted">to</span>
+                                            <span class="fw-semibold">
+                                                @slot.EndTime.ToString(@"hh\:mm")
+                                            </span>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            @* <a asp-action="Edit"
+                                               asp-route-workerId="@slot.WorkerId"
+                                               asp-route-id="@slot.Id"
+                                               class="btn btn-sm btn-outline-primary">
+                                                Edit
+                                            </a> *@
+                                            <a asp-action="Edit"
+                                               asp-route-id="@slot.Id"
+                                               class="btn btn-sm btn-outline-primary">
+                                                Edit
+                                            </a>
+
+
+                                            @* <form asp-action="Delete"
+                                                  asp-route-id="@slot.Id"
+                                                  asp-route-workerId="@slot.WorkerId"
+                                                  method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Delete
+                                                </button>
+                                            </form> *@
+                                            <form asp-action="Delete" asp-route-id="@slot.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

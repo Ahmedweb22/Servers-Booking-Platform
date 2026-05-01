@@ -1,0 +1,36 @@
+﻿@model Shatbly.ViewModels.WithdrawalRequestVM
+
+@{
+    ViewData["Title"] = "Request Withdrawal";
+}
+<div class="alert alert-info">
+    Available balance: @Model.AvailableBalance.ToString("C")
+</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Request Withdrawal</h2>
+        <p class="text-muted mb-0">Create a new withdrawal request</p>
+    </div>
+
+    <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+</div>
+
+<div class="page-card p-4">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Amount" class="form-label"></label>
+            <input asp-for="Amount" class="form-control" />
+            <span asp-validation-for="Amount" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

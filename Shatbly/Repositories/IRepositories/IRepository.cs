@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Shatbly.Services.WithdrawalService;
+using System.Linq.Expressions;
 
 namespace Shatbly.Repositories.IRepositories
 {
@@ -16,6 +17,6 @@ namespace Shatbly.Repositories.IRepositories
         Task<T?> GetOneAsync(Expression<Func<T, bool>>? expression = null, Expression<Func<T, object>>[]? includes = null, bool tracking = true);
 
         Task<int> CommitAsync();
-      
+        //Task CreateAsync(WithdrawalRequest request);
     }
 }
