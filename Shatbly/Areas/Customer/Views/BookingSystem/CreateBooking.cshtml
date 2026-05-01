@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.BookingWizardViewModel
+﻿@model Shatbly.ViewModels.BookingWizardViewModel
 @using Shatbly.Models
 @using Stripe
 
@@ -22,9 +22,7 @@
         margin: 0;
         font-family: "Segoe UI", Tahoma, sans-serif;
         color: var(--ink);
-        background:
-            radial-gradient(circle at top right, rgba(194, 106, 45, 0.14), transparent 26%),
-            linear-gradient(180deg, #fcfaf7 0%, var(--page-bg) 100%);
+        background: radial-gradient(circle at top right, rgba(194, 106, 45, 0.14), transparent 26%), linear-gradient(180deg, #fcfaf7 0%, var(--page-bg) 100%);
     }
 
     .booking-shell {
@@ -90,11 +88,11 @@
         border: 1px solid var(--line);
     }
 
-    .metric strong {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 1.3rem;
-    }
+        .metric strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.3rem;
+        }
 
     .wizard-grid {
         display: grid;
@@ -124,20 +122,20 @@
         text-align: center;
     }
 
-    .step-chip.active {
-        background: linear-gradient(135deg, #1e3a34, #2f5f55);
-        color: #fff;
-        border-color: transparent;
-    }
+        .step-chip.active {
+            background: linear-gradient(135deg, #1e3a34, #2f5f55);
+            color: #fff;
+            border-color: transparent;
+        }
 
     .wizard-step {
         display: none;
         animation: fade-up 180ms ease;
     }
 
-    .wizard-step.active {
-        display: block;
-    }
+        .wizard-step.active {
+            display: block;
+        }
 
     @@keyframes fade-up {
         from {
@@ -176,29 +174,29 @@
         background: #fff;
     }
 
-    .choice-card input {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-    }
+        .choice-card input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
 
-    .choice-card:has(input:checked) {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px rgba(194, 106, 45, 0.14);
-        background: #fff8f2;
-    }
+        .choice-card:has(input:checked) {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(194, 106, 45, 0.14);
+            background: #fff8f2;
+        }
 
-    .choice-card strong {
-        display: block;
-        margin-bottom: 8px;
-    }
+        .choice-card strong {
+            display: block;
+            margin-bottom: 8px;
+        }
 
-    .choice-card span {
-        color: var(--muted);
-        font-size: 0.93rem;
-        line-height: 1.45;
-    }
+        .choice-card span {
+            color: var(--muted);
+            font-size: 0.93rem;
+            line-height: 1.45;
+        }
 
     .field-grid {
         display: grid;
@@ -278,9 +276,9 @@
         top: 20px;
     }
 
-    .summary-card h3 {
-        margin-top: 0;
-    }
+        .summary-card h3 {
+            margin-top: 0;
+        }
 
     .summary-line {
         display: flex;
@@ -291,9 +289,9 @@
         font-size: 0.96rem;
     }
 
-    .summary-line:last-child {
-        border-bottom: 0;
-    }
+        .summary-line:last-child {
+            border-bottom: 0;
+        }
 
     .summary-total {
         margin-top: 14px;
@@ -322,11 +320,11 @@
         font-size: 0.95rem;
     }
 
-    .banner.error {
-        background: #fef3f2;
-        color: #b42318;
-        border: 1px solid #fecdca;
-    }
+        .banner.error {
+            background: #fef3f2;
+            color: #b42318;
+            border: 1px solid #fecdca;
+        }
 
     @@media (max-width: 900px) {
         .hero, .wizard-grid, .field-grid {

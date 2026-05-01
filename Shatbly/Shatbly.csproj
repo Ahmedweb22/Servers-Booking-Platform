@@ -22,6 +22,9 @@
 
     <Folder Include="Areas\Admin\Views\" />
     <Folder Include="Areas\Customer\Controllers\" />
+
+    <Folder Include="Areas\Worker\Controllers\" />
+    <Folder Include="Areas\Worker\Views\" />
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\Identity\Views\" />
 
@@ -32,6 +35,9 @@
     <Folder Include="wwwroot\img\service_categories\" />
     <Folder Include="wwwroot\img\worker\worker_cv\" />
 	  <Folder Include="Areas\Customer\Controllers\" />
+    <PackageReference Include="Stripe.net" Version="51.1.0" />
+	  <Folder Include="Areas\Worker\Controllers\" />
+	  <Folder Include="Areas\Worker\Views\" />
 	  <Folder Include="Areas\Identity\Controllers\" />
 	  <Folder Include="Areas\Identity\Views\" />
 	  <Folder Include="Services\IServices\" />
