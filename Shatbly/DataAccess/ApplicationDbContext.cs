@@ -40,6 +40,7 @@ namespace Shatbly.DataAccess
         public DbSet<LogActivity> LogActivities { get; set; }
         public DbSet<Dipuste> Disputes { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<WithdrawalRequest> WithdrawalRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -6,6 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageReference Include="ICSharpCode.Decompiler" Version="10.0.1.8346" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.12" />
@@ -15,26 +19,27 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
     <PackageReference Include="Stripe.net" Version="51.0.0" />
   </ItemGroup>
   <ItemGroup>
 
     <Folder Include="Areas\Admin\Views\" />
+    <Folder Include="Areas\Customer\Controllers\" />
 
     <Folder Include="Areas\Worker\Controllers\" />
     <Folder Include="Areas\Worker\Views\" />
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\Identity\Views\" />
-    <Folder Include="ViewModels\" />
 
     <Folder Include="Areas\Identity\Views\" />
-    <Folder Include="ViewModels\" />
 
     <Folder Include="Services\IServices\" />
     <Folder Include="wwwroot\img\banners\" />
     <Folder Include="wwwroot\img\service_categories\" />
     <Folder Include="wwwroot\img\worker\worker_cv\" />
+	  <Folder Include="Areas\Customer\Controllers\" />
     <PackageReference Include="Stripe.net" Version="51.1.0" />
 	  <Folder Include="Areas\Worker\Controllers\" />
 	  <Folder Include="Areas\Worker\Views\" />
