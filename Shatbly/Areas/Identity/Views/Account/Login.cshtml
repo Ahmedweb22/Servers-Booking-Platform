@@ -1,4 +1,4 @@
-﻿@model LoginVM
+@model LoginVM
 
     <title>Shtbly | شطبلي - تسجيل الدخول</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
@@ -44,57 +44,54 @@
                     </div>
 
                 <form asp-action="Login">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <div class="mb-3">
+                    <div class="mb-3">
                         <label asp-for="EmailOrUserName" class="form-label fw-bold">البريد الإلكتروني أو اسم المستخدم</label>
-                            <div class="input-group">
-                            <input type="text" asp-for="EmailOrUserName" class="form-control border-start-0 ps-0" id="emailOrUsername" name="emailOrUsername"
-                                       placeholder="example@mail.com أو username123" required autocomplete="username">\
-                            <span asp-validation-for="EmailOrUserName" class="text-danger"></span>
-                                <div class="invalid-feedback">هذا الحقل مطلوب.</div>
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" asp-for="EmailOrUserName" class="form-control" placeholder="example@mail.com أو username123" required autocomplete="username">
                         </div>
+                        <span asp-validation-for="EmailOrUserName" class="text-danger d-block mt-1"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
                             <label asp-for="Password" class="form-label fw-bold mb-0">كلمة المرور</label>
-                            <a asp-action ="ForgetPassword" class="small text-primary text-decoration-none">نسيت كلمة المرور؟</a>
-                            </div>
-                            <div class="input-group">
-                            <span asp-validation-for="Password" class="text-danger"></span>
-
-                            <input asp-for="Password" class="form-control border-start-0 ps-0"
-                                       placeholder="أدخل كلمة المرور" required autocomplete="current-password">
-                                <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword" tabindex="-1" aria-label="إظهار/إخفاء كلمة المرور">
-                                    <i class="bi bi-eye" id="eyeIcon"></i>
-                                </button>
-                                <div class="invalid-feedback">كلمة المرور مطلوبة.</div>
-                            </div>
+                            <a asp-action="ForgetPassword" class="small text-primary text-decoration-none">نسيت كلمة المرور؟</a>
                         </div>
-
-                        <div class="mb-4">
-                            <div class="form-check">
-                            <input class="form-check-input" asp-for="RememberMe" /> @Html.DisplayNameFor(model => model.RememberMe)
-                                <label class="form-check-label" for="rememberMe" >تذكّرني</label>
-                            </div>
-                        </div>
-
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary fw-bold py-2" style="border-radius:12px;">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> تسجيل الدخول
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Password" class="form-control" placeholder="أدخل كلمة المرور" required autocomplete="current-password" id="Password">
+                            <button class="btn btn-outline-secondary bg-white text-muted" type="button" id="togglePassword" tabindex="-1" aria-label="إظهار/إخفاء كلمة المرور">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
                             </button>
                         </div>
-
-                        <div class="text-center">
-                            <span class="text-muted small">ليس لديك حساب؟ </span>
-                        <a asp-action ="Register" class="small text-primary fw-bold text-decoration-none">سجّل الآن</a>
-                        </div>
-                    <div class="text-center">
-                        <span class="text-muted small"> إعادة إرسال بريد التأكيد</span>
-                        <a asp-action="ResendEmailConfirmation" class="small text-primary fw-bold text-decoration-none">سجّل الآن</a>
+                        <span asp-validation-for="Password" class="text-danger d-block mt-1"></span>
                     </div>
-                    </form>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" asp-for="RememberMe" />
+                            <label class="form-check-label" asp-for="RememberMe">تذكّرني</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary fw-bold py-2" style="border-radius:12px;">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> تسجيل الدخول
+                        </button>
+                    </div>
+
+                    <div class="text-center mb-2">
+                        <span class="text-muted small">ليس لديك حساب؟ </span>
+                        <a asp-action="Register" class="small text-primary fw-bold text-decoration-none">سجّل الآن</a>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-muted small">إعادة إرسال بريد التأكيد</span>
+                        <a asp-action="ResendEmailConfirmation" class="small text-primary fw-bold text-decoration-none">اضغط هنا</a>
+                    </div>
+                </form>
                 </div>
             </div>
         </div>
@@ -104,15 +101,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('togglePassword').addEventListener('click', function () {
-        const pwd = document.getElementById('password');
-        const icon = document.getElementById('eyeIcon');
-        if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('bi-eye','bi-eye-slash'); }
-        else { pwd.type = 'password'; icon.classList.replace('bi-eye-slash','bi-eye'); }
-        });
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!this.checkValidity()) { this.classList.add('was-validated'); return; }
-        // TODO: submit logic
+            const pwd = document.getElementById('Password');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') { 
+                pwd.type = 'text'; 
+                icon.classList.replace('bi-eye', 'bi-eye-slash'); 
+            } else { 
+                pwd.type = 'password'; 
+                icon.classList.replace('bi-eye-slash', 'bi-eye'); 
+            }
         });
     </script>
 @section Scripts {
