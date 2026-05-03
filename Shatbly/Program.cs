@@ -1,4 +1,7 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Shatbly.HealthCheck;
 using Shatbly.Services.AvailabilityService;
 using Shatbly.Services.BookingSystem;
 using Shatbly.Services.CurrentWorkerService1;
@@ -8,6 +11,7 @@ using Shatbly.Services.WithdrawalService;
 using Shatbly.Services.WorkerProfileService;
 using Shatbly.UnitOfWork;
 using Shatbly.Utilities.Dbintializes;
+
 
 namespace Shatbly
 {
@@ -22,6 +26,34 @@ namespace Shatbly
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            //builder.Services.AddHealthChecks()
+            // .AddSqlServer(
+            //     builder.Configuration.GetConnectionString("DefaultConnection"),
+            //     name: "SQL Server",
+            //     failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy
+            //);
+            //builder.Services.AddHealthChecks()
+            //.AddCheck<WorkerHealthCheck>("Booking Service")
+            //.AddCheck<CouponHealthChack>("Coupon Service");
+
+
+            builder.Services.AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
+    .AddCheck<WorkerHealthCheck>("Worker Service")
+    .AddCheck<CouponHealthChack>("Coupon Repository"); //  „  ’ÕÌÕ «·Œÿ√ «·≈„·«∆Ì Â‰«
+
+            // 2. ≈⁄œ«œ«  «·‹ UI
+            builder.Services.AddHealthChecksUI(options =>
+            {
+                options.SetEvaluationTimeInSeconds(10); //  ÕœÌÀ «·»Ì«‰«  ﬂ· 10 ÀÊ«‰Ì
+                options.MaximumHistoryEntriesPerEndpoint(50);
+
+                // Â‰« »‰ﬁÊ· ··‹ UI Ì—ÊÕ Ì”Õ» «·»Ì«‰«  „‰ „”«— «·‹ JSON
+                options.AddHealthCheckEndpoint("Main API", "/health-api-json");
+            })
+            .AddInMemoryStorage();
+
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
@@ -81,7 +113,39 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            // 3. „”«— «·‹ JSON «·»”Ìÿ (·Ê Õ«»»  ﬁ—√ «·»Ì«‰«  ﬂ‹ Text ⁄«œÌ √Ê ·”ﬂ—»  Œ«—ÃÌ)
+            app.MapHealthChecks("/health", new HealthCheckOptions
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = "application/json";
+                    var result = JsonSerializer.Serialize(new
+                    {
+                        status = report.Status.ToString(),
+                        checks = report.Entries.Select(e => new
+                        {
+                            name = e.Key,
+                            status = e.Value.Status.ToString(),
+                            error = e.Value.Exception?.Message
+                        })
+                    });
+                    await context.Response.WriteAsync(result);
+                }
+            });
 
+            // 4. „”«— «·‹ JSON «·Œ«’ »·ÊÕ… «· Õﬂ„ („Â„ Ãœ«)
+            // «·„”«— œÂ ·«“„ ÌﬂÊ‰ ‰›” «·«”„ «··Ì ﬂ »‰«Â ›Êﬁ ›Ì ≈⁄œ«œ«  «·‹ UI
+            app.MapHealthChecks("/health-api-json", new HealthCheckOptions
+            {
+                // «·‹ ResponseWriter œÂ ÂÊ «··Ì »Ì⁄„· «·‹ JSON «·„⁄ﬁœ «··Ì «·‹ UI »ÌÕ «ÃÂ
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            // 5. „”«— Ê«ÃÂ… «·„” Œœ„ (Dashboard)
+            app.MapHealthChecksUI(options =>
+            {
+                options.UIPath = "/health-ui"; // œÂ «·—«»ÿ «··Ì Â ﬂ »Â ›Ì «·„ ’›Õ
+            });
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();

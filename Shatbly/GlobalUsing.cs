@@ -14,3 +14,7 @@ global using System.Text.Json;
 global using Shatbly.UnitOfWork;
 global using DayOfWeek = Shatbly.Models.DayOfWeek;
 global using Shatbly.Services.WithdrawalService;
+global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+global using System.Text.Json;
+global using HealthChecks.UI.Client;
+global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
