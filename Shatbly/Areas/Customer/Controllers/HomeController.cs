@@ -2,26 +2,103 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Models;
 using Shatbly.Services.BookingSystem;
-
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq.Expressions;
 namespace Shatbly.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IRepository<Favorite> _favoriteRepository;
+        private readonly IRepository<WorkerProfile> _workerRepository;
+        private readonly IRepository<Booking> _bookingRepository;
+        private readonly IRepository<WorkerService> _serviceRepository;
+        private readonly IRepository<ServiceCategory> _categoryRepository;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService)
+        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService, UserManager<IdentityUser> userManager, IRepository<Favorite> favoriteRepository, IRepository<WorkerProfile> workerRepository, IRepository<Booking> bookingRepository, IRepository<WorkerService> serviceRepository, IRepository<ServiceCategory> categoryRepository)
         {
             _logger = logger;
             _bookingSystemService = bookingSystemService;
+            _userManager = userManager;
+            _favoriteRepository = favoriteRepository;
+            _workerRepository = workerRepository;
+            _bookingRepository = bookingRepository;
+            _serviceRepository = serviceRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? categoryId)
         {
-            return View();
+            Expression<Func<WorkerProfile, bool>> filter = null;
+            if(categoryId.HasValue && categoryId> 0)
+            {
+                filter = w => w.WorkerServices.CategoryId == categoryId;
+            }
+            var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category]);
+            var categories = await _categoryRepository.GetAsync();
+            var favoriteWorkerIds = new List<int>();
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId);
+                favoriteWorkerIds = favorites.Select(f => f.WorkerId).ToList();
+            }
+                var vm = new CustomerIndexVM
+                {
+                    Workers = workers,
+                    FavoriteWorkerIds = favoriteWorkerIds
+
+                };
+                return View(vm);
+            
+          
         }
-        
+          [HttpPost]
+          public async Task<IActionResult> ToggleFavorite(int workerId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var existingFavorite = await _favoriteRepository.GetOneAsync(f => f.ClientId == userId && f.WorkerId == workerId);
+            if (existingFavorite is null)
+            {
+                var newFavorite = new Favorite
+                {
+                    ClientId = userId,
+                    WorkerId = workerId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _favoriteRepository.CreateAsync(newFavorite);
+            }
+            else
+            {
+                 _favoriteRepository.Delete(existingFavorite);
+            }
+            await _favoriteRepository.CommitAsync();
+            return RedirectToAction("Index");
+        }
+      
+    [Authorize]
+        public async Task<IActionResult> Favorites()
+        {
+          var claimsIdentity = User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId , includes: [f => f.Worker]);
+            var favoriteWorkers = favorites.Select(f => f.Worker).ToList();
+            return View(favoriteWorkers);
+        }
         public IActionResult Privacy()
         {
             return View();
