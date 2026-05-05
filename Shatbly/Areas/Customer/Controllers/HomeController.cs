@@ -52,7 +52,7 @@ namespace Shatbly.Controllers
             {
                 filter = w => w.User.FName.Contains(searchString);
             }
-            var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category , w => w.User]);
+            var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category, w => w.User.Addresses]);
             var categories = await _categoryRepository.GetAsync();
             ViewData["SearchString"] = searchString;
             var favoriteWorkerIds = new List<int>();
@@ -109,7 +109,7 @@ namespace Shatbly.Controllers
             {
                 return Unauthorized();
             }
-            var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId , includes: [f => f.Worker]);
+            var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId, includes: [f => f.Worker.User.Addresses, f => f.Worker.WorkerServices.Category]);
             var favoriteWorkers = favorites.Select(f => f.Worker).ToList();
             return View(favoriteWorkers);
         }

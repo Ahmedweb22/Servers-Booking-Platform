@@ -144,7 +144,7 @@ namespace Shatbly
             app.UseRouting();
             var scope = app.Services.CreateScope();
             var Service = scope.ServiceProvider.GetService<IDbintialize>();
-            Service.Intializer();
+            Service.Intializer().GetAwaiter().GetResult();
 
             app.UseAuthorization();
 
@@ -158,3 +158,4 @@ namespace Shatbly
         }
     }
 }
+
