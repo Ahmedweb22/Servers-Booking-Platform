@@ -1,5 +1,3 @@
-using HealthChecks.UI.Client;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Shatbly.HealthCheck;
 using Shatbly.Services.AvailabilityService;
@@ -7,9 +5,7 @@ using Shatbly.Services.BookingSystem;
 using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.Services.File_Service;
 using Shatbly.Services.Portfolio;
-using Shatbly.Services.WithdrawalService;
 using Shatbly.Services.WorkerProfileService;
-using Shatbly.UnitOfWork;
 using Shatbly.Utilities.Dbintializes;
 
 
@@ -41,15 +37,12 @@ namespace Shatbly
             builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
     .AddCheck<WorkerHealthCheck>("Worker Service")
-    .AddCheck<CouponHealthChack>("Coupon Repository"); //  „  ’ÕÌÕ «·Œÿ√ «·≈„·«∆Ì Â‰«
+    .AddCheck<CouponHealthChack>("Coupon Repository"); 
 
-            // 2. ≈⁄œ«œ«  «·‹ UI
             builder.Services.AddHealthChecksUI(options =>
             {
-                options.SetEvaluationTimeInSeconds(10); //  ÕœÌÀ «·»Ì«‰«  ﬂ· 10 ÀÊ«‰Ì
+                options.SetEvaluationTimeInSeconds(10); 
                 options.MaximumHistoryEntriesPerEndpoint(50);
-
-                // Â‰« »‰ﬁÊ· ··‹ UI Ì—ÊÕ Ì”Õ» «·»Ì«‰«  „‰ „”«— «·‹ JSON
                 options.AddHealthCheckEndpoint("Main API", "/health-api-json");
             })
             .AddInMemoryStorage();

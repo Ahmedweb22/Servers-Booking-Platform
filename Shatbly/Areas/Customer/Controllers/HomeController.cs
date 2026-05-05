@@ -56,24 +56,24 @@ namespace Shatbly.Controllers
             var categories = await _categoryRepository.GetAsync();
             ViewData["SearchString"] = searchString;
             var favoriteWorkerIds = new List<int>();
+
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId);
                 favoriteWorkerIds = favorites.Select(f => f.WorkerId).ToList();
             }
-                var vm = new CustomerIndexVM
-                {
-                    Workers = workers,
-                    Categories = categories,
-                    FavoriteWorkerIds = favoriteWorkerIds
 
-                };
-                return View(vm);
-            
-          
+            var vm = new CustomerIndexVM
+            {
+                Workers = workers,
+                Categories = categories,
+                FavoriteWorkerIds = favoriteWorkerIds
+            };
+
+            return View(vm);
         }
-          [HttpPost]
+        [HttpPost]
           public async Task<IActionResult> ToggleFavorite(int workerId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
