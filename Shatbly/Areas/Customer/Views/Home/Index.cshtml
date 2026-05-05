@@ -3,11 +3,15 @@
     <!-- 2. Advanced Filter Bar -->
     <nav class="filter-bar">
         <div class="d-flex align-items-center gap-3 flex-grow-1">
+
             <div class="search-wrapper">
+                      <form asp-action="Index" method="get">
                 <i class="bi bi-search"></i>
-                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة...">
+                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة..." value="@ViewData["SearchString"]" name="searchString" />
+                <button type="submit" class="search-btn">بحث</button>
+</form>
             </div>
-            
+                 
             <div class="category-chips">
             <div class="chip active"><a href ="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a></div>
 			@foreach (var category in Model.Categories)
