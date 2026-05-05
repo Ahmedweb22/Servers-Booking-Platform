@@ -3,11 +3,15 @@
     <!-- 2. Advanced Filter Bar -->
     <nav class="filter-bar">
         <div class="d-flex align-items-center gap-3 flex-grow-1">
+
             <div class="search-wrapper">
+                      <form asp-action="Index" method="get">
                 <i class="bi bi-search"></i>
-                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة...">
+                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة..." value="@ViewData["SearchString"]" name="searchString" />
+                <button type="submit" class="search-btn">بحث</button>
+</form>
             </div>
-            
+                 
             <div class="category-chips">
             <div class="chip active"><a href ="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a></div>
 			@foreach (var category in Model.Categories)
@@ -17,28 +21,44 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2 ms-3 border-start ps-3">
-            <select class="filter-select">
-                <option selected disabled>المكان</option>
-                <option>الإسكندرية - سموحة</option>
-                <option>الإسكندرية - ميامي</option>
-                <option>القاهرة - التجمع</option>
-            </select>
-            <button class="btn btn-dark fw-bold rounded-3 px-3 py-2"><i class="bi bi-sliders me-1"></i> فلتر</button>
+        <div class="category-chips">
+            <div class="chip active"><a href="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a></div>
+
+            <!-- ✅ تعديل: التحقق من أن الأقسام موجودة قبل الدوران عليها -->
+            @if (Model.Categories != null)
+            {
+                @foreach (var category in Model.Categories)
+                {
+                    <div class="chip"><a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @category.Name</a></div>
+                }
+            }
         </div>
-    </nav>
+    </div>
 
-    <!-- 3. Main Content -->
-    <div class="main-layout">
-        
-        <!-- Sidebar: Workers List -->
-        <aside class="workers-sidebar">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <h5 class="mb-0">فنيين متاحين في منطقتك</h5>
-                <span class="text-muted fw-bold small">124 نتيجة</span>
-            </div>
+    <div class="d-flex align-items-center gap-2 ms-3 border-start ps-3">
+        <select class="filter-select">
+            <option selected disabled>المكان</option>
+            <option>الإسكندرية - سموحة</option>
+            <option>الإسكندرية - ميامي</option>
+            <option>القاهرة - التجمع</option>
+        </select>
+        <button class="btn btn-dark fw-bold rounded-3 px-3 py-2"><i class="bi bi-sliders me-1"></i> فلتر</button>
+    </div>
+</nav>
 
-		@if (!Model.Workers.Any())
+<!-- 3. Main Content -->
+<div class="main-layout">
+
+    <!-- Sidebar: Workers List -->
+    <aside class="workers-sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h5 class="mb-0">فنيين متاحين في منطقتك</h5>
+            <!-- يمكنك لاحقاً جعل هذا الرقم ديناميكي باستخدام Model.Workers?.Count() -->
+            <span class="text-muted fw-bold small">@(Model.Workers?.Count() ?? 0) نتيجة</span>
+        </div>
+
+        <!-- ✅ تعديل: حماية التحقق من الفنيين إذا كانت القائمة فارغة -->
+        @if (Model.Workers == null || !Model.Workers.Any())
         {
             <div class="alert alert-info text-center">
                 <i class="bi bi-info-circle-fill fs-1 mb-2"></i>
@@ -48,9 +68,8 @@
         }
         else
         {
-
             <!-- Normal Worker Card 1 -->
-			@foreach (var worker in Model.Workers)
+            @foreach (var worker in Model.Workers)
             {
                 <div class="worker-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -60,6 +79,7 @@
                                 <span class="online-dot" style="background-color: #f59e0b;"></span> <!-- Busy but available soon -->
                             </div>
                             <div>
+                                <!-- ✅ تعديل: استخدام ؟ لمنع الخطأ إذا كان الـ User فارغاً -->
                                 <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
 									@(worker.User?.FName) @(worker.User?.LName)
                                     <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
@@ -108,16 +128,15 @@
                 </div>
             }
         }
-        </aside>
+    </aside>
 
-        <!-- Main Map Area -->
-        <main id="map-container">
-            <div class="map-overlay">
-                <div class="map-badge">
-                    <i class="bi bi-geo-alt-fill fs-1 text-primary mb-2 d-block"></i>
-                    <h4 class="fw-800 mb-1">خريطة الفنيين التفاعلية</h4>
-                    <p class="text-muted fw-semibold mb-0">جاري تحميل الخريطة والمواقع المباشرة للفنيين...</p>
-                </div>
+    <!-- Main Map Area -->
+    <main id="map-container">
+        <div class="map-overlay">
+            <div class="map-badge">
+                <i class="bi bi-geo-alt-fill fs-1 text-primary mb-2 d-block"></i>
+                <h4 class="fw-800 mb-1">خريطة الفنيين التفاعلية</h4>
+                <p class="text-muted fw-semibold mb-0">جاري تحميل الخريطة والمواقع المباشرة للفنيين...</p>
             </div>
             
             <!-- Emergency Button -->

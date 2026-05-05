@@ -33,34 +33,47 @@ namespace Shatbly.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index(int? categoryId)
+        public async Task<IActionResult> Index(int? categoryId , string searchString)
         {
             Expression<Func<WorkerProfile, bool>> filter = null;
+      
             if(categoryId.HasValue && categoryId> 0)
             {
-                filter = w => w.WorkerServices.CategoryId == categoryId;
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    filter = w => w.WorkerServices.CategoryId == categoryId && w.User.FName.Contains(searchString);
+                }
+                else
+                {
+                    filter = w => w.WorkerServices.CategoryId == categoryId;
+                }   
+            }
+            else if (!string.IsNullOrEmpty(searchString))
+            {
+                filter = w => w.User.FName.Contains(searchString);
             }
             var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category, w => w.User.Addresses]);
             var categories = await _categoryRepository.GetAsync();
+            ViewData["SearchString"] = searchString;
             var favoriteWorkerIds = new List<int>();
+
             if (User.Identity.IsAuthenticated)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId);
                 favoriteWorkerIds = favorites.Select(f => f.WorkerId).ToList();
             }
-                var vm = new CustomerIndexVM
-                {
-                    Workers = workers,
-                    Categories = categories,
-                    FavoriteWorkerIds = favoriteWorkerIds
 
-                };
-                return View(vm);
-            
-          
+            var vm = new CustomerIndexVM
+            {
+                Workers = workers,
+                Categories = categories,
+                FavoriteWorkerIds = favoriteWorkerIds
+            };
+
+            return View(vm);
         }
-          [HttpPost]
+        [HttpPost]
           public async Task<IActionResult> ToggleFavorite(int workerId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
