@@ -1,4 +1,4 @@
-﻿@model CustomerIndexVM
+@model CustomerIndexVM
 
     <!-- 2. Advanced Filter Bar -->
     <nav class="filter-bar">
@@ -61,19 +61,19 @@
                             </div>
                             <div>
                                 <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
-									@worker.User.FName @worker.User.LName
+									@(worker.User?.FName) @(worker.User?.LName)
                                     <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
                                 </h6>
-                                <p class="text-muted fw-semibold small mb-2">@worker.WorkerServices.Category.Name</p>
+                                <p class="text-muted fw-semibold small mb-2">@(worker.WorkerServices?.Category?.Name ?? "غير محدد")</p>
                                 <div class="d-flex gap-2">
-                                    <span class="tag"><i class="bi bi-house-gear me-1"></i> سمارت هوم</span>
-                                    <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> يبعد 3.1 كم</span>
+                                    <span class="tag"><i class="bi bi-house-gear me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.District ?? "حي غير محدد")</span>
+                                    <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.City ?? "مدينة غير محددة")</span>
                                 </div>
                             </div>
                         </div>
                         		<form method="post" action="/Customer/Home/ToggleFavorite">
 							<input type="hidden" name="workerId" value="@worker.Id" />
-                        <button class="fav-btn" type="submit">
+                        <button class="fav-btn @(Model.FavoriteWorkerIds.Contains(worker.Id) ? "active" : "")" type="submit">
                             @if(Model.FavoriteWorkerIds.Contains(worker.Id))
                             {
                                 <i class="bi bi-heart-fill"></i>
@@ -88,7 +88,17 @@
 
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">ج.م / معاينة</span></div>
-                        <button class="btn-book bg-light text-dark border">التفاصيل</button>
+                        <div class="d-flex gap-2">
+                            @{
+                                var addr = worker.User?.Addresses?.FirstOrDefault();
+                                var lat = addr?.Lat ?? 30.0444; // Default to Cairo
+                                var lng = addr?.Lng ?? 31.2357;
+                            }
+                            <button class="btn btn-outline-primary rounded-3 px-3 py-1 fw-bold small" onclick="showWorkerOnMap(@lat, @lng, '@(worker.User?.FName) @(worker.User?.LName)')">
+                                <i class="bi bi-geo-alt-fill"></i> تحديد الموقع
+                            </button>
+                            <button class="btn-book">التفاصيل</button>
+                        </div>
                     </div>
 
                     <div class="stats-row">
@@ -117,3 +127,45 @@
             </button>
         </main>
     </div>
+</div>
+
+@section Scripts {
+    <script>
+        var map;
+        var marker;
+
+        function initMap() {
+            // Initialize map centered on Egypt
+            map = L.map('map-container').setView([26.8206, 30.8025], 6);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Remove overlay once map is loaded
+            document.querySelector('.map-overlay').style.display = 'none';
+        }
+
+        function showWorkerOnMap(lat, lng, name) {
+            if (!map) initMap();
+
+            // Clear existing marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Move view to worker
+            map.setView([lat, lng], 15);
+
+            // Add marker
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup("<b>" + name + "</b><br>موقع الفني المعتمد")
+                .openPopup();
+        }
+
+        // Auto init map on first interaction or page load if needed
+        window.onload = function() {
+            initMap();
+        };
+    </script>
+}

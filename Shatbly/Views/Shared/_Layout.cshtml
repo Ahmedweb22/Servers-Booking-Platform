@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
             :root {
@@ -27,8 +29,6 @@
                 font-family: 'Cairo', sans-serif;
                 background-color: var(--bg-color);
                 color: var(--text-main);
-                height: 100vh;
-                overflow: hidden;
                 margin: 0;
             }
 
@@ -198,9 +198,7 @@
             #map-container {
                 flex-grow: 1;
                 position: relative;
-                background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2000&auto=format&fit=crop');
-                background-size: cover;
-                background-position: center;
+                z-index: 1;
             }
 
             .map-overlay {
@@ -453,7 +451,7 @@
     <!-- 1. Top Navigation -->
     <header class="top-nav justify-content-between">
         <div class="d-flex align-items-center gap-4">
-            <div class="brand-logo">SHTBLY <span class="text-dark fs-5 fw-bold ms-1">شطبلي</span></div>
+            <a href="/Customer/Home/Index" class="brand-logo text-decoration-none">SHTBLY <span class="text-dark fs-5 fw-bold ms-1">شطبلي</span></a>
 
             <nav class="d-none d-lg-flex gap-2 ms-4 border-start ps-4">
                 <a href="#" class="nav-link-custom active"><i class="bi bi-compass me-1"></i> استكشف</a>
@@ -495,6 +493,8 @@
     <script src="~/js/customer.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet Map JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         // Simple script to toggle active state on category chips
         document.querySelectorAll('.chip').forEach(chip => {
