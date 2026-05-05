@@ -13,7 +13,7 @@ namespace Shatbly.Controllers
     public class HomeController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IRepository<Favorite> _favoriteRepository;
         private readonly IRepository<WorkerProfile> _workerRepository;
         private readonly IRepository<Booking> _bookingRepository;
@@ -21,7 +21,7 @@ namespace Shatbly.Controllers
         private readonly IRepository<ServiceCategory> _categoryRepository;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService, UserManager<IdentityUser> userManager, IRepository<Favorite> favoriteRepository, IRepository<WorkerProfile> workerRepository, IRepository<Booking> bookingRepository, IRepository<WorkerService> serviceRepository, IRepository<ServiceCategory> categoryRepository)
+        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService, UserManager<User> userManager, IRepository<Favorite> favoriteRepository, IRepository<WorkerProfile> workerRepository, IRepository<Booking> bookingRepository, IRepository<WorkerService> serviceRepository, IRepository<ServiceCategory> categoryRepository)
         {
             _logger = logger;
             _bookingSystemService = bookingSystemService;
@@ -52,6 +52,7 @@ namespace Shatbly.Controllers
                 var vm = new CustomerIndexVM
                 {
                     Workers = workers,
+                    Categories = categories,
                     FavoriteWorkerIds = favoriteWorkerIds
 
                 };
