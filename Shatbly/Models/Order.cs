@@ -8,7 +8,8 @@ namespace Shatbly.Models
         Completed,
         Cancelled,
         NoResponse,
-        Rescheduled
+        Rescheduled,
+        Rejected
     }
 
     public enum BookingTypes

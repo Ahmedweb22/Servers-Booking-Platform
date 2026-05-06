@@ -1,0 +1,58 @@
+﻿@model Shatbly.ViewModels.ChatViewModel
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Chat";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Chat</h2>
+        <span class="text-muted">Booking #@Model.BookingId</span>
+    </div>
+
+    <div class="border rounded p-3 mb-3" style="height: 420px; overflow-y: auto; background: #f8f9fa;">
+        @if (!Model.Messages.Any())
+        {
+            <div class="text-muted text-center mt-5">
+                No messages yet.
+            </div>
+        }
+        else
+        {
+            foreach (var item in Model.Messages)
+            {
+                var isMine = item.SenderId == currentUserId;
+
+                <div class="d-flex mb-2 @(isMine ? "justify-content-end" : "justify-content-start")">
+                    <div class="p-2 rounded @(isMine ? "bg-primary text-white" : "bg-white border")"
+                         style="max-width: 70%;">
+                        <div>@item.Message</div>
+                        <small class="@(isMine ? "text-white-50" : "text-muted")">
+                            @item.SentAt.ToLocalTime().ToString("g")
+                        </small>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <form asp-area="Customer" asp-controller="Chat" asp-action="Send" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="bookingId" value="@Model.BookingId" />
+        <input type="hidden" name="receiverId" value="@Model.ReceiverId" />
+
+        <div class="input-group">
+            <input name="message"
+                   class="form-control"
+                   placeholder="Write your message..."
+                   autocomplete="off" />
+
+            <button type="submit" class="btn btn-primary">
+                Send
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Shatbly.HealthCheck;
+using Shatbly.Hubs;
 using Shatbly.Services.AvailabilityService;
 using Shatbly.Services.BookingSystem;
+using Shatbly.Services.Chat;
 using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.Services.File_Service;
+using Shatbly.Services.Notification;
 using Shatbly.Services.Portfolio;
 using Shatbly.Services.WorkerProfileService;
+using Shatbly.UnitOfWork;
 using Shatbly.Utilities.Dbintializes;
-
 
 namespace Shatbly
 {
@@ -37,7 +40,8 @@ namespace Shatbly
             builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
     .AddCheck<WorkerHealthCheck>("Worker Service")
-    .AddCheck<CouponHealthChack>("Coupon Repository"); 
+    .AddCheck<CouponHealthChack>("Coupon Repository")
+    .AddCheck<BookingHealthChack>("Booking Repository"); 
 
             builder.Services.AddHealthChecksUI(options =>
             {
@@ -85,6 +89,7 @@ namespace Shatbly
             builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
             builder.Services.AddScoped<IBookingSystemService, BookingSystemService>();
             builder.Services.AddScoped<IRepository<Order>, Repository<Order>>();
+            builder.Services.AddScoped<IRepository<Notification>, Repository<Notification>>();
             builder.Services.AddScoped<IAccountService, Services.AccountService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IFileService, FileService>();
@@ -96,7 +101,19 @@ namespace Shatbly
             builder.Services.AddScoped<ICurrentWorkerService, CurrentWorkerService>();
             builder.Services.AddScoped<IEarningsService, EarningsService>();
             builder.Services.AddScoped<IWithdrawalService, WithdrawalService>();
+            //Notefication
+            builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+            builder.Services.AddScoped<INotificationRepository, SqlNotificationRepository>();
             builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+            builder.Services.AddScoped<ISmsService, MockSmsService>();
+            builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
+            builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
+            builder.Services.AddSignalR();
+            //Chat
+            builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -125,35 +142,28 @@ namespace Shatbly
                     await context.Response.WriteAsync(result);
                 }
             });
-
-            // 4. „”«— «·‹ JSON «·Œ«’ »·ÊÕ… «· Õﬂ„ („Â„ Ãœ«)
-            // «·„”«— œÂ ·«“„ ÌﬂÊ‰ ‰›” «·«”„ «··Ì ﬂ »‰«Â ›Êﬁ ›Ì ≈⁄œ«œ«  «·‹ UI
             app.MapHealthChecks("/health-api-json", new HealthCheckOptions
             {
-                // «·‹ ResponseWriter œÂ ÂÊ «··Ì »Ì⁄„· «·‹ JSON «·„⁄ﬁœ «··Ì «·‹ UI »ÌÕ «ÃÂ
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
-
-            // 5. „”«— Ê«ÃÂ… «·„” Œœ„ (Dashboard)
             app.MapHealthChecksUI(options =>
             {
-                options.UIPath = "/health-ui"; // œÂ «·—«»ÿ «··Ì Â ﬂ »Â ›Ì «·„ ’›Õ
+                options.UIPath = "/health-ui";
             });
+            app.MapHub<NotificationHub>("/hubs/notifications");
+            app.MapHub<ChatHub>("/chatHub");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             var scope = app.Services.CreateScope();
             var Service = scope.ServiceProvider.GetService<IDbintialize>();
             Service.Intializer();
-
             app.UseAuthorization();
-
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{area=Identity}/{controller=Account}/{action=Index}/{id?}")
                 .WithStaticAssets();
-
             app.Run();
         }
     }
