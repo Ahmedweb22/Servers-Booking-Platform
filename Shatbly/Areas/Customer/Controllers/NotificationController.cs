@@ -27,7 +27,7 @@ namespace Shatbly.Areas.Customer.Controllers
         public async Task<IActionResult> MarkAsRead(int id, CancellationToken cancellationToken)
         {
             await notificationService.MarkAsReadAsync(id, cancellationToken);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
 
         [HttpPost]
@@ -35,7 +35,7 @@ namespace Shatbly.Areas.Customer.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             await notificationService.DeleteAsync(id, cancellationToken);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -55,9 +55,8 @@ namespace Shatbly.Areas.Customer.Controllers
                 null,
                 cancellationToken);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
-
         private string? GetCurrentUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
