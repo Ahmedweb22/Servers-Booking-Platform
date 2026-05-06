@@ -1,48 +1,60 @@
 @model CustomerIndexVM
 
-    <!-- 2. Advanced Filter Bar -->
-    <nav class="filter-bar">
-        <div class="d-flex align-items-center gap-3 flex-grow-1">
+<!-- 2. Advanced Filter Bar -->
+<nav class="filter-bar">
+    <div class="d-flex align-items-center gap-3 flex-grow-1 flex-wrap">
 
-            <div class="search-wrapper">
-                      <form asp-action="Index" method="get">
+        <!-- 🔍 البحث -->
+        <div class="search-wrapper">
+            <form asp-action="Index" method="get" id="filterForm">
                 <i class="bi bi-search"></i>
                 <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة..." value="@ViewData["SearchString"]" name="searchString" />
                 <button type="submit" class="search-btn">بحث</button>
-</form>
-            </div>
-                 
-            <div class="category-chips">
-            <div class="chip active"><a href ="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a></div>
-			@foreach (var category in Model.Categories)
-			{
-                <div class="chip"><a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @category.Name</a></div>
-            }  
-            </div>
+            </form>
         </div>
 
-        <div class="category-chips">
-            <div class="chip active"><a href="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a></div>
-
-            <!-- ✅ تعديل: التحقق من أن الأقسام موجودة قبل الدوران عليها -->
-            @if (Model.Categories != null)
-            {
-                @foreach (var category in Model.Categories)
+        <!-- 📂 تصنيف الخدمات -->
+        <div class="filter-group">
+            <span class="filter-label"><i class="bi bi-layers me-1"></i> التصنيف:</span>
+            <div class="category-chips">
+                <div class="chip @(ViewData["SelectedCategory"] == null ? "active" : "")">
+                    <a href="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a>
+                </div>
+                @if (Model.Categories != null)
                 {
-                    <div class="chip"><a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @category.Name</a></div>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="chip @(ViewData["SelectedCategory"]?.ToString() == category.Id.ToString() ? "active" : "")">
+                            <a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @category.NameAr</a>
+                        </div>
+                    }
                 }
-            }
+            </div>
         </div>
     </div>
 
+    <!-- 📍 فلتر الموقع: محافظة ← منطقة -->
     <div class="d-flex align-items-center gap-2 ms-3 border-start ps-3">
-        <select class="filter-select">
-            <option selected disabled>المكان</option>
-            <option>الإسكندرية - سموحة</option>
-            <option>الإسكندرية - ميامي</option>
-            <option>القاهرة - التجمع</option>
-        </select>
-        <button class="btn btn-dark fw-bold rounded-3 px-3 py-2"><i class="bi bi-sliders me-1"></i> فلتر</button>
+        <div class="location-filter-group">
+            <span class="filter-label"><i class="bi bi-geo-alt me-1"></i> الموقع:</span>
+            <div class="d-flex align-items-center gap-2">
+                <select class="filter-select" id="governorateSelect">
+                    <option value="" selected disabled>اختر المحافظة</option>
+                </select>
+                <select class="filter-select" id="districtSelect" disabled>
+                    <option value="" selected disabled>اختر المنطقة</option>
+                </select>
+                <button class="btn btn-dark fw-bold rounded-3 px-3 py-2" id="locationFilterBtn" type="button">
+                    <i class="bi bi-sliders me-1"></i> فلتر
+                </button>
+                @if (ViewData["SelectedCity"] != null || ViewData["SelectedDistrict"] != null)
+                {
+                    <a href="/Customer/Home/Index" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-bold" title="إزالة فلتر الموقع">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                }
+            </div>
+        </div>
     </div>
 </nav>
 
@@ -53,11 +65,9 @@
     <aside class="workers-sidebar">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <h5 class="mb-0">فنيين متاحين في منطقتك</h5>
-            <!-- يمكنك لاحقاً جعل هذا الرقم ديناميكي باستخدام Model.Workers?.Count() -->
             <span class="text-muted fw-bold small">@(Model.Workers?.Count() ?? 0) نتيجة</span>
         </div>
 
-        <!-- ✅ تعديل: حماية التحقق من الفنيين إذا كانت القائمة فارغة -->
         @if (Model.Workers == null || !Model.Workers.Any())
         {
             <div class="alert alert-info text-center">
@@ -68,7 +78,6 @@
         }
         else
         {
-            <!-- Normal Worker Card 1 -->
             @foreach (var worker in Model.Workers)
             {
                 <div class="worker-card">
@@ -76,10 +85,9 @@
                         <div class="d-flex gap-3">
                             <div class="avatar-container">
                                 <img src="https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop" class="worker-avatar" alt="Worker">
-                                <span class="online-dot" style="background-color: #f59e0b;"></span> <!-- Busy but available soon -->
+                                <span class="online-dot" style="background-color: #f59e0b;"></span>
                             </div>
                             <div>
-                                <!-- ✅ تعديل: استخدام ؟ لمنع الخطأ إذا كان الـ User فارغاً -->
                                 <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
 									@(worker.User?.FName) @(worker.User?.LName)
                                     <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
@@ -91,17 +99,17 @@
                                 </div>
                             </div>
                         </div>
-                        		<form method="post" action="/Customer/Home/ToggleFavorite">
-							<input type="hidden" name="workerId" value="@worker.Id" />
-                        <button class="fav-btn @(Model.FavoriteWorkerIds.Contains(worker.Id) ? "active" : "")" type="submit">
-                            @if(Model.FavoriteWorkerIds.Contains(worker.Id))
-                            {
-                                <i class="bi bi-heart-fill"></i>
-                            }
-								else
-								{
-									<i class="bi bi-heart"></i>
-								}
+                        <form method="post" action="/Customer/Home/ToggleFavorite">
+						    <input type="hidden" name="workerId" value="@worker.Id" />
+                            <button class="fav-btn @(Model.FavoriteWorkerIds.Contains(worker.Id) ? "active" : "")" type="submit">
+                                @if(Model.FavoriteWorkerIds.Contains(worker.Id))
+                                {
+                                    <i class="bi bi-heart-fill"></i>
+                                }
+							    else
+							    {
+								    <i class="bi bi-heart"></i>
+							    }
                             </button>
                         </form>
                     </div>
@@ -111,13 +119,13 @@
                         <div class="d-flex gap-2">
                             @{
                                 var addr = worker.User?.Addresses?.FirstOrDefault();
-                                var lat = addr?.Lat ?? 30.0444; // Default to Cairo
+                                var lat = addr?.Lat ?? 30.0444;
                                 var lng = addr?.Lng ?? 31.2357;
                             }
                             <button class="btn btn-outline-primary rounded-3 px-3 py-1 fw-bold small" onclick="showWorkerOnMap(@lat, @lng, '@(worker.User?.FName) @(worker.User?.LName)')">
                                 <i class="bi bi-geo-alt-fill"></i> تحديد الموقع
                             </button>
-                            <button class="btn-book">التفاصيل</button>
+                            <a href="/Customer/Home/WorkerDetails/@worker.Id" class="btn-book">التفاصيل</a>
                         </div>
                     </div>
 
@@ -144,8 +152,8 @@
                 <i class="bi bi-exclamation-triangle-fill"></i>
                 طلب طوارئ سريع
             </button>
-        </main>
-    </div>
+        </div>
+    </main>
 </div>
 
 @section Scripts {
@@ -154,37 +162,133 @@
         var marker;
 
         function initMap() {
-            // Initialize map centered on Egypt
             map = L.map('map-container').setView([26.8206, 30.8025], 6);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Remove overlay once map is loaded
             document.querySelector('.map-overlay').style.display = 'none';
         }
 
         function showWorkerOnMap(lat, lng, name) {
             if (!map) initMap();
 
-            // Clear existing marker
             if (marker) {
                 map.removeLayer(marker);
             }
 
-            // Move view to worker
             map.setView([lat, lng], 15);
 
-            // Add marker
             marker = L.marker([lat, lng]).addTo(map)
                 .bindPopup("<b>" + name + "</b><br>موقع الفني المعتمد")
                 .openPopup();
         }
 
-        // Auto init map on first interaction or page load if needed
         window.onload = function() {
             initMap();
         };
+
+        // ===== Cascading Location Filter =====
+        // Egypt governorates and their districts/places
+        var locationData = {
+            "القاهرة": ["المعادي", "التجمع الخامس", "مدينة نصر", "مصر الجديدة", "وسط البلد", "الزمالك", "المقطم", "عين شمس", "شبرا", "حلوان"],
+            "الإسكندرية": ["سموحة", "ميامي", "سيدي جابر", "المنتزه", "العجمي", "محرم بك", "كليوباترا", "ستانلي", "الشاطبي", "لوران"],
+            "الجيزة": ["الدقي", "المهندسين", "الهرم", "فيصل", "6 أكتوبر", "الشيخ زايد", "أكتوبر", "العمرانية", "البدرشين", "الحوامدية"],
+            "القليوبية": ["شبرا الخيمة", "بنها", "قليوب", "القناطر الخيرية", "طوخ", "كفر شكر"],
+            "الشرقية": ["الزقازيق", "العاشر من رمضان", "ههيا", "بلبيس", "فاقوس", "أبو حماد"],
+            "الدقهلية": ["المنصورة", "طلخا", "ميت غمر", "أجا", "دكرنس", "السنبلاوين"],
+            "الغربية": ["طنطا", "المحلة الكبرى", "كفر الزيات", "زفتى", "السنطة", "قطور"],
+            "المنوفية": ["شبين الكوم", "منوف", "أشمون", "الشهداء", "قويسنا", "تلا"],
+            "البحيرة": ["دمنهور", "كفر الدوار", "رشيد", "إيتاي البارود", "أبو حمص", "المحمودية"],
+            "كفر الشيخ": ["كفر الشيخ", "دسوق", "بلطيم", "فوه", "سيدي سالم", "الحامول"],
+            "دمياط": ["دمياط", "رأس البر", "فارسكور", "كفر سعد", "الزرقا"],
+            "بورسعيد": ["حي الشرق", "حي العرب", "حي المناخ", "حي الضواحي", "حي الزهور"],
+            "السويس": ["حي الأربعين", "حي عتاقة", "حي السويس", "الجناين", "فيصل"],
+            "الإسماعيلية": ["الإسماعيلية", "فايد", "القنطرة شرق", "التل الكبير", "أبو صوير"],
+            "أسيوط": ["أسيوط", "ديروط", "منفلوط", "القوصية", "أبنوب", "الفتح"],
+            "سوهاج": ["سوهاج", "أخميم", "طما", "جرجا", "المراغة", "البلينا"],
+            "قنا": ["قنا", "نجع حمادي", "قوص", "دشنا", "فرشوط", "أبو تشت"],
+            "الأقصر": ["الأقصر", "إسنا", "أرمنت", "الطود", "القرنة", "البياضية"],
+            "أسوان": ["أسوان", "كوم أمبو", "إدفو", "دراو", "نصر النوبة"],
+            "المنيا": ["المنيا", "ملوي", "بني مزار", "أبو قرقاص", "سمالوط", "مغاغة"],
+            "بني سويف": ["بني سويف", "الفشن", "ببا", "إهناسيا", "ناصر", "الواسطى"],
+            "الفيوم": ["الفيوم", "طامية", "سنورس", "إطسا", "يوسف الصديق"],
+            "البحر الأحمر": ["الغردقة", "سفاجا", "القصير", "مرسى علم", "رأس غارب"],
+            "الوادي الجديد": ["الخارجة", "الداخلة", "الفرافرة", "باريس", "بلاط"],
+            "مطروح": ["مرسى مطروح", "الحمام", "العلمين", "الضبعة", "سيوة", "السلوم"],
+            "شمال سيناء": ["العريش", "الشيخ زويد", "رفح", "بئر العبد", "الحسنة"],
+            "جنوب سيناء": ["شرم الشيخ", "دهب", "نويبع", "طابا", "سانت كاترين", "الطور"]
+        };
+
+        var selectedCity = '@(ViewData["SelectedCity"] ?? "")';
+        var selectedDistrict = '@(ViewData["SelectedDistrict"] ?? "")';
+
+        var govSelect = document.getElementById('governorateSelect');
+        var distSelect = document.getElementById('districtSelect');
+
+        // Populate governorates
+        Object.keys(locationData).forEach(function(gov) {
+            var opt = document.createElement('option');
+            opt.value = gov;
+            opt.textContent = gov;
+            if (gov === selectedCity) opt.selected = true;
+            govSelect.appendChild(opt);
+        });
+
+        // If a city was already selected, populate districts
+        if (selectedCity && locationData[selectedCity]) {
+            distSelect.disabled = false;
+            distSelect.innerHTML = '<option value="" selected disabled>اختر المنطقة</option>';
+            locationData[selectedCity].forEach(function(dist) {
+                var opt = document.createElement('option');
+                opt.value = dist;
+                opt.textContent = dist;
+                if (dist === selectedDistrict) opt.selected = true;
+                distSelect.appendChild(opt);
+            });
+        }
+
+        // When governorate changes, populate districts
+        govSelect.addEventListener('change', function() {
+            var gov = this.value;
+            distSelect.disabled = false;
+            distSelect.innerHTML = '<option value="" selected disabled>اختر المنطقة</option>';
+            // Add "All districts" option
+            var allOpt = document.createElement('option');
+            allOpt.value = '__all__';
+            allOpt.textContent = 'كل المناطق';
+            distSelect.appendChild(allOpt);
+
+            if (locationData[gov]) {
+                locationData[gov].forEach(function(dist) {
+                    var opt = document.createElement('option');
+                    opt.value = dist;
+                    opt.textContent = dist;
+                    distSelect.appendChild(opt);
+                });
+            }
+        });
+
+        // Filter button click
+        document.getElementById('locationFilterBtn').addEventListener('click', function() {
+            var city = govSelect.value;
+            var district = distSelect.value;
+            if (!city) {
+                // Highlight the governorate select
+                govSelect.style.borderColor = '#ef4444';
+                govSelect.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.15)';
+                setTimeout(function() {
+                    govSelect.style.borderColor = '';
+                    govSelect.style.boxShadow = '';
+                }, 1500);
+                return;
+            }
+            var url = '/Customer/Home/Index?city=' + encodeURIComponent(city);
+            if (district && district !== '__all__') {
+                url += '&district=' + encodeURIComponent(district);
+            }
+            window.location.href = url;
+        });
     </script>
 }
