@@ -123,7 +123,7 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            // 3. ãÓÇÑ ÇáÜ JSON ÇáÈÓíØ (áæ ÍÇÈÈ ÊÞÑÃ ÇáÈíÇäÇÊ ßÜ Text ÚÇÏí Ãæ áÓßÑÈÊ ÎÇÑÌí)
+            // 3. Ã£Ã“Ã‡Ã‘ Ã‡Ã¡Ãœ JSON Ã‡Ã¡ÃˆÃ“Ã­Ã˜ (Ã¡Ã¦ ÃÃ‡ÃˆÃˆ ÃŠÃžÃ‘Ãƒ Ã‡Ã¡ÃˆÃ­Ã‡Ã¤Ã‡ÃŠ ÃŸÃœ Text ÃšÃ‡ÃÃ­ ÃƒÃ¦ Ã¡Ã“ÃŸÃ‘ÃˆÃŠ ÃŽÃ‡Ã‘ÃŒÃ­)
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
@@ -168,3 +168,4 @@ namespace Shatbly
         }
     }
 }
+
