@@ -33,11 +33,12 @@ namespace Shatbly.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index(int? categoryId , string searchString)
+        public async Task<IActionResult> Index(int? categoryId, string searchString, string city, string district)
         {
             Expression<Func<WorkerProfile, bool>> filter = null;
       
-            if(categoryId.HasValue && categoryId> 0)
+            // Build filter based on category and search
+            if(categoryId.HasValue && categoryId > 0)
             {
                 if (!string.IsNullOrEmpty(searchString))
                 {
@@ -52,9 +53,25 @@ namespace Shatbly.Controllers
             {
                 filter = w => w.User.FName.Contains(searchString);
             }
+
             var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category, w => w.User.Addresses]);
+
+            // Apply location filter (city/district) after fetching
+            if (!string.IsNullOrEmpty(city))
+            {
+                workers = workers.Where(w => w.User?.Addresses != null && w.User.Addresses.Any(a => a.City == city)).ToList();
+                
+                if (!string.IsNullOrEmpty(district))
+                {
+                    workers = workers.Where(w => w.User.Addresses.Any(a => a.District == district)).ToList();
+                }
+            }
+
             var categories = await _categoryRepository.GetAsync();
             ViewData["SearchString"] = searchString;
+            ViewData["SelectedCategory"] = categoryId?.ToString();
+            ViewData["SelectedCity"] = city;
+            ViewData["SelectedDistrict"] = district;
             var favoriteWorkerIds = new List<int>();
 
             if (User.Identity.IsAuthenticated)
@@ -73,6 +90,37 @@ namespace Shatbly.Controllers
 
             return View(vm);
         }
+
+        public async Task<IActionResult> WorkerDetails(int id)
+        {
+            var worker = await _workerRepository.GetOneAsync(
+                w => w.Id == id,
+                includes: [
+                    w => w.User.Addresses,
+                    w => w.WorkerServices.Category,
+                    w => w.WorkerReviews,
+                    w => w.Availabilities,
+                    w => w.PortfolioMediaItems
+                ]);
+
+            if (worker == null)
+            {
+                return NotFound();
+            }
+
+            // Check if this worker is in the current user's favorites
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isFavorite = false;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var fav = await _favoriteRepository.GetOneAsync(f => f.ClientId == userId && f.WorkerId == id);
+                isFavorite = fav != null;
+            }
+
+            ViewData["IsFavorite"] = isFavorite;
+            return View(worker);
+        }
+
         [HttpPost]
           public async Task<IActionResult> ToggleFavorite(int workerId)
         {

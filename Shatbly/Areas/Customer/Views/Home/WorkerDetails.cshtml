@@ -1,0 +1,722 @@
+@model Shatbly.Models.WorkerProfile
+
+@{
+    ViewData["Title"] = $"{Model.User?.FName} {Model.User?.LName} - ملف الفني";
+    var addr = Model.User?.Addresses?.FirstOrDefault();
+    var isFavorite = (bool)(ViewData["IsFavorite"] ?? false);
+    var dayNames = new Dictionary<string, string> {
+        {"Sunday", "الأحد"}, {"Monday", "الاثنين"}, {"Tuesday", "الثلاثاء"},
+        {"Wednesday", "الأربعاء"}, {"Thursday", "الخميس"}, {"Friday", "الجمعة"}, {"Saturday", "السبت"}
+    };
+    var memberYear = Model.CreatedAt.Year;
+    var completedOrders = Model.WorkerBookings?.Count() ?? 0;
+    var rating = Model.RatingAvg;
+    var categoryName = Model.WorkerServices?.Category?.NameAr ?? "غير محدد";
+    var firstLetter = Model.User?.FName?.Substring(0, Math.Min(3, Model.User.FName.Length)) ?? "م";
+}
+
+<style>
+    /* ===== Worker Profile Page - Redesigned ===== */
+
+    .wp-page {
+        min-height: calc(100vh - 76px);
+        background: #f5f7fa;
+        overflow-y: auto;
+        padding-bottom: 90px; /* space for sticky bar */
+        width: 100%;
+    }
+
+    /* --- Gradient Header --- */
+    .wp-header {
+        background: linear-gradient(135deg, #2196F3 0%, #00BCD4 50%, #26C6DA 100%);
+        padding: 40px 20px 60px;
+        text-align: center;
+        position: relative;
+    }
+
+    .wp-avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: white;
+        letter-spacing: 1px;
+    }
+
+    .wp-worker-name {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .wp-worker-name .verified-badge {
+        color: #2196F3;
+        font-size: 1.2rem;
+    }
+
+    .wp-specialty-line {
+        color: #198754;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .wp-specialty-line .dot-online {
+        width: 8px;
+        height: 8px;
+        background: #198754;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* --- Profile Card Container --- */
+    .wp-profile-card {
+        background: white;
+        max-width: 720px;
+        margin: -35px auto 0;
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        position: relative;
+        z-index: 10;
+        overflow: hidden;
+        border: none;
+    }
+
+    /* --- Stats Row --- */
+    .wp-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-bottom: none;
+    }
+
+    .wp-stat-item {
+        text-align: center;
+        padding: 20px 10px;
+        border-left: none;
+    }
+
+    .wp-stat-item:last-child {
+        border-left: none;
+    }
+
+    .wp-stat-value {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .wp-stat-value .star-icon {
+        color: #f59e0b;
+        font-size: 1.1rem;
+    }
+
+    .wp-stat-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    /* --- Tab Navigation --- */
+    .wp-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-bottom: none;
+    }
+
+    .wp-tab {
+        padding: 15px 10px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+        background: none;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        font-family: inherit;
+    }
+
+    .wp-tab:hover {
+        color: #2196F3;
+    }
+
+    .wp-tab.active {
+        color: white;
+        background: #2196F3;
+        border-bottom-color: #2196F3;
+    }
+
+    /* --- Tab Content --- */
+    .wp-tab-content {
+        display: none;
+        padding: 25px;
+        animation: fadeInTab 0.3s ease;
+    }
+
+    .wp-tab-content.active {
+        display: block;
+    }
+
+    @@keyframes fadeInTab {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* About Section */
+    .wp-section-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .wp-section-title i {
+        color: #2196F3;
+    }
+
+    .wp-bio-text {
+        font-size: 0.9rem;
+        line-height: 1.9;
+        color: #475569;
+        font-weight: 500;
+        background: #f8fafc;
+        padding: 18px;
+        border-radius: 14px;
+        border: none;
+    }
+
+    /* Work Hours */
+    .wp-hours-section {
+        margin-top: 25px;
+    }
+
+    .wp-hour-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        font-size: 0.88rem;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .wp-hour-row i {
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .wp-hour-row .icon-active {
+        color: #2196F3;
+    }
+
+    .wp-hour-row .icon-closed {
+        color: #ef4444;
+    }
+
+    /* Services List */
+    .wp-service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .wp-service-item:last-child {
+        border-bottom: none;
+    }
+
+    .wp-service-name {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1a1a2e;
+    }
+
+    .wp-service-price {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.82rem;
+    }
+
+    /* --- Sticky Bottom Bar --- */
+    .wp-bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-top: none;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 1000;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .wp-book-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #2196F3;
+        color: white;
+        border: none;
+        padding: 14px 36px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 1rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 18px rgba(33, 150, 243, 0.35);
+    }
+
+    .wp-book-btn:hover {
+        background: #1976D2;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 150, 243, 0.45);
+        color: white;
+    }
+
+    .wp-bottom-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .wp-action-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        text-decoration: none;
+    }
+
+    .wp-chat-btn {
+        background: #1a1a2e;
+        color: white;
+    }
+
+    .wp-chat-btn:hover {
+        background: #2196F3;
+        transform: scale(1.08);
+        color: white;
+    }
+
+    .wp-fav-btn {
+        background: #f8fafc;
+        color: #cbd5e1;
+        border: 2px solid #e2e8f0;
+    }
+
+    .wp-fav-btn:hover, .wp-fav-btn.active {
+        color: #ef4444;
+        border-color: #fecaca;
+        background: #fef2f2;
+    }
+
+    /* Back Arrow Button */
+    .wp-back-btn {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(6px);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        z-index: 20;
+    }
+
+    .wp-back-btn:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+        color: white;
+    }
+
+    /* Empty state */
+    .wp-empty {
+        text-align: center;
+        padding: 25px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 0.88rem;
+    }
+    .wp-empty i {
+        font-size: 1.8rem;
+        display: block;
+        margin-bottom: 8px;
+        opacity: 0.4;
+    }
+
+    /* Reviews inside About tab */
+    .wp-review-card {
+        background: #f8fafc;
+        border-radius: 14px;
+        border: none;
+        padding: 16px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+    }
+    .wp-review-card:hover {
+        box-shadow: 0 2px 12px rgba(33, 150, 243, 0.08);
+    }
+    .wp-review-stars {
+        color: #f59e0b;
+        font-size: 0.82rem;
+    }
+    .wp-review-comment {
+        font-size: 0.88rem;
+        color: #475569;
+        font-weight: 500;
+        line-height: 1.6;
+        margin-top: 6px;
+    }
+    .wp-review-date {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-top: 6px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .wp-profile-card {
+            margin: -35px 5px 0;
+            border-radius: 16px;
+            border: none;
+        }
+        .wp-stat-value {
+            font-size: 1.2rem;
+        }
+        .wp-book-btn {
+            padding: 12px 24px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="wp-page">
+
+    <!-- Gradient Header -->
+    <div class="wp-header">
+        <a href="/Customer/Home/Index" class="wp-back-btn">
+            <i class="bi bi-arrow-right"></i>
+        </a>
+
+        <!-- Circular Avatar -->
+        <div class="wp-avatar-circle">
+            @firstLetter
+        </div>
+
+        <!-- Worker Name -->
+        <h1 class="wp-worker-name">
+            @(Model.User?.FName) @(Model.User?.LName)
+            @if (Model.IsVerified)
+            {
+                <i class="bi bi-patch-check-fill verified-badge"></i>
+            }
+        </h1>
+
+        <!-- Specialty & Status -->
+        <div class="wp-specialty-line">
+            <i class="bi bi-tools"></i>
+            @categoryName
+            <span>|</span>
+            @if (Model.IsAvailable)
+            {
+                <span class="dot-online"></span>
+                <span>متاح الآن</span>
+            }
+            else
+            {
+                <span style="color: #94a3b8;">غير متاح</span>
+            }
+        </div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="wp-profile-card">
+
+        <!-- Stats Row -->
+        <div class="wp-stats">
+            <div class="wp-stat-item">
+                <div class="wp-stat-value">@memberYear</div>
+                <div class="wp-stat-label">عضو منذ</div>
+            </div>
+            <div class="wp-stat-item">
+                <div class="wp-stat-value">@completedOrders</div>
+                <div class="wp-stat-label">طلب مكتمل</div>
+            </div>
+            <div class="wp-stat-item">
+                <div class="wp-stat-value">
+                    <i class="bi bi-star-fill star-icon"></i>
+                    @rating.ToString("F1")
+                </div>
+                <div class="wp-stat-label">التقييم العام</div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="wp-tabs">
+            <button class="wp-tab" data-tab="services" id="tab-services">الخدمات والأسعار</button>
+            <button class="wp-tab active" data-tab="about" id="tab-about">نبذة ومواعيد</button>
+        </div>
+
+        <!-- Tab: About & Schedule -->
+        <div class="wp-tab-content active" id="content-about">
+
+            <!-- Bio -->
+            <div>
+                <h3 class="wp-section-title">
+                    <i class="bi bi-person-vcard"></i>
+                    نبذة عني
+                </h3>
+                @if (!string.IsNullOrEmpty(Model.Bio))
+                {
+                    <div class="wp-bio-text">@Model.Bio</div>
+                }
+                else
+                {
+                    <div class="wp-bio-text" style="color: #94a3b8; text-align: center;">
+                        لم يتم إضافة نبذة بعد
+                    </div>
+                }
+            </div>
+
+            <!-- Work Hours -->
+            <div class="wp-hours-section">
+                <h3 class="wp-section-title">
+                    <i class="bi bi-clock"></i>
+                    مواعيد العمل الرسمية
+                </h3>
+                @if (Model.Availabilities?.Any() == true)
+                {
+                    @foreach (var avail in Model.Availabilities.OrderBy(a => a.DayOfWeek))
+                    {
+                        var dayKey = avail.DayOfWeek.ToString();
+                        var dayAr = dayNames.ContainsKey(dayKey) ? dayNames[dayKey] : dayKey;
+                        <div class="wp-hour-row">
+                            <i class="bi bi-calendar-check icon-active"></i>
+                            <span>@dayAr: @avail.StartTime.ToString(@"hh\:mm") صباحاً - @avail.EndTime.ToString(@"hh\:mm") مساءً</span>
+                        </div>
+                    }
+                    
+                    @* Show Friday as closed if not in availabilities *@
+                    var hasFriday = Model.Availabilities.Any(a => a.DayOfWeek.ToString() == "Friday");
+                    if (!hasFriday)
+                    {
+                        <div class="wp-hour-row">
+                            <i class="bi bi-x-circle icon-closed"></i>
+                            <span>الجمعة: مغلق للإجازة الأسبوعية</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="wp-empty">
+                        <i class="bi bi-calendar-x"></i>
+                        لم يتم تحديد مواعيد العمل
+                    </div>
+                }
+            </div>
+
+            <!-- Reviews Section inside About tab -->
+            @if (Model.WorkerReviews?.Any() == true)
+            {
+                <div style="margin-top: 25px;">
+                    <h3 class="wp-section-title">
+                        <i class="bi bi-chat-square-heart-fill"></i>
+                        التقييمات
+                        <span style="background: #eff6ff; color: #2196F3; padding: 2px 10px; border-radius: 12px; font-size: 0.78rem;">@Model.WorkerReviews.Count()</span>
+                    </h3>
+                    @foreach (var review in Model.WorkerReviews.OrderByDescending(r => r.CreatedAt).Take(5))
+                    {
+                        <div class="wp-review-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="wp-review-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </div>
+                                <span class="wp-review-date">@review.CreatedAt.ToString("dd MMM yyyy")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p class="wp-review-comment">@review.Comment</p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tab: Services & Prices -->
+        <div class="wp-tab-content" id="content-services">
+            <h3 class="wp-section-title">
+                <i class="bi bi-tools"></i>
+                الخدمات المتاحة
+            </h3>
+
+            @if (Model.WorkerServices != null)
+            {
+                <div class="wp-service-item">
+                    <span class="wp-service-name">@(Model.WorkerServices.Category?.NameAr ?? "خدمة عامة")</span>
+                    <span class="wp-service-price">@Model.WorkerServices.HourlyRate.ToString("N0") ج.م / س</span>
+                </div>
+            }
+            else
+            {
+                <div class="wp-empty">
+                    <i class="bi bi-tools"></i>
+                    لا توجد خدمات مسجلة
+                </div>
+            }
+
+            <!-- Service Details Card -->
+            @if (Model.WorkerServices != null)
+            {
+                <div style="margin-top: 25px;">
+                    <h3 class="wp-section-title">
+                        <i class="bi bi-info-circle"></i>
+                        تفاصيل إضافية
+                    </h3>
+                    <div style="background: #f8fafc; border-radius: 14px; padding: 18px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span style="color: #94a3b8; font-weight: 600; font-size: 0.88rem;">حالة الخدمة</span>
+                            @if (Model.WorkerServices.IsActive)
+                            {
+                                <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                                    <i class="bi bi-check-circle-fill me-1"></i> نشطة
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="background: #f1f5f9; color: #94a3b8; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+                                    <i class="bi bi-pause-circle me-1"></i> غير نشطة
+                                </span>
+                            }
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span style="color: #94a3b8; font-weight: 600; font-size: 0.88rem;">يقبل أونلاين</span>
+                            @if (Model.AcceptsOnline)
+                            {
+                                <span style="color: #2e7d32; font-weight: 700; font-size: 0.88rem;">
+                                    <i class="bi bi-wifi me-1"></i> نعم
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="color: #94a3b8; font-weight: 700; font-size: 0.88rem;">
+                                    <i class="bi bi-wifi-off me-1"></i> لا
+                                </span>
+                            }
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="color: #94a3b8; font-weight: 600; font-size: 0.88rem;">الموقع</span>
+                            <span style="color: #1a1a2e; font-weight: 700; font-size: 0.88rem;">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                @(addr?.City ?? "غير محدد")، @(addr?.District ?? "غير محدد")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<!-- Sticky Bottom Bar -->
+<div class="wp-bottom-bar">
+    <a href="/Customer/BookingSystem/Create?workerId=@Model.Id" class="wp-book-btn">
+        <i class="bi bi-calendar-check"></i>
+        حجز ميعاد الآن
+    </a>
+
+    <div class="wp-bottom-actions">
+        <a href="/Customer/Chat?workerId=@Model.UserId" class="wp-action-circle wp-chat-btn" title="محادثة">
+            <i class="bi bi-chat-dots-fill"></i>
+        </a>
+        <form method="post" action="/Customer/Home/ToggleFavorite" style="margin:0;">
+            <input type="hidden" name="workerId" value="@Model.Id" />
+            <button type="submit" class="wp-action-circle wp-fav-btn @(isFavorite ? "active" : "")" title="المفضلة">
+                <i class="bi @(isFavorite ? "bi-heart-fill" : "bi-heart")"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tab switching logic
+        document.querySelectorAll('.wp-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                // Remove active from all tabs and contents
+                document.querySelectorAll('.wp-tab').forEach(function(t) { t.classList.remove('active'); });
+                document.querySelectorAll('.wp-tab-content').forEach(function(c) { c.classList.remove('active'); });
+
+                // Activate clicked tab and its content
+                this.classList.add('active');
+                var targetId = 'content-' + this.getAttribute('data-tab');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+    </script>
+}
