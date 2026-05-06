@@ -171,6 +171,14 @@
                    class="@IsActive("Availability")">
                     Availability
                 </a>
+                <a asp-area="Worker"
+                   asp-controller="Notification"
+                   asp-action="MyNotification"
+                   class="nav-link-custom">
+                    <i class="bi bi-chat-dots me-1"></i>
+                    Massages
+                    @await Component.InvokeAsync("UnreadNotifications")
+                </a>
 
                 <a asp-area="Worker"
                    asp-controller="Portfolio"
