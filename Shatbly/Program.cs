@@ -123,7 +123,7 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            // 3. ãÓÇÑ ÇáÜ JSON ÇáÈÓíØ (áæ ÍÇÈÈ ÊÞÑÃ ÇáÈíÇäÇÊ ßÜ Text ÚÇÏí Ãæ áÓßÑÈÊ ÎÇÑÌí)
+            // 3. Ã£Ã“Ã‡Ã‘ Ã‡Ã¡Ãœ JSON Ã‡Ã¡ÃˆÃ“Ã­Ã˜ (Ã¡Ã¦ ÃÃ‡ÃˆÃˆ ÃŠÃžÃ‘Ãƒ Ã‡Ã¡ÃˆÃ­Ã‡Ã¤Ã‡ÃŠ ÃŸÃœ Text ÃšÃ‡ÃÃ­ ÃƒÃ¦ Ã¡Ã“ÃŸÃ‘ÃˆÃŠ ÃŽÃ‡Ã‘ÃŒÃ­)
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
@@ -158,11 +158,15 @@ namespace Shatbly
             var scope = app.Services.CreateScope();
             var Service = scope.ServiceProvider.GetService<IDbintialize>();
 <<<<<<< HEAD
+<<<<<<< HEAD
             Service.Intializer();
 =======
             Service.Intializer().GetAwaiter().GetResult();
 
 >>>>>>> 06428f79a9e621ad835e9d7999967080537d3fd6
+=======
+            Service.Intializer();
+>>>>>>> ff492d719e9ef6db83416c561a91ee07b44295c5
             app.UseAuthorization();
             app.MapStaticAssets();
             app.MapControllerRoute(
