@@ -7,7 +7,7 @@ namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_WORKER},{SD.ROLE_ADMIN}")]
-    public class NotificationController(INotificationService notificationService) : Controller
+    public class WorkerNotificationController(INotificationService notificationService) : Controller
     {
         [HttpGet]
         public async Task<IActionResult> MyNotification(CancellationToken cancellationToken)
@@ -27,7 +27,7 @@ namespace Shatbly.Areas.Worker.Controllers
         public async Task<IActionResult> MarkAsRead(int id, CancellationToken cancellationToken)
         {
             await notificationService.MarkAsReadAsync(id, cancellationToken);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
 
         [HttpPost]
@@ -35,7 +35,7 @@ namespace Shatbly.Areas.Worker.Controllers
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
         {
             await notificationService.DeleteAsync(id, cancellationToken);
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -55,7 +55,7 @@ namespace Shatbly.Areas.Worker.Controllers
                 null,
                 cancellationToken);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(MyNotification));
         }
         private string? GetCurrentUserId()
         {
