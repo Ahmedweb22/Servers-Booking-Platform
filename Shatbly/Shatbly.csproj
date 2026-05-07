@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -21,25 +21,15 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
-    <PackageReference Include="Stripe.net" Version="51.0.0" />
+    <PackageReference Include="Stripe.net" Version="51.1.0" />
   </ItemGroup>
   <ItemGroup>
-
     <Folder Include="Areas\Admin\Views\" />
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\Identity\Views\" />
-
-    <Folder Include="Areas\Identity\Views\" />
-
     <Folder Include="Services\IServices\" />
     <Folder Include="wwwroot\img\banners\" />
     <Folder Include="wwwroot\img\service_categories\" />
     <Folder Include="wwwroot\img\worker\worker_cv\" />
-    <PackageReference Include="Stripe.net" Version="51.1.0" />
-	  <Folder Include="Areas\Identity\Controllers\" />
-	  <Folder Include="Areas\Identity\Views\" />
-	  <Folder Include="Services\IServices\" />
-	  <Folder Include="wwwroot\img\banners\" />
-	  <Folder Include="wwwroot\img\worker\worker_cv\" />
   </ItemGroup>
 </Project>
