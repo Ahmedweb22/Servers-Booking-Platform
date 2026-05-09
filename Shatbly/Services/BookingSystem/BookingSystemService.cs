@@ -505,7 +505,19 @@ public class BookingSystemService : IBookingSystemService
 
         return 0m;
     }
-
+    public async Task<bool> MarkAsPaidAsync(int bookingId)
+    { 
+    var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId);
+        if (booking != null)
+        { 
+        booking.PaymentStatus = PaymentStatuses.Paid;
+            booking.Status = OrderStatuses.Confirmed;
+             _orderRepository.Update(booking);
+            await _orderRepository.CommitAsync();
+            return true;
+        }
+        return false;
+    }
     private static BookingActionResult FailAction(int bookingId, string message)
     {
         return new BookingActionResult

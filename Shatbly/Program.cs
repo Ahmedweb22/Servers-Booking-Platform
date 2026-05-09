@@ -11,6 +11,11 @@ using Shatbly.Services.Portfolio;
 using Shatbly.Services.WorkerProfileService;
 using Shatbly.UnitOfWork;
 using Shatbly.Utilities.Dbintializes;
+using Stripe;
+using Address = Shatbly.Models.Address;
+using Coupon = Shatbly.Models.Coupon;
+using FileService = Shatbly.Services.File_Service.FileService;
+using PromotionCode = Shatbly.Models.PromotionCode;
 
 namespace Shatbly
 {
@@ -114,6 +119,9 @@ namespace Shatbly
             //Chat
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
+
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
