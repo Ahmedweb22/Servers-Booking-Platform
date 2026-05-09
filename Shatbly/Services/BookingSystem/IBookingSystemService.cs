@@ -7,4 +7,5 @@ public interface IBookingSystemService
     Task<BookingDetailsViewModel?> GetDetailsAsync(int id);
     Task<BookingActionResult> RescheduleAsync(int id, string scheduledAt);
     Task<BookingActionResult> CancelAsync(int id, string? cancellationReason);
+    Task<bool> MarkAsPaidAsync(int bookingId);
 }
