@@ -25,7 +25,12 @@ namespace Shatbly.Models
         public ReviewDirection Direction { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+        public string? BeforeImageUrl { get; set; }
+        public string? AfterImageUrl { get; set; }
+        [Required]
+        public int OrderId { get; set; }
+        [ForeignKey(nameof(BookingId))]
+        public Order Order { get; set; }
         [Required]
         public int BookingId { get; set; }
         [ForeignKey(nameof(BookingId))]

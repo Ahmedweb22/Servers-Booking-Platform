@@ -73,6 +73,8 @@ namespace Shatbly.Models
 
         [StringLength(500)]
         public string? Notes { get; set; }
+        public int BookingId { get; set; }
+        public Booking Booking { get; set; }
 
         [Required]
         public PaymentMethods PaymentMethod { get; set; } = PaymentMethods.Cash;
