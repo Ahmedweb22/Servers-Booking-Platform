@@ -8,4 +8,6 @@ public interface IBookingSystemService
     Task<BookingActionResult> RescheduleAsync(int id, string scheduledAt);
     Task<BookingActionResult> CancelAsync(int id, string? cancellationReason);
     Task<bool> MarkAsPaidAsync(int bookingId);
+    Task<bool> AddReviewAsync(Review review);
+    Task<bool> RaiseDisputeAsync(int bookingId, string reason);
 }

@@ -2,9 +2,10 @@
 {
     public interface IFileService
     {
-        Task<FileUploadResult> UploadPdfAsync(
+        Task<FileUploadResult> UploadFileAsync(
         IFormFile file,
         string folderPath,
-        long maxSizeInBytes);
+        long maxSizeInBytes,
+        string[] allowedExtensions);
     }
 }

@@ -16,6 +16,7 @@ using Address = Shatbly.Models.Address;
 using Coupon = Shatbly.Models.Coupon;
 using FileService = Shatbly.Services.File_Service.FileService;
 using PromotionCode = Shatbly.Models.PromotionCode;
+using Review = Shatbly.Models.Review;
 
 namespace Shatbly
 {
@@ -95,6 +96,7 @@ namespace Shatbly
             builder.Services.AddScoped<IBookingSystemService, BookingSystemService>();
             builder.Services.AddScoped<IRepository<Order>, Repository<Order>>();
             builder.Services.AddScoped<IRepository<Notification>, Repository<Notification>>();
+            builder.Services.AddScoped<IRepository<Review>, Repository<Review>>();
             builder.Services.AddScoped<IAccountService, Services.AccountService>();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IFileService, FileService>();

@@ -120,10 +120,11 @@ namespace Shatbly.Areas.Worker.Controllers
                 return RedirectToAction(nameof(Edit));
             }
 
-            var result = await _fileService.UploadPdfAsync(
+            var result = await _fileService.UploadFileAsync(
                 model.CVFile,
                 "uploads/cv",
-                maxSizeInBytes: 5 * 1024 * 1024);
+                maxSizeInBytes: 5 * 1024 * 1024,
+                allowedExtensions: new[] { ".pdf" });
 
             if (!result.Succeeded)
             {
