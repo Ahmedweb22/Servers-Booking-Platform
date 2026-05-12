@@ -135,8 +135,6 @@ namespace Shatbly
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
             //ai
-            //builder.Services.AddHttpClient<IAiChatService, OpenAiChatService>();
-            builder.Services.AddScoped<IAiChatService, MockAiChatService>();
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IChatAiService, GroqChatService>();
 
