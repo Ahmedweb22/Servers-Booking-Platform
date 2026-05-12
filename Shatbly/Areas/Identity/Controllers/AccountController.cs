@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Shatbly.Services;
+using Shatbly.Services.TokenServices;
 using Shatbly.ViewModels;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Shatbly.Areas.Identity.Controllers
 {
@@ -15,13 +18,16 @@ namespace Shatbly.Areas.Identity.Controllers
         private readonly IEmailSender _emailSender;
         private readonly IAccountService _accountService;
         private readonly IRepository<OTP_Verification> _otpRepository;
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IAccountService accountService, IRepository<OTP_Verification> otpRepository)
+        private readonly ITokenService _tokenService;
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IAccountService accountService,
+            IRepository<OTP_Verification> otpRepository,ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _accountService = accountService;
             _otpRepository = otpRepository;
+            _tokenService = tokenService;
         }
         public IActionResult Index()
         { 
@@ -147,6 +153,31 @@ namespace Shatbly.Areas.Identity.Controllers
                 TempData["success-notification"] = $"Welcome back {user.UserName}!";
                 return RedirectToAction("Index", "Home", new { area = "Customer" });
             }
+        //    var Claims = new List<Claim>();
+        //    {
+        //        Claims.Add(new(ClaimTypes.NameIdentifier, user.Id));
+        //        Claims.Add(new(ClaimTypes.Name, user.UserName!));
+        //        Claims.Add(new(ClaimTypes.Email, user.Email!));
+        //        Claims.Add(new(JwtRegisteredClaimNames.Sub, user.Id));
+        //        Claims.Add(new Claim(
+        //JwtRegisteredClaimNames.Iat,
+        //new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
+        //ClaimValueTypes.Integer64));
+        //    }
+
+        //    var userRoles = await _userManager.GetRolesAsync(user);
+        //    foreach (var item in userRoles)
+        //    {
+        //        Claims.Add(new Claim(ClaimTypes.Role, item));
+        //    }
+        //    var accesstoken = _tokenService.GenerateAccessToken(Claims);
+        //    var refreshToken = _tokenService.GenerateRefreshToken();
+
+        //    user.RefreshToken = refreshToken;
+        //    user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+
+        //    await _userManager.UpdateAsync(user);
+
             return RedirectToAction("Index", "Home" , new { area = "Admin" });
         }
         [HttpGet]

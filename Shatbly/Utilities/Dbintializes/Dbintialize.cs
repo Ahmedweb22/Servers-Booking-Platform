@@ -20,7 +20,7 @@ namespace Shatbly.Utilities.Dbintializes
             {
                 _context.Database.Migrate();
             }
-            if (_roleManager.Roles.IsNullOrEmpty())
+            if (!_roleManager.Roles.Any())
             {
                 await _roleManager.CreateAsync(new(SD.ROLE_SUPER_ADMIN));
                 await _roleManager.CreateAsync(new(SD.ROLE_ADMIN));

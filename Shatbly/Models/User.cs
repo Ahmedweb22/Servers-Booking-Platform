@@ -17,7 +17,9 @@ namespace Shatbly.Models
         public string? Address { get; set; }
 
         public WorkerProfile WorkerProfile { get; set; }  
-        public Wallet Wallet { get; set; }                
+        public Wallet Wallet { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiryTime { get; set; }
 
         public ICollection<Address> Addresses { get; set; }
         public ICollection<OTP_Verification> OtpVerifications { get; set; }

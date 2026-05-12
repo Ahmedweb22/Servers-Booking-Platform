@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.IdentityModel.Tokens;
 using Shatbly.HealthCheck;
 using Shatbly.Hubs;
+using Shatbly.Services.AI;
 using Shatbly.Services.AvailabilityService;
 using Shatbly.Services.BookingSystem;
 using Shatbly.Services.Chat;
@@ -8,16 +11,19 @@ using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.Services.File_Service;
 using Shatbly.Services.Notification;
 using Shatbly.Services.Portfolio;
+using Shatbly.Services.TokenServices;
 using Shatbly.Services.WorkerProfileService;
 using Shatbly.UnitOfWork;
 using Shatbly.Utilities.Dbintializes;
 using Stripe;
+using System.Security.Claims;
+using System.Text;
 using Address = Shatbly.Models.Address;
 using Coupon = Shatbly.Models.Coupon;
 using FileService = Shatbly.Services.File_Service.FileService;
 using PromotionCode = Shatbly.Models.PromotionCode;
 using Review = Shatbly.Models.Review;
-
+using TokenService = Shatbly.Services.TokenServices.TokenService;
 namespace Shatbly
 {
     public class Program
@@ -25,33 +31,19 @@ namespace Shatbly
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
-
-            //builder.Services.AddHealthChecks()
-            // .AddSqlServer(
-            //     builder.Configuration.GetConnectionString("DefaultConnection"),
-            //     name: "SQL Server",
-            //     failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy
-            //);
-            //builder.Services.AddHealthChecks()
-            //.AddCheck<WorkerHealthCheck>("Booking Service")
-            //.AddCheck<CouponHealthChack>("Coupon Service");
-
-
             builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
     .AddCheck<WorkerHealthCheck>("Worker Service")
     .AddCheck<CouponHealthChack>("Coupon Repository")
-    .AddCheck<BookingHealthChack>("Booking Repository"); 
+    .AddCheck<BookingHealthChack>("Booking Repository");
 
             builder.Services.AddHealthChecksUI(options =>
             {
-                options.SetEvaluationTimeInSeconds(10); 
+                options.SetEvaluationTimeInSeconds(10);
                 options.MaximumHistoryEntriesPerEndpoint(50);
                 options.AddHealthCheckEndpoint("Main API", "/health-api-json");
             })
@@ -77,20 +69,38 @@ namespace Shatbly
                 options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 options.SlidingExpiration = true;
             });
+    //        builder.Services.AddAuthentication(opt =>
+    //        {
+    //            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    //            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //        })
+    //.AddJwtBearer(options =>
+    //{
+    //    options.TokenValidationParameters = new TokenValidationParameters
+    //    {
+    //        ClockSkew = TimeSpan.Zero,
+    //        ValidateIssuer = true,
+    //        ValidIssuer = "https://localhost:7282",
+    //        ValidateAudience = true,
+    //        ValidAudience = "https://localhost:7282",
+    //        ValidateLifetime = true,
+    //        ValidateIssuerSigningKey = true,
+    //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ=")),
+    //        RoleClaimType = ClaimTypes.Role
+    //    };
+    //});
             builder.Services.AddScoped<IRepository<OTP_Verification>, Repository<OTP_Verification>>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddScoped<IRepository<WorkerProfile> , Repository<WorkerProfile>>();
             builder.Services.AddScoped<IDbintialize, Dbintialize>();
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
             builder.Services.AddScoped<IRepository<WorkerProfile>, Repository<WorkerProfile>>();
             builder.Services.AddScoped<IRepository<Address>, Repository<Address>>();
             builder.Services.AddScoped<IRepository<Booking>, Repository<Booking>>();
             builder.Services.AddScoped<IRepository<Coupon>, Repository<Coupon>>();
-            builder.Services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();    
+            builder.Services.AddScoped<IRepository<Promotion>, Repository<Promotion>>();
             builder.Services.AddScoped<IRepository<PromotionCode>, Repository<PromotionCode>>();
             builder.Services.AddScoped<IRepository<Banner>, Repository<Banner>>();
-            builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
             builder.Services.AddScoped<IRepository<WorkerService>, Repository<WorkerService>>();
             builder.Services.AddScoped<IRepository<ServiceCategory>, Repository<ServiceCategory>>();
             builder.Services.AddScoped<IBookingSystemService, BookingSystemService>();
@@ -105,6 +115,7 @@ namespace Shatbly
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IPortfolioService, PortfolioService>();
             builder.Services.AddScoped<IFilePortfolioService, FilePortfolioService>();
+            builder.Services.AddTransient<ITokenService, TokenService>();
             builder.Services.AddScoped<ICurrentWorkerService, CurrentWorkerService>();
             builder.Services.AddScoped<IEarningsService, EarningsService>();
             builder.Services.AddScoped<IWithdrawalService, WithdrawalService>();
@@ -119,10 +130,15 @@ namespace Shatbly
             builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
             builder.Services.AddSignalR();
             //Chat
-            builder.Services.AddScoped<IChatService, ChatService>();
-            builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
+            //builder.Services.AddScoped<IChatService, ChatService>();
+            //builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
+            //ai
+            //builder.Services.AddHttpClient<IAiChatService, OpenAiChatService>();
+            builder.Services.AddScoped<IAiChatService, MockAiChatService>();
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped<IChatAiService, GroqChatService>();
 
             var app = builder.Build();
 
@@ -133,7 +149,6 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            // 3. ãÓÇÑ ÇáÜ JSON ÇáÈÓíØ (áæ ÍÇÈÈ ÊÞÑÃ ÇáÈíÇäÇÊ ßÜ Text ÚÇÏí Ãæ áÓßÑÈÊ ÎÇÑÌí)
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
@@ -169,7 +184,7 @@ namespace Shatbly
             var Service = scope.ServiceProvider.GetService<IDbintialize>();
             //Service.Intializer();
             Service.Intializer().GetAwaiter().GetResult();
-
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapStaticAssets();
             app.MapControllerRoute(

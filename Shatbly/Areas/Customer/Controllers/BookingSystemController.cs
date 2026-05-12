@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.BookingSystem;
 using Stripe.Checkout;
 
 namespace Shatbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
+
     public class BookingSystemController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;

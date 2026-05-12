@@ -5,7 +5,7 @@ using System.Security.Claims;
 namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
-    [Authorize(Roles = SD.ROLE_WORKER)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]
     public class WorkerProfileController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
