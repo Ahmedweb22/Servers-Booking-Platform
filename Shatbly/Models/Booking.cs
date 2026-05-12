@@ -59,5 +59,6 @@ namespace Shatbly.Models
         public ICollection<Notification> Notifications { get; set; }
         public ICollection<LogActivity> LogActivities { get; set; } 
         public ICollection<Dipuste> Disputes { get; set; }
+        public ICollection<Order> Orders { get; set; }
     }
 }

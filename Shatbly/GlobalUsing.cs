@@ -18,3 +18,6 @@ global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 global using System.Text.Json;
 global using HealthChecks.UI.Client;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.IdentityModel.Tokens;
+global using System.Text;

@@ -7,7 +7,7 @@ using Shatbly.Services.File_Service;
 namespace Shatbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
-    [Authorize]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
     public class ReviewController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;

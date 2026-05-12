@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace Shatbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
-    [Authorize(Roles = $"{SD.ROLE_CUSTOMER},{SD.ROLE_ADMIN}")]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
     public class ChatsController(IChatService chatService) : Controller
     {
         [HttpPost]

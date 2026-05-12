@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]
+
     public class WorkerController : Controller
     {
         private readonly UserManager<User> _userManager;

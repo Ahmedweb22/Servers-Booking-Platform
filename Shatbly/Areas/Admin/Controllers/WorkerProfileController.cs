@@ -9,7 +9,7 @@ using System.IO;
 namespace Shatbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
-    //[Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
     public class WorkerProfileController : Controller
     {
         private readonly IRepository<WorkerProfile> _workerProfileRepo;
