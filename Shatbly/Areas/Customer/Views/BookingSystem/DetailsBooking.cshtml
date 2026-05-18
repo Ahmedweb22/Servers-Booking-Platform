@@ -270,7 +270,61 @@
                     <p class="muted">This booking can no longer be cancelled in its current status.</p>
                 }
             </div>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+            <div class="card mt-4">
+                <input type="hidden" id="bookingIdStore" value="@Model.Booking.Id" />
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-map-marked-alt"></i> تتبع الفني لايف</h5>
+                </div>
+                <div class="card-body">
+                    <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                </div>
+            </div>
         </section>
     </div>
 </div>
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // جلب رقم الحجز الحالي من الموديل
+        const currentBookingId = document.getElementById("bookingIdStore").value;
+
+        // 1. رسم الخريطة (افتراضياً على إحداثيات مصر/القاهرة مثلاً) وزوم 15
+        var map = L.map('map').setView([30.0444, 31.2357], 15);
+
+        // 2. تحميل شكل الخريطة المجاني من OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Shatably Live Tracking'
+        }).addTo(map);
+
+        // 3. عمل علامة (Marker) افتراضية على الخريطة تمثل الفني
+        var workerMarker = L.marker([30.0444, 31.2357]).addTo(map)
+        .bindPopup("<b>الفني في الطريق إليك</b>").openPopup();
+
+        // 4. الاتصال بماسورة التتبع بالـ SignalR
+        const clientHubConn = new signalR.HubConnectionBuilder()
+        .withUrl("/trackingHub")
+        .build();
+
+        clientHubConn.start().then(function () {
+        console.log("Connected to Tracking Hub successfully!");
+
+        // بمجرد ما العميل يفتح، بندخله "الجروب" الخاص برقم حكزه عشان يلقط اللوكيشن بتاعه بس
+        clientHubConn.invoke("JoinBookingTracking", currentBookingId.toString());
+        }).catch(err => console.error(err.toString()));
+
+        // 5. الاستماع لايف -> أول ما الفني يبعت لوكيشن جديد، الدالة دي بتشتغل فوراً
+        clientHubConn.on("ReceiveLocation", function (latitude, longitude) {
+        console.log(`Received Worker Location -> Lat: ${latitude}, Lng: ${longitude}`);
+
+        var newCoords = new L.LatLng(latitude, longitude);
+
+        workerMarker.setLatLng(newCoords); // تحريك أيقونة الفني للمكان الجديد
+        map.panTo(newCoords);              // نقل مركز الخريطة مع حركة الفني
+        });
+    </script>
+}
 

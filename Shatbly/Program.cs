@@ -175,6 +175,7 @@ namespace Shatbly
             });
             app.MapHub<NotificationHub>("/hubs/notifications");
             app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<TrackingHub>("/trackingHub");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
