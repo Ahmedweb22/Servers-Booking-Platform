@@ -1,5 +1,6 @@
 using Stripe;
 using BookingTypes = Shatbly.ViewModels.BookingTypes;
+using Review = Shatbly.Models.Review;
 
 namespace Shatbly.Services.BookingSystem;
 public enum RecurrencePatterns
@@ -26,16 +27,19 @@ public class BookingSystemService : IBookingSystemService
 
     private readonly IRepository<ServiceCategory> _serviceCategoryRepository;
     private readonly IRepository<Order> _orderRepository;
+    private readonly IRepository<Review> _reviewRepository;
     private readonly UserManager<User> _userManager;
 
     public BookingSystemService(
         UserManager<User> userManager,
         IRepository<ServiceCategory> serviceCategoryRepository,
-        IRepository<Order> orderRepository)
+        IRepository<Order> orderRepository,
+        IRepository<Review> reviewRepository)
     {
         _userManager = userManager;
         _serviceCategoryRepository = serviceCategoryRepository;
         _orderRepository = orderRepository;
+        _reviewRepository = reviewRepository;
     }
 
     public async Task<BookingWizardViewModel> BuildCreateViewModelAsync(BookingWizardViewModel? model = null)
@@ -505,7 +509,43 @@ public class BookingSystemService : IBookingSystemService
 
         return 0m;
     }
+    public async Task<bool> MarkAsPaidAsync(int bookingId)
+    { 
+    var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId);
+        if (booking != null)
+        { 
+        booking.PaymentStatus = PaymentStatuses.Paid;
+            booking.Status = OrderStatuses.Confirmed;
+             _orderRepository.Update(booking);
+            await _orderRepository.CommitAsync();
+            return true;
+        }
+        return false;
+    }
+    public async Task<bool> AddReviewAsync(Review review)
+    { 
+    var booking = await _orderRepository.GetOneAsync(o => o.Id == review.BookingId);
+        if (booking != null && booking.Status == OrderStatuses.Completed)
+        {
+            await _reviewRepository.CreateAsync(review);
+            await _reviewRepository.CommitAsync();
+            return true;
+        }
+        return false;
+    }
+    public async Task<bool> RaiseDisputeAsync(int bookingId , string reason)
+    {
+        var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId);
+        if (booking == null)
+        {
+            return false;
+        }
 
+        booking.Booking.Status = BookingStatus.Disputed;
+         _orderRepository.Update(booking);
+        await _orderRepository.CommitAsync();
+        return true;
+    }
     private static BookingActionResult FailAction(int bookingId, string message)
     {
         return new BookingActionResult

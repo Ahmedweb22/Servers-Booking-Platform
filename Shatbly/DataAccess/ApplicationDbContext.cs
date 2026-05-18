@@ -141,6 +141,28 @@ namespace Shatbly.DataAccess
                 .WithMany(pc => pc.Bookings)
                 .HasForeignKey(b => b.PromoCodeId)
                 .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Order>()
+    .HasOne(o => o.User)
+    .WithMany()
+    .HasForeignKey(o => o.UserId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Worker)
+                .WithMany()
+                .HasForeignKey(o => o.WorkerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Booking)
+                .WithMany(b => b.Orders)
+                .HasForeignKey(o => o.BookingId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Review>()
+    .HasOne(r => r.Order)
+    .WithMany()
+    .HasForeignKey(r => r.BookingId) // أو OrderId لو ده الصح
+    .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

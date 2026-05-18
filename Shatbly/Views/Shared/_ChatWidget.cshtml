@@ -1,0 +1,101 @@
+﻿<!-- Floating Button -->
+<button id="chatToggle" class="btn btn-primary rounded-circle shadow"
+        style="position:fixed; bottom:30px; right:30px; width:55px; height:55px; z-index:999;">
+    <i class="fas fa-comments"></i>
+</button>
+
+<!-- Chat Box -->
+<div id="chatBox" class="card shadow-lg d-none"
+     style="position:fixed; bottom:95px; right:30px; width:340px; height:460px; z-index:998; display:flex; flex-direction:column;">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-robot me-2"></i>مساعد الحجز</span>
+        <button class="btn btn-sm text-white" onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="card-body overflow-auto flex-grow-1" style="font-size:14px; direction:rtl;">
+        <div class="text-muted text-center mt-3">
+            <i class="fas fa-comments fa-2x mb-2 text-primary"></i>
+            <p>مرحباً! كيف أقدر أساعدك في الحجز؟</p>
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <div class="input-group">
+            <input id="chatInput" type="text" class="form-control form-control-sm"
+                   placeholder="اكتب سؤالك..." style="direction:rtl;"
+                   onkeydown="if(event.key==='Enter') sendMessage()" />
+            <button class="btn btn-primary btn-sm" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let chatHistory = [];
+
+    function toggleChat() {
+        const box = document.getElementById('chatBox');
+        box.classList.toggle('d-none');
+    }
+
+    document.getElementById('chatToggle').onclick = toggleChat;
+
+    async function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        appendMessage('user', msg);
+        chatHistory.push({ role: 'user', text: msg });
+        input.value = '';
+
+        appendTyping();
+
+        const res = await fetch('/Customer/ServiceChat/Send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, history: chatHistory.slice(-10) })
+        });
+
+        removeTyping();
+
+           if (res.ok) {
+        const data = await res.json();
+        appendMessage('model', data.reply);
+        chatHistory.push({ role: 'assistant', text: data.reply }); // ← هنا بدل 'model'
+    } else {
+            appendMessage('model', 'عذراً، حدث خطأ. حاول مرة أخرى.');
+        }
+    }
+
+    function appendMessage(role, text) {
+        const container = document.getElementById('chatMessages');
+        const isUser = role === 'user';
+        const div = document.createElement('div');
+        div.className = `d-flex mb-2 ${isUser ? 'justify-content-start' : 'justify-content-end'}`;
+        div.innerHTML = `
+            <div class="px-3 py-2 rounded-3 ${isUser ? 'bg-light' : 'bg-primary text-white'}"
+                 style="max-width:80%; direction:rtl; text-align:right;">
+                ${text}
+            </div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function appendTyping() {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.id = 'typingIndicator';
+        div.className = 'd-flex mb-2 justify-content-end';
+        div.innerHTML = `<div class="px-3 py-2 rounded-3 bg-primary text-white">
+            <span class="spinner-grow spinner-grow-sm"></span> جاري الكتابة...
+        </div>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTyping() {
+        document.getElementById('typingIndicator')?.remove();
+    }
+</script>

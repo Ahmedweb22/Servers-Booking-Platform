@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 namespace Shatbly.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
-    [Authorize]
+    [Authorize(Roles =$"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
     public class HomeController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;

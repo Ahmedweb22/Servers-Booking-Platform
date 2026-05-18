@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace Shatbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
-    [Authorize(Roles =$"{SD.ROLE_CUSTOMER},{SD.ROLE_ADMIN}")]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
     public class NotificationController(INotificationService notificationService) : Controller
     {
         [HttpGet]
@@ -57,7 +57,6 @@ namespace Shatbly.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(MyNotification));
         }
-
         private string? GetCurrentUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);

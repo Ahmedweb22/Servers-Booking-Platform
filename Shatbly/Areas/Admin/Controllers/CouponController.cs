@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Shatbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
-    //[Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
     public class CouponController : Controller
     {
         private readonly IRepository<Coupon> _couponRepo;

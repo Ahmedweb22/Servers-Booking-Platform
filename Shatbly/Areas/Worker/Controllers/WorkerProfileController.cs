@@ -5,7 +5,7 @@ using System.Security.Claims;
 namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
-    [Authorize(Roles = SD.ROLE_WORKER)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]
     public class WorkerProfileController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -120,10 +120,11 @@ namespace Shatbly.Areas.Worker.Controllers
                 return RedirectToAction(nameof(Edit));
             }
 
-            var result = await _fileService.UploadPdfAsync(
+            var result = await _fileService.UploadFileAsync(
                 model.CVFile,
                 "uploads/cv",
-                maxSizeInBytes: 5 * 1024 * 1024);
+                maxSizeInBytes: 5 * 1024 * 1024,
+                allowedExtensions: new[] { ".pdf" });
 
             if (!result.Succeeded)
             {

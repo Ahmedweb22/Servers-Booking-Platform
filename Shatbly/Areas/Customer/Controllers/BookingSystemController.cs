@@ -1,15 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.BookingSystem;
+using Stripe.Checkout;
 
 namespace Shatbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
+
     public class BookingSystemController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;
-        public BookingSystemController(IBookingSystemService bookingSystemService)
+        private readonly UserManager<User> _userManager;
+        public BookingSystemController(IBookingSystemService bookingSystemService , UserManager<User> userManager)
         {
             _bookingSystemService = bookingSystemService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -71,7 +77,29 @@ namespace Shatbly.Areas.Customer.Controllers
             TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Success(int id)
+        { 
+        var booking = await _bookingSystemService.GetDetailsAsync(id);
+            if (booking is null)
+            {
+                return NotFound();
+            }
+        var result = await _bookingSystemService.MarkAsPaidAsync(id);
+            if (result)
+            {
+                TempData["Success"] = "Payment successful";
 
+            }
+            else
+            {
+                TempData["Error"] = "Payment failed";
+            }
+
+      
+            return RedirectToAction(nameof(DetailsBooking), new { id = id });
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id, string? cancellationReason)
@@ -84,6 +112,47 @@ namespace Shatbly.Areas.Customer.Controllers
 
             TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
+        }
+        public async Task<IActionResult> Pay(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+                return NotFound();
+            var booking = await _bookingSystemService.GetDetailsAsync(id);
+            if (booking is null)
+                return NotFound();
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string>
+                {
+                    "card",
+                },
+                Mode = "payment",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/Customer/BookingSystem/Success?id={id}",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/Customer/BookingSystem/Cancel?id={id}",
+                LineItems = new List<SessionLineItemOptions>
+                {
+                new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(booking.Booking.TotalPrice * 100),
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = $"خدمه فنيه من :{booking.Booking.User.Name}",
+                            Description = "حجز موعد صيانه",
+                        },
+
+                    },
+                    Quantity = 1,
+                }
+            }
+            };
+            var services = new SessionService();
+            var session = services.Create(options);
+            return Redirect(session.Url);
         }
     }
 }
