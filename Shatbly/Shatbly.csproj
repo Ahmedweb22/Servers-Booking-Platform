@@ -23,6 +23,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.7" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
+    <PackageReference Include="QuestPDF" Version="2026.5.0" />
     <PackageReference Include="Stripe.net" Version="51.1.0" />
   </ItemGroup>
   <ItemGroup>

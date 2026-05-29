@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Fluent;
+using Shatbly.Reports;
 
 namespace Shatbly.Areas.Admin.Controllers
 {
@@ -245,6 +247,19 @@ namespace Shatbly.Areas.Admin.Controllers
                 TempData["success-notification"] = $"Delete Successful";
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> ExportPdf()
+        {
+            var users = await _userManager.Users
+                .Include(u => u.Orders)
+                .Include(u => u.ClientBookings)
+                .ToListAsync();
+
+            var report = new SimpleReport(users);
+            var pdfBytes = report.GeneratePdf();
+
+            return File(pdfBytes, "application/pdf", "UsersReport.pdf");
         }
     }
 }

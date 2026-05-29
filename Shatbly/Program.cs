@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Packaging;
 using Shatbly.HealthCheck;
 using Shatbly.Hubs;
 using Shatbly.Services.AI;
@@ -24,6 +25,9 @@ using FileService = Shatbly.Services.File_Service.FileService;
 using PromotionCode = Shatbly.Models.PromotionCode;
 using Review = Shatbly.Models.Review;
 using TokenService = Shatbly.Services.TokenServices.TokenService;
+using QuestPDF.Infrastructure;
+using LicenseType = QuestPDF.Infrastructure.LicenseType;
+
 namespace Shatbly
 {
     public class Program
@@ -31,6 +35,7 @@ namespace Shatbly
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -137,6 +142,7 @@ namespace Shatbly
             //ai
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IChatAiService, GroqChatService>();
+            QuestPDF.Settings.License = LicenseType.Community;
 
             var app = builder.Build();
 

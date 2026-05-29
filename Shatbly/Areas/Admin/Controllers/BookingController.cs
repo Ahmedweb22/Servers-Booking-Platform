@@ -114,11 +114,11 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Booking booking)
         {
-            if (!ModelState.IsValid)
-            {
-                await LoadDropdownsAsync(booking);
-                return View(booking);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    //await LoadDropdownsAsync(booking);
+            //    return View(booking);
+            //}
 
             await _bookingRepo.CreateAsync(booking);
             await _bookingRepo.CommitAsync();
@@ -141,11 +141,11 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Booking booking)
         {
-            if (!ModelState.IsValid)
-            {
-                await LoadDropdownsAsync(booking);
-                return View(booking);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    await LoadDropdownsAsync(booking);
+            //    return View(booking);
+            //}
 
             var existingBooking = await _bookingRepo.GetOneAsync(b => b.Id == booking.Id);
 

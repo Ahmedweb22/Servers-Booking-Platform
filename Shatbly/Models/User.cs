@@ -15,7 +15,7 @@ namespace Shatbly.Models
                 [Phone]
         public string Phone { get; set; }
         public string? Address { get; set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public WorkerProfile WorkerProfile { get; set; }  
         public Wallet Wallet { get; set; }
         public string? RefreshToken { get; set; }
@@ -38,5 +38,6 @@ namespace Shatbly.Models
         public ICollection<Referral> ReferralsReceived { get; set; }
         public ICollection<Banner> banners { get; set; }
         public string Name { get; internal set; }
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

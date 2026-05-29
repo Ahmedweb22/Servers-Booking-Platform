@@ -38,7 +38,7 @@ namespace Shatbly.Areas.Identity.Controllers
         {
             await _signInManager.SignOutAsync();
             TempData["success-notification"] = "Logged out successfully.";
-            return RedirectToAction("Index", "Home", new { area = "Customer" });
+            return RedirectToAction("Index", "Home", new { area = "Identity" });
 
         }
         [HttpGet]
@@ -52,7 +52,7 @@ namespace Shatbly.Areas.Identity.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-           User applicationUser = new()
+            User applicationUser = new()
             {
                 UserName = model.UserName,
                 Email = model.Email,
