@@ -9,10 +9,12 @@ namespace Shatbly.Areas.Admin.Controllers
     public class BanerController : Controller
     {
         private readonly IRepository<Banner> _bannerRepo;
+        private readonly UserManager<User> _userManager;
 
-        public BanerController(IRepository<Banner> bannerRepo)
+        public BanerController(IRepository<Banner> bannerRepo, UserManager<User> userManager)
         {
             _bannerRepo = bannerRepo;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index(string? title, int page = 1)
@@ -49,16 +51,33 @@ namespace Shatbly.Areas.Admin.Controllers
             ModelState.Remove("ImageUrl");
             ModelState.Remove("User");
             ModelState.Remove("UserId");
+            if (img == null)
+            {
+                ModelState.AddModelError("ImageUrl", "Banner image is required");
+            }
             if (!ModelState.IsValid)
                 return View(banner);
-           
+
+            if (img != null && img.Length > 0)
+            {
                 var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(img.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", newFileName);
                 using (var stream = System.IO.File.Create(filePath))
                 {
-                    img.CopyTo(stream);
+                    await img.CopyToAsync(stream);
                 }
                 banner.ImageUrl = newFileName;
+            }
+            else
+            {
+                ModelState.AddModelError("ImageUrl", "Please upload an image.");
+                return View(banner);
+            }
+
+            if (string.IsNullOrEmpty(banner.UserId))
+            {
+                banner.UserId = _userManager.GetUserId(User);
+            }
 
             await _bannerRepo.CreateAsync(banner);
             await _bannerRepo.CommitAsync();
@@ -79,35 +98,42 @@ namespace Shatbly.Areas.Admin.Controllers
         [Authorize(Roles = $" {SD.ROLE_SUPER_ADMIN}")]
         public async Task<IActionResult> Edit(Banner banner, IFormFile? img)
         {
-            ModelState.Remove("ImageUrl");
             ModelState.Remove("User");
             ModelState.Remove("UserId");
+
             if (!ModelState.IsValid)
                 return View(banner);
 
             Banner? existingBanner = await _bannerRepo.GetOneAsync(e => e.Id == banner.Id, tracking: false);
+
             if (existingBanner is null)
                 return NotFound();
-           
-            
+
+            if (img != null && img.Length > 0)
+            {
                 var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(img.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", newFileName);
                 using (var stream = System.IO.File.Create(filePath))
                 {
-                    img.CopyTo(stream);
+                    await img.CopyToAsync(stream);
                 }
-                // Optionally delete the old banner file
-                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", existingBanner.ImageUrl);
-                if (System.IO.File.Exists(oldFilePath))
-                {
-                    System.IO.File.Delete(oldFilePath);
-                }
-                banner.ImageUrl = newFileName;
 
-            if (img is  null && img.Length < 0)
-            {
-                banner.ImageUrl = existingBanner.ImageUrl;
+                if (!string.IsNullOrEmpty(existingBanner.ImageUrl))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", existingBanner.ImageUrl);
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                    banner.ImageUrl = newFileName;
+                }
+                else
+                {
+                    banner.ImageUrl = existingBanner.ImageUrl;
+                }
             }
+            banner.UserId = existingBanner.UserId;
+
             _bannerRepo.Update(banner);
             await _bannerRepo.CommitAsync();
             TempData["Notification"] = "Banner updated successfully";
