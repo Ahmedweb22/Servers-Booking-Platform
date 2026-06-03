@@ -27,6 +27,12 @@
             <span>Users</span>
         </a>
 
+        <a asp-area="Admin" asp-controller="Baner" asp-action="Index"
+           class="nav-item @(currentController == "Baner" ? "active" : "")">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Banner</span>
+        </a>
+
         <a asp-area="Admin" asp-controller="Coupon" asp-action="Index"
            class="nav-item @(currentController == "Coupon" ? "active" : "")">
             <i class="fa-solid fa-ticket"></i>

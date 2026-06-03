@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 namespace Shatbly.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
-    [Authorize(Roles =$"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
     public class HomeController : Controller
     {
         private readonly IBookingSystemService _bookingSystemService;
@@ -19,9 +19,10 @@ namespace Shatbly.Controllers
         private readonly IRepository<Booking> _bookingRepository;
         private readonly IRepository<WorkerService> _serviceRepository;
         private readonly IRepository<ServiceCategory> _categoryRepository;
+        private readonly IRepository<Banner> _bannerRepository;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService, UserManager<User> userManager, IRepository<Favorite> favoriteRepository, IRepository<WorkerProfile> workerRepository, IRepository<Booking> bookingRepository, IRepository<WorkerService> serviceRepository, IRepository<ServiceCategory> categoryRepository)
+        public HomeController(ILogger<HomeController> logger, IBookingSystemService bookingSystemService, UserManager<User> userManager, IRepository<Favorite> favoriteRepository, IRepository<WorkerProfile> workerRepository, IRepository<Booking> bookingRepository, IRepository<WorkerService> serviceRepository, IRepository<ServiceCategory> categoryRepository, IRepository<Banner> bannerRepository)
         {
             _logger = logger;
             _bookingSystemService = bookingSystemService;
@@ -31,14 +32,15 @@ namespace Shatbly.Controllers
             _bookingRepository = bookingRepository;
             _serviceRepository = serviceRepository;
             _categoryRepository = categoryRepository;
+            _bannerRepository = bannerRepository;
         }
 
         public async Task<IActionResult> Index(int? categoryId, string searchString, string city, string district)
         {
             Expression<Func<WorkerProfile, bool>> filter = null;
-      
+
             // Build filter based on category and search
-            if(categoryId.HasValue && categoryId > 0)
+            if (categoryId.HasValue && categoryId > 0)
             {
                 if (!string.IsNullOrEmpty(searchString))
                 {
@@ -47,7 +49,7 @@ namespace Shatbly.Controllers
                 else
                 {
                     filter = w => w.WorkerServices.CategoryId == categoryId;
-                }   
+                }
             }
             else if (!string.IsNullOrEmpty(searchString))
             {
@@ -60,7 +62,7 @@ namespace Shatbly.Controllers
             if (!string.IsNullOrEmpty(city))
             {
                 workers = workers.Where(w => w.User?.Addresses != null && w.User.Addresses.Any(a => a.City == city)).ToList();
-                
+
                 if (!string.IsNullOrEmpty(district))
                 {
                     workers = workers.Where(w => w.User.Addresses.Any(a => a.District == district)).ToList();
@@ -81,11 +83,18 @@ namespace Shatbly.Controllers
                 favoriteWorkerIds = favorites.Select(f => f.WorkerId).ToList();
             }
 
+            var banners = await _bannerRepository.GetAsync(
+                e => e.IsActive
+                && e.StartDate <= DateTime.Now
+                && e.EndDate >= DateTime.Now,
+                tracking: false);
+
             var vm = new CustomerIndexVM
             {
                 Workers = workers,
                 Categories = categories,
-                FavoriteWorkerIds = favoriteWorkerIds
+                FavoriteWorkerIds = favoriteWorkerIds,
+                Banners = banners
             };
 
             return View(vm);
@@ -122,7 +131,7 @@ namespace Shatbly.Controllers
         }
 
         [HttpPost]
-          public async Task<IActionResult> ToggleFavorite(int workerId)
+        public async Task<IActionResult> ToggleFavorite(int workerId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -142,16 +151,16 @@ namespace Shatbly.Controllers
             }
             else
             {
-                 _favoriteRepository.Delete(existingFavorite);
+                _favoriteRepository.Delete(existingFavorite);
             }
             await _favoriteRepository.CommitAsync();
             return RedirectToAction("Index");
         }
-      
-    [Authorize]
+
+        [Authorize]
         public async Task<IActionResult> Favorites()
         {
-          var claimsIdentity = User.Identity as ClaimsIdentity;
+            var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
             {

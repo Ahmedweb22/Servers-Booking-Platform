@@ -27,7 +27,6 @@
     <PackageReference Include="Stripe.net" Version="51.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Areas\Admin\Views\" />
     <Folder Include="Areas\Identity\Views\" />
     <Folder Include="Services\IServices\" />
     <Folder Include="wwwroot\img\banners\" />

@@ -17,29 +17,28 @@ namespace Shatbly.Models
 
         [Required]
         [MaxLength(255)]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(1024)]
-        [Url]
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
 
         [MaxLength(1024)]
         [Url]
         public string LinkUrl { get; set; }
 
         [Required]
-        public BannerTarget Target { get; set; }
+        public BannerTarget Target { get; set; } 
         public int? TargetId { get; set; }
 
         public bool IsActive { get; set; } = true;
 
         [Required]
-        public DateTime StartDate { get; set; }
+        public DateTime StartDate { get; set; } 
 
         [Required]
         public DateTime EndDate { get; set; }
-        public string UserId { get; set; }
+        public string UserId { get; set; } 
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
     }
