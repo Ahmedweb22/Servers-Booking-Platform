@@ -74,12 +74,12 @@
             <i class="fa-solid fa-briefcase"></i>
             <span>Worker profile</span>
         </a>
-
-        <a asp-area="Admin" asp-controller="BookingSystem" asp-action="Create"
+        @* Spam to Customer Area *@
+        @* <a asp-area="Admin" asp-controller="BookingSystem" asp-action="Create"
            class="nav-item @(currentController == "BookingSystem" ? "active" : "")">
             <i class="fa-solid fa-calendar-check"></i>
             <span>Booking System</span>
-        </a>
+        </a> *@
 
         <a asp-area="Admin" asp-controller="Report" asp-action="Index"
            class="nav-item @(currentController == "Report" ? "active" : "")">

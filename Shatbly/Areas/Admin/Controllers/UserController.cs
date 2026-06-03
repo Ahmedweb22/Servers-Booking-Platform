@@ -61,7 +61,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             return View(new CreateUserVM
             {
-                Roles = roles.AsEnumerable()
+                Roles = roles.ToList()
             });
         }
         //[HttpPost]
@@ -108,25 +108,25 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserVM createUserVM)
         {
-            ModelState.Remove("Id");
-            ModelState.Remove("User");
-            ModelState.Remove("Roles");
+            //ModelState.Remove("Id");
+            //ModelState.Remove("User");
+            //ModelState.Remove("Roles");
 
-            if (!ModelState.IsValid)
-            {
-                foreach (var error in ModelState)
-                {
-                    Console.WriteLine(error.Key);
-                    foreach (var subError in error.Value.Errors)
-                    {
-                        Console.WriteLine(subError.ErrorMessage);
-                    }
-                }
+            //if (!ModelState.IsValid)
+            //{
+            //    foreach (var error in ModelState)
+            //    {
+            //        Console.WriteLine(error.Key);
+            //        foreach (var subError in error.Value.Errors)
+            //        {
+            //            Console.WriteLine(subError.ErrorMessage);
+            //        }
+            //    }
 
-                TempData["error-notification"] = "Invalid Data";
-                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
-                return View(createUserVM);
-            }
+            //    TempData["error-notification"] = "Invalid Data";
+            //    createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+            //    return View(createUserVM);
+            //}
 
             var existingUser = await _userManager.FindByEmailAsync(createUserVM.Email);
             if (existingUser != null)
@@ -140,6 +140,7 @@ namespace Shatbly.Areas.Admin.Controllers
             {
                 FName = createUserVM.FName,
                 LName = createUserVM.LName,
+                Name = createUserVM.FName + createUserVM.LName,
                 UserName = createUserVM.UserName,
                 Email = createUserVM.Email,
                 Phone = createUserVM.Phone
@@ -159,10 +160,10 @@ namespace Shatbly.Areas.Admin.Controllers
                 return View(createUserVM);
             }
 
-            if (!string.IsNullOrEmpty(createUserVM.RoleName))
-            {
-                await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
-            }
+            //if (!string.IsNullOrEmpty(createUserVM.RoleName))
+            //{
+            //    await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
+            //}
 
             TempData["success-notification"] = "Save Successful";
             return RedirectToAction(nameof(Index));
