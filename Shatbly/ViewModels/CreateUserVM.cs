@@ -22,6 +22,8 @@
         public string Password { get; set; }
         [Required]
         public string RoleName { get; set; }
-        public IEnumerable<IdentityRole> Roles { get; set; }
+        // public IEnumerable<IdentityRole> Roles { get; set; }
+         public List<IdentityRole> Roles { get; set; }
+
     }
 }

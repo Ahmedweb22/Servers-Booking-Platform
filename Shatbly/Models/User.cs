@@ -6,10 +6,10 @@ namespace Shatbly.Models
     public class User : IdentityUser
     {
         [Required]
-        [MaxLength(150)]
+        //[MaxLength(150)]
         public string FName { get; set; }
         [Required]
-        [MaxLength(150)]
+        //[MaxLength(150)]
         public string LName { get; set; }
         [Required]
                 [Phone]
