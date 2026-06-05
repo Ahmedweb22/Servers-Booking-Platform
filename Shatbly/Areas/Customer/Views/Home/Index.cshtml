@@ -1,5 +1,209 @@
 @model CustomerIndexVM
 
+@{
+    ViewData["Title"] = "الصفحة الرئيسية";
+}
+
+<style>
+    /* =========================
+       SMART BANNER
+    ========================= */
+
+    .smart-banner {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        overflow: hidden;
+        background: linear-gradient( 135deg, #0f172a, #1e293b );
+        border-radius: 0 0 24px 24px;
+        margin-bottom: 18px;
+    }
+
+    /* Slider */
+
+    .smart-banner-slider {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Item */
+
+    .smart-banner-item {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.6s;
+    }
+
+        .smart-banner-item.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
+        }
+
+    /* Content */
+
+    .smart-banner-content {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 40px 80px;
+        gap: 40px;
+    }
+
+    /* Text */
+
+    .smart-banner-text {
+        max-width: 500px;
+        color: white;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .smart-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.15);
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .smart-banner-text h2 {
+        font-size: 2.3rem;
+        font-weight: 900;
+        line-height: 1.3;
+        margin-bottom: 16px;
+        color: white;
+        text-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    }
+
+    .smart-banner-text p {
+        color: rgba(255,255,255,0.92);
+        line-height: 1.9;
+        margin-bottom: 22px;
+        font-weight: 500;
+    }
+
+    /* Button */
+
+    .smart-banner-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 24px;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        border-radius: 14px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+        .smart-banner-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    /* Image */
+
+    .smart-banner-image {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .smart-banner-image img {
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.25));
+        }
+
+    /* Arrows */
+
+    .smart-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(8px);
+        color: white;
+        z-index: 10;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .smart-arrow:hover {
+            background: rgba(255,255,255,0.22);
+        }
+
+        .smart-arrow.prev {
+            left: 18px;
+        }
+
+        .smart-arrow.next {
+            right: 18px;
+        }
+
+    /* Dots */
+
+    .smart-dots {
+        position: absolute;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+    }
+
+    .smart-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.35);
+        transition: 0.3s;
+    }
+
+        .smart-dot.active {
+            width: 28px;
+            border-radius: 999px;
+            background: white;
+        }
+
+    /* Responsive */
+
+    @@media(max - width:768px) {
+
+        .smart-banner {
+            height: auto;
+        }
+
+        .smart-banner-content {
+            flex-direction: column;
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        .smart-banner-text h2 {
+            font-size: 1.7rem;
+        }
+
+        .smart-banner-image img {
+            max-height: 160px;
+        }
+    }
+</style>
 <!-- 2. Advanced Filter Bar -->
 <nav class="filter-bar">
     <div class="d-flex align-items-center gap-3 flex-grow-1 flex-wrap">
@@ -57,7 +261,99 @@
         </div>
     </div>
 </nav>
+@if (Model.Banners != null && Model.Banners.Any())
+{
+    <section class="smart-banner">
 
+        <div class="smart-banner-slider">
+
+            @{
+                int index = 0;
+            }
+
+            @foreach (var banner in Model.Banners
+           .Where(b => b.IsActive
+           && b.StartDate <= DateTime.Now
+           && b.EndDate >= DateTime.Now))
+            {
+                <div class="smart-banner-item @(index == 0 ? "active" : "")">
+
+                    <div class="smart-banner-content">
+
+                        <div class="smart-banner-text">
+
+                            <span class="smart-badge">
+                                إعلان مميز
+                            </span>
+
+                            <h2>@banner.Title</h2>
+
+                            <p>
+                                اكتشف أفضل الخدمات والعروض المتاحة الآن
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(banner.LinkUrl))
+                            {
+                                <a href="@banner.LinkUrl"
+                                   class="smart-banner-btn">
+
+                                    اكتشف الآن
+
+                                    <i class="bi bi-arrow-left"></i>
+
+                                </a>
+                            }
+
+                        </div>
+
+                        <div class="smart-banner-image">
+
+                            <img src="~/img/banners/@banner.ImageUrl"
+                                 alt="@banner.Title">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                index++;
+            }
+
+        </div>
+
+        <!-- Arrows -->
+
+        <button class="smart-arrow prev" id="bannerPrev">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <button class="smart-arrow next" id="bannerNext">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+
+        <!-- Dots -->
+
+        <div class="smart-dots">
+
+            @{
+                int dotIndex = 0;
+            }
+
+            @foreach (var banner in Model.Banners
+           .Where(b => b.IsActive
+           && b.StartDate <= DateTime.Now
+           && b.EndDate >= DateTime.Now))
+            {
+                <span class="smart-dot @(dotIndex == 0 ? "active" : "")"></span>
+
+                dotIndex++;
+            }
+
+        </div>
+
+    </section>
+}
 <!-- 3. Main Content -->
 <div class="main-layout">
 
@@ -89,7 +385,7 @@
                             </div>
                             <div>
                                 <h6 class="fw-800 mb-1 fs-5 d-flex align-items-center">
-									@(worker.User?.FName) @(worker.User?.LName)
+                                    @(worker.User?.FName) @(worker.User?.LName)
                                     <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
                                 </h6>
                                 <p class="text-muted fw-semibold small mb-2">@(worker.WorkerServices?.Category?.Name ?? "غير محدد")</p>
@@ -100,16 +396,16 @@
                             </div>
                         </div>
                         <form method="post" action="/Customer/Home/ToggleFavorite">
-						    <input type="hidden" name="workerId" value="@worker.Id" />
+                            <input type="hidden" name="workerId" value="@worker.Id" />
                             <button class="fav-btn @(Model.FavoriteWorkerIds.Contains(worker.Id) ? "active" : "")" type="submit">
-                                @if(Model.FavoriteWorkerIds.Contains(worker.Id))
+                                @if (Model.FavoriteWorkerIds.Contains(worker.Id))
                                 {
                                     <i class="bi bi-heart-fill"></i>
                                 }
-							    else
-							    {
-								    <i class="bi bi-heart"></i>
-							    }
+                                else
+                                {
+                                    <i class="bi bi-heart"></i>
+                                }
                             </button>
                         </form>
                     </div>
@@ -146,7 +442,7 @@
                 <h4 class="fw-800 mb-1">خريطة الفنيين التفاعلية</h4>
                 <p class="text-muted fw-semibold mb-0">جاري تحميل الخريطة والمواقع المباشرة للفنيين...</p>
             </div>
-            
+
             <!-- Emergency Button -->
             <button class="fab-emergency">
                 <i class="bi bi-exclamation-triangle-fill"></i>
@@ -290,5 +586,59 @@
             }
             window.location.href = url;
         });
+
+
+            const slides = document.querySelectorAll('.smart-banner-item');
+        const dots = document.querySelectorAll('.smart-dot');
+
+        const nextBtn = document.getElementById('bannerNext');
+        const prevBtn = document.getElementById('bannerPrev');
+
+        let current = 0;
+
+        function showSlide(index) {
+
+            slides.forEach(slide =>
+                slide.classList.remove('active'));
+
+            dots.forEach(dot =>
+                dot.classList.remove('active'));
+
+            slides[index].classList.add('active');
+
+            dots[index].classList.add('active');
+        }
+
+        nextBtn.addEventListener('click', () => {
+
+            current++;
+
+            if (current >= slides.length)
+                current = 0;
+
+            showSlide(current);
+        });
+
+        prevBtn.addEventListener('click', () => {
+
+            current--;
+
+            if (current < 0)
+                current = slides.length - 1;
+
+            showSlide(current);
+        });
+
+        setInterval(() => {
+
+            current++;
+
+            if (current >= slides.length)
+                current = 0;
+
+            showSlide(current);
+
+        }, 5000);
+
     </script>
 }
