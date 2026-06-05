@@ -74,26 +74,36 @@ namespace Shatbly
                 options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 options.SlidingExpiration = true;
             });
-    //        builder.Services.AddAuthentication(opt =>
-    //        {
-    //            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    //        })
-    //.AddJwtBearer(options =>
-    //{
-    //    options.TokenValidationParameters = new TokenValidationParameters
-    //    {
-    //        ClockSkew = TimeSpan.Zero,
-    //        ValidateIssuer = true,
-    //        ValidIssuer = "https://localhost:7282",
-    //        ValidateAudience = true,
-    //        ValidAudience = "https://localhost:7282",
-    //        ValidateLifetime = true,
-    //        ValidateIssuerSigningKey = true,
-    //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ=")),
-    //        RoleClaimType = ClaimTypes.Role
-    //    };
-    //});
+            //        builder.Services.AddAuthentication(opt =>
+            //        {
+            //            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        })
+            //.AddJwtBearer(options =>
+            //{
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ClockSkew = TimeSpan.Zero,
+            //        ValidateIssuer = true,
+            //        ValidIssuer = "https://localhost:7282",
+            //        ValidateAudience = true,
+            //        ValidAudience = "https://localhost:7282",
+            //        ValidateLifetime = true,
+            //        ValidateIssuerSigningKey = true,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ=")),
+            //        RoleClaimType = ClaimTypes.Role
+            //    };
+            //});
+            builder.Services
+            .AddAuthentication()
+            .AddGoogle(options =>
+            {
+                options.ClientId =
+                    builder.Configuration["Authentication:Google:ClientId"];
+
+                options.ClientSecret =
+                    builder.Configuration["Authentication:Google:ClientSecret"];
+            });
             builder.Services.AddScoped<IRepository<OTP_Verification>, Repository<OTP_Verification>>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
