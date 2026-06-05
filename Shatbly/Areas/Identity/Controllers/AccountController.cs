@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
@@ -306,6 +308,91 @@ namespace Shatbly.Areas.Identity.Controllers
             }
             TempData["success-notification"] = "Your password has been reset successfully. You can now log in with your new password.";
             return RedirectToAction("Login");
+        }
+        [HttpPost]
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        {
+            // ✅ validate الـ returnUrl الجاي من الـ form
+            var safeReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : "/Customer/Home/Index";
+
+            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl = safeReturnUrl });
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+
+            if (remoteError != null)
+            {
+                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
+                return RedirectToAction(nameof(Login));
+            }
+
+            // 1. الحصول على بيانات التسجيل من المزود الخارجي (جوجل مثلاً)
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // 2. محاولة تسجيل الدخول باستخدام بيانات المزود الخارجي
+            // لو اليوزر سجل قبل كده وتم ربط حسابه، السطر ده هيدخله علطول
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
+            if (signInResult.Succeeded)
+            {
+                return LocalRedirect(returnUrl);
+            }
+
+            // 3. لو السطر اللي فوق فشل، ده معناه إن اليوزر أول مرة يسجل أو حسابه مش مربوط
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (email == null)
+            {
+                ModelState.AddModelError(string.Empty, "Email claim not received from provider.");
+                return RedirectToAction(nameof(Login));
+            }
+
+            // ابحث عن اليوزر في قاعدة البيانات بالإيميل
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                // إنشاء مستخدم جديد لو مش موجود
+                var username = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0];
+                Random random = new Random();
+
+                user = new User
+                {
+                    UserName = username.Replace(" ", "") + random.Next(1000, 9999),
+                    Email = email,
+                    EmailConfirmed = true
+                };
+
+                var createUserResult = await _userManager.CreateAsync(user);
+                if (!createUserResult.Succeeded)
+                {
+                    return RedirectToAction(nameof(Login));
+                }
+            }
+
+            // 4. ربط الحساب الخارجي بالحساب المحلي (لو مش مربوطين)
+            var existingLogins = await _userManager.GetLoginsAsync(user);
+            if (!existingLogins.Any(x => x.LoginProvider == info.LoginProvider))
+            {
+                var addLoginResult = await _userManager.AddLoginAsync(user, info);
+                if (!addLoginResult.Succeeded)
+                {
+                    return RedirectToAction(nameof(Login));
+                }
+            }
+
+            // 5. أهم خطوة: تسجيل الدخول الفعلي بعد الإنشاء أو الربط
+            await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+
+            // ✅ كده
+            return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }
 

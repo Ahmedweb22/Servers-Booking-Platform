@@ -12,6 +12,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="9.0.0" />
     <PackageReference Include="ICSharpCode.Decompiler" Version="10.0.1.8346" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.16" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.12" />
