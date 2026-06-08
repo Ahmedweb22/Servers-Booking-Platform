@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -35,12 +35,13 @@ namespace Shatbly.Areas.Identity.Controllers
         { 
         return  View();
         }
+        [HttpGet]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             TempData["success-notification"] = "Logged out successfully.";
-            return RedirectToAction("Index", "Home", new { area = "Identity" });
+            return RedirectToAction("Login", "Account", new { area = "Identity" });
 
         }
         [HttpGet]

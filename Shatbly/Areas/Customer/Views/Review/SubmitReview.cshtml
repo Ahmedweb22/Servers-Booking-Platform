@@ -1,0 +1,451 @@
+@model Shatbly.ViewModels.ReviewVM
+@{
+    ViewData["Title"] = "تقييم الخدمة";
+}
+
+<style>
+    /* Override layout overflow restriction to allow scrolling */
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+    }
+
+    .review-container {
+        max-width: 720px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .review-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .review-card:hover {
+        box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Rating Stars Styles */
+    .rating-wrapper {
+        direction: ltr; /* Keeping ltr for correct star ordering */
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 12px;
+        margin: 20px 0 10px;
+    }
+
+    .star-btn {
+        background: none;
+        border: none;
+        font-size: 2.8rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease;
+        padding: 0;
+    }
+
+    .star-btn:hover {
+        transform: scale(1.2);
+    }
+
+    .star-btn.active, .star-btn.hovered {
+        color: #f59e0b; /* Amber accent */
+        text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .rating-hint {
+        font-weight: 700;
+        color: #f59e0b;
+        font-size: 1.1rem;
+        min-height: 27px;
+    }
+
+    /* Form Fields */
+    .form-group label {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .custom-textarea {
+        border-radius: 16px;
+        border: 1.5px solid #e2e8f0;
+        padding: 15px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+        resize: none;
+        min-height: 120px;
+    }
+
+    .custom-textarea:focus {
+        border-color: #3b82f6;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    /* Custom File Upload Styling */
+    .upload-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    @@media (max-width: 576px) {
+        .upload-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .upload-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 20px;
+        padding: 24px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+    }
+
+    .upload-box:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    .upload-box input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 5;
+    }
+
+    .upload-icon {
+        font-size: 2.2rem;
+        color: #64748b;
+        margin-bottom: 8px;
+        transition: color 0.3s;
+    }
+
+    .upload-box:hover .upload-icon {
+        color: #3b82f6;
+    }
+
+    .upload-box span {
+        font-weight: 600;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+
+    .upload-box small {
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+
+    .image-preview-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        z-index: 10;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-preview-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 15;
+        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+    }
+
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+
+    /* Buttons */
+    .btn-submit {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        font-weight: 700;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: none;
+        transition: all 0.3s;
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: 1px solid #cbd5e1;
+        transition: all 0.3s;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Header Info */
+    .service-info-badge {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+        padding: 12px 20px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+</style>
+
+<div class="review-container">
+    <div class="review-card">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark mb-2">تقييم الخدمة والفني</h2>
+            <p class="text-secondary fs-6">نسعد بسماع رأيك عن تجربتك الأخيرة لمساعدتنا في تحسين خدماتنا باستمرار.</p>
+        </div>
+
+        <!-- Service & Worker Metadata Badge -->
+        <div class="service-info-badge">
+            <i class="bi bi-patch-check-fill fs-5"></i>
+            <div>
+                <span>خدمة <strong>@ViewBag.ServiceName</strong> مع الفني <strong>@ViewBag.WorkerName</strong></span>
+            </div>
+        </div>
+
+        <form asp-action="SubmitReview" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="OrderId" />
+            <input type="hidden" asp-for="RevieweeId" />
+            <input type="hidden" asp-for="Rating" id="ratingInput" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+            <!-- Star Rating Row -->
+            <div class="form-group text-center mb-4">
+                <label class="d-block mb-1">ما هو تقييمك العام للتجربة؟ <span class="text-danger">*</span></label>
+                
+                <div class="rating-wrapper">
+                    <button type="button" class="star-btn" data-value="5"><i class="bi bi-star-fill"></i></button>
+                    <button type="button" class="star-btn" data-value="4"><i class="bi bi-star-fill"></i></button>
+                    <button type="button" class="star-btn" data-value="3"><i class="bi bi-star-fill"></i></button>
+                    <button type="button" class="star-btn" data-value="2"><i class="bi bi-star-fill"></i></button>
+                    <button type="button" class="star-btn" data-value="1"><i class="bi bi-star-fill"></i></button>
+                </div>
+                
+                <div class="rating-hint text-center" id="ratingHint">اضغط على النجوم للتقييم</div>
+                <span asp-validation-for="Rating" class="text-danger d-block mt-2 fw-semibold"></span>
+            </div>
+
+            <!-- Comment Input -->
+            <div class="form-group mb-4">
+                <label asp-for="Comment">اكتب تعليقك وتجربتك بالتفصيل <span class="text-muted">(اختياري)</span></label>
+                <textarea asp-for="Comment" class="form-control custom-textarea" placeholder="صف جودة العمل، التزام الفني بالمواعيد، والاحترافية..."></textarea>
+                <span asp-validation-for="Comment" class="text-danger fw-semibold"></span>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="form-group mb-5">
+                <label>أضف صور العمل المنفذ <span class="text-muted">(اختياري)</span></label>
+                <p class="text-muted small mt-0 mb-3">يمكنك إرفاق صور للمكان قبل وبدء العمل لتوضيح النتيجة ومشاركتها مع مجتمع شطبلي.</p>
+                
+                <div class="upload-grid">
+                    <!-- Before Image Upload -->
+                    <div class="upload-box" id="beforeUploadBox">
+                        <i class="bi bi-camera-fill upload-icon"></i>
+                        <span>صورة قبل العمل</span>
+                        <small>JPG, PNG حتى 5 ميجابايت</small>
+                        <input type="file" asp-for="BeforeImage" id="beforeFileInput" accept="image/*" />
+                        
+                        <div class="image-preview-container" id="beforePreviewContainer">
+                            <button type="button" class="remove-btn" id="beforeRemoveBtn"><i class="bi bi-trash3-fill"></i></button>
+                            <img id="beforeImgPreview" src="" alt="Before Preview" />
+                        </div>
+                    </div>
+
+                    <!-- After Image Upload -->
+                    <div class="upload-box" id="afterUploadBox">
+                        <i class="bi bi-camera-fill upload-icon"></i>
+                        <span>صورة بعد العمل</span>
+                        <small>JPG, PNG حتى 5 ميجابايت</small>
+                        <input type="file" asp-for="AfterImage" id="afterFileInput" accept="image/*" />
+                        
+                        <div class="image-preview-container" id="afterPreviewContainer">
+                            <button type="button" class="remove-btn" id="afterRemoveBtn"><i class="bi bi-trash3-fill"></i></button>
+                            <img id="afterImgPreview" src="" alt="After Preview" />
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <span asp-validation-for="BeforeImage" class="text-danger fw-semibold small"></span>
+                    <span asp-validation-for="AfterImage" class="text-danger fw-semibold small"></span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-3 border-top pt-4">
+                <a href="/Customer/BookingSystem/DetailsBooking/@Model.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">إلغاء</a>
+                <button type="submit" class="btn btn-submit flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2">
+                    <span>إرسال التقييم</span>
+                    <i class="bi bi-send-fill fs-6"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            const ratingInput = $('#ratingInput');
+            const ratingHint = $('#ratingHint');
+            const stars = $('.star-btn');
+            
+            const hintTexts = {
+                1: 'سيء جداً 😞',
+                2: 'سيء 😕',
+                3: 'مقبول 🙂',
+                4: 'جيد جداً 😊',
+                5: 'ممتاز وبطل! 🤩'
+            };
+
+            // Set default rating if value already exists
+            const initialRating = parseInt(ratingInput.value || ratingInput.val());
+            if (initialRating > 0) {
+                updateStars(initialRating);
+            }
+
+            // Hover and click behaviors for stars
+            stars.on('mouseenter', function () {
+                const hoverVal = parseInt($(this).data('value'));
+                stars.each(function () {
+                    const starVal = parseInt($(this).data('value'));
+                    if (starVal <= hoverVal) {
+                        $(this).addClass('hovered');
+                    } else {
+                        $(this).removeClass('hovered');
+                    }
+                });
+                ratingHint.text(hintTexts[hoverVal]);
+            });
+
+            stars.on('mouseleave', function () {
+                stars.removeClass('hovered');
+                const selectedVal = parseInt(ratingInput.val());
+                if (selectedVal > 0) {
+                    ratingHint.text(hintTexts[selectedVal]);
+                } else {
+                    ratingHint.text('اضغط على النجوم للتقييم');
+                }
+                updateStars(selectedVal);
+            });
+
+            stars.on('click', function () {
+                const selectedVal = parseInt($(this).data('value'));
+                ratingInput.val(selectedVal);
+                updateStars(selectedVal);
+                // Trigger client-side validation update
+                ratingInput.valid && ratingInput.valid();
+            });
+
+            function updateStars(value) {
+                stars.each(function () {
+                    const starVal = parseInt($(this).data('value'));
+                    if (starVal <= value) {
+                        $(this).addClass('active');
+                    } else {
+                        $(this).removeClass('active');
+                    }
+                });
+            }
+
+            // Image Preview Handlers
+            setupImagePreview('#beforeFileInput', '#beforePreviewContainer', '#beforeImgPreview', '#beforeRemoveBtn');
+            setupImagePreview('#afterFileInput', '#afterPreviewContainer', '#afterImgPreview', '#afterRemoveBtn');
+
+            function setupImagePreview(fileInputSelector, containerSelector, imgSelector, removeBtnSelector) {
+                const fileInput = $(fileInputSelector);
+                const container = $(containerSelector);
+                const img = $(imgSelector);
+                const removeBtn = $(removeBtnSelector);
+
+                fileInput.on('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            img.attr('src', e.target.result);
+                            container.fadeIn(200).css('display', 'flex');
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                removeBtn.on('click', function (e) {
+                    e.stopPropagation(); // Avoid triggering file chooser again
+                    fileInput.val('');
+                    img.attr('src', '');
+                    container.fadeOut(200);
+                });
+            }
+        });
+    </script>
+}

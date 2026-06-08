@@ -1,4 +1,4 @@
-using Stripe;
+ï»¿using Stripe;
 using BookingTypes = Shatbly.ViewModels.BookingTypes;
 using Review = Shatbly.Models.Review;
 
@@ -158,7 +158,7 @@ public class BookingSystemService : IBookingSystemService
      ? null
      : await _userManager.FindByIdAsync(model.WorkerId);
 
-        // ÇáÊÚÏíá: ÏãÌ ÔÑæØ ÇáÊÍÞÞ ãä ÇáÚÇãá áÊÌäÈ ÊßÑÇÑ æÊÏÇÎá ÇáÃÎØÇÁ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (worker is null)
         {
             validationErrors[nameof(model.WorkerId)] = ["Choose a worker."];
@@ -222,7 +222,7 @@ public class BookingSystemService : IBookingSystemService
             CreatedAt = DateTime.UtcNow
         };
 
-        // ÇáÊÚÏíá: ÊÝÚíá ÓØÑ ÅÖÇÝÉ ÇáØáÈ Åáì ÇáãÓÊæÏÚ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         await _orderRepository.CreateAsync(order);
         await _orderRepository.CommitAsync();
 
@@ -235,7 +235,7 @@ public class BookingSystemService : IBookingSystemService
     }
     public async Task<BookingDetailsViewModel?> GetDetailsAsync(int id)
     {
-        var booking = (await _orderRepository.GetAsync(o => o.Id == id)).FirstOrDefault();
+        var booking = (await _orderRepository.GetAsync(o => o.Id == id, new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Booking })).FirstOrDefault();
         if (booking is null)
         {
             return null;
@@ -243,12 +243,16 @@ public class BookingSystemService : IBookingSystemService
 
         await PopulateNavigationAsync(booking);
 
+        var reviewList = await _reviewRepository.GetAsync(r => r.BookingId == id);
+        var hasReview = reviewList != null && System.Linq.Enumerable.Any(reviewList);
+
         return new BookingDetailsViewModel
         {
             Booking = booking,
             RefundPreview = CalculateRefund(booking),
             CanCancel = CanManageBooking(booking),
-            CanReschedule = CanManageBooking(booking)
+            CanReschedule = CanManageBooking(booking),
+            HasReview = hasReview
         };
     }
 
@@ -535,7 +539,7 @@ public class BookingSystemService : IBookingSystemService
     }
     public async Task<bool> RaiseDisputeAsync(int bookingId , string reason)
     {
-        var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId);
+        var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId, new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Booking });
         if (booking == null)
         {
             return false;

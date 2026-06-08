@@ -1,8 +1,10 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.BookingSystem;
 using Shatbly.Services.File_Service;
+using Shatbly.Models;
+using Shatbly.ViewModels;
 
 namespace Shatbly.Areas.Customer.Controllers
 {
@@ -17,8 +19,20 @@ namespace Shatbly.Areas.Customer.Controllers
             _bookingSystemService = bookingSystemService;
             _fileService = fileService;
         }
+
         public async Task<IActionResult> SubmitReview(ReviewVM reviewVM)
         {
+            var bookingDetails = await _bookingSystemService.GetDetailsAsync(reviewVM.OrderId);
+            if (bookingDetails == null)
+            {
+                TempData["Error"] = "الطلب غير موجود";
+                return RedirectToAction("Index", "Home");
+            }
+            var order = bookingDetails.Booking;
+
+            ViewBag.WorkerName = order.Worker?.Name ?? "غير محدد";
+            ViewBag.ServiceName = order.Service?.Name ?? "غير محدد";
+
             if (ModelState.IsValid)
             {
                 string beforeUrl = null;
@@ -51,38 +65,63 @@ namespace Shatbly.Areas.Customer.Controllers
                 }
                 var review = new Review
                 {
-            
                     OrderId = reviewVM.OrderId,
+                    BookingId = reviewVM.OrderId, // AddReviewAsync matches o.Id with review.BookingId
+                    CategoryId = order.ServiceId,
+                    Direction = ReviewDirection.ClientToWorker,
                     Rating = reviewVM.Rating,
                     Comment = reviewVM.Comment,
                     RevieweeId = reviewVM.RevieweeId,
                     ReviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier),
                     BeforeImageUrl = beforeUrl,
                     AfterImageUrl = afterUrl
-            
                 };
                 var result = await _bookingSystemService.AddReviewAsync(review);
                 if(result)
                 {
-                    TempData["Success"] = "تم تسجيل تقيمك بنجاح";
-                    return RedirectToAction(nameof(BookingSystemController.DetailsBooking), new { id = reviewVM.OrderId });
+                    TempData["Success"] = "تم تسجيل تقييمك بنجاح";
+                    return RedirectToAction("DetailsBooking", "BookingSystem", new { id = reviewVM.OrderId });
+                }
+                else
+                {
+                    ModelState.AddModelError("", "فشل تسجيل التقييم. تأكد من إتمام الطلب أولاً.");
                 }
             }
             return View(reviewVM);
         }
-        public async Task<IActionResult> RaiseDispute(int id, string reason)
+        [HttpGet]
+        public async Task<IActionResult> RaiseDispute(int id)
+        {
+            var bookingDetails = await _bookingSystemService.GetDetailsAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (bookingDetails == null || bookingDetails.Booking.UserId != userId)
+            {
+                TempData["Error"] = "الحجز غير موجود أو لا تملك صلاحية الوصول إليه";
+                return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
+            }
+
+            ViewBag.WorkerName = bookingDetails.Booking.Worker?.Name ?? "غير محدد";
+            ViewBag.ServiceName = bookingDetails.Booking.Service?.Name ?? "غير محدد";
+            ViewBag.OrderId = id;
+
+            return View();
+        }
+
+        [HttpPost]
+        [ActionName("RaiseDispute")]
+        public async Task<IActionResult> RaiseDisputePost(int id, string reason)
         { 
             var booking = await _bookingSystemService.GetDetailsAsync(id);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (booking == null || booking.Booking.UserId != userId)
             {
                 TempData["Error"] = "الحجز غير موجود أو لا تملك صلاحية الوصول إليه";
-                return RedirectToAction(nameof(BookingSystemController.DetailsBooking), new { id });
+                return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
             }
             if (string.IsNullOrEmpty(reason))
             {
                 TempData["Error"] = "يجب إدخال سبب النزاع";
-                return RedirectToAction(nameof(BookingSystemController.DetailsBooking), new { id });
+                return RedirectToAction(nameof(RaiseDispute), new { id });
             }
             var result = await _bookingSystemService.RaiseDisputeAsync(id, reason);
             if (result)
@@ -93,7 +132,7 @@ namespace Shatbly.Areas.Customer.Controllers
             {
                 TempData["Error"] = "فشل في رفع النزاع. يرجى المحاولة مرة أخرى.";
             }
-            return RedirectToAction(nameof(BookingSystemController.DetailsBooking), new { id });
+            return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
         }
 
     }

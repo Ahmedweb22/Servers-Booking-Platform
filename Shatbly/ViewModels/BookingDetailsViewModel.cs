@@ -1,4 +1,4 @@
-﻿namespace Shatbly.ViewModels
+namespace Shatbly.ViewModels
 {
     public class BookingDetailsViewModel
     {
@@ -6,5 +6,6 @@
         public decimal RefundPreview { get; set; }
         public bool CanReschedule { get; set; }
         public bool CanCancel { get; set; }
+        public bool HasReview { get; set; }
     }
 }
