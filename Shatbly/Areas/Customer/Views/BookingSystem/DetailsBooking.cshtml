@@ -1,4 +1,4 @@
-﻿@model Shatbly.ViewModels.BookingDetailsViewModel
+@model Shatbly.ViewModels.BookingDetailsViewModel
 @using Shatbly.Models
 
 @{
@@ -6,6 +6,19 @@
 }
 
 <style>
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+    }
+
+    #map {
+        z-index: 1 !important;
+    }
+
+    .top-nav, .dropdown-menu {
+        z-index: 9999 !important;
+    }
+
     body {
         margin: 0;
         font-family: "Segoe UI", Tahoma, sans-serif;
@@ -223,6 +236,39 @@
         </section>
 
         <section class="stack">
+            @if (Model.Booking.Status == OrderStatuses.Completed && !string.IsNullOrEmpty(Model.Booking.WorkerId))
+            {
+                <div class="card text-center" style="border: 2px solid #bbf7d0; background: #f0fdf4; border-radius: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.08);">
+                    <h3 style="margin-top:0; color: #166534; font-weight: 800; font-size: 1.25rem;">
+                        <i class="bi bi-stars text-warning me-1"></i> تقييم الخدمة والفني
+                    </h3>
+                    
+                    @if (Model.HasReview)
+                    {
+                        <div class="py-2">
+                            <span class="badge bg-success rounded-pill px-3 py-2 fs-6 fw-bold">
+                                <i class="bi bi-check-circle-fill me-1"></i> تم التقييم بنجاح
+                            </span>
+                            <p class="text-success fw-semibold mt-3 mb-1" style="font-size: 0.95rem;">شكراً لك! لقد قمت بتقييم هذا الطلب بالفعل وساعدتنا في تحسين الجودة.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="muted" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 18px;">
+                            لقد تم إتمام هذا الطلب بنجاح! يسعدنا جداً معرفة رأيك في أداء الفني ومستوى الخدمة المقدمة.
+                        </p>
+                        <a href="/Customer/Review/SubmitReview?OrderId=@Model.Booking.Id&RevieweeId=@Model.Booking.WorkerId" 
+                           class="btn w-100 d-flex align-items-center justify-content-center gap-2" 
+                           style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-weight: 700; padding: 12px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 16px rgba(16, 185, 129, 0.15);"
+                           onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 10px 20px rgba(16, 185, 129, 0.25)';"
+                           onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.15)';">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span>تقييم الخدمة الآن</span>
+                        </a>
+                    }
+                </div>
+            }
+
             <div class="card">
                 <h3 style="margin-top:0;">Reschedule</h3>
                 <p class="muted">Use a new date and time. If the slot is available, the booking moves to <strong>Rescheduled</strong> and the worker gets another 30-minute response window.</p>
@@ -270,6 +316,40 @@
                     <p class="muted">This booking can no longer be cancelled in its current status.</p>
                 }
             </div>
+
+            @if (Model.Booking.Status != OrderStatuses.Cancelled && Model.Booking.Status != OrderStatuses.Rejected)
+            {
+                <div class="card mt-3 text-center" style="border: 2px solid #fee2e2; background: #fffdfd; border-radius: 20px; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.05);">
+                    <h3 style="margin-top:0; color: #991b1b; font-weight: 800; font-size: 1.2rem;">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> هل تواجه مشكلة في الخدمة؟
+                    </h3>
+                    
+                    @if (Model.Booking.Booking != null && Model.Booking.Booking.Status == BookingStatus.Disputed)
+                    {
+                        <div class="py-2">
+                            <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 fw-bold">
+                                <i class="bi bi-shield-fill-exclamation me-1"></i> قيد المراجعة (نزاع مفتوح)
+                            </span>
+                            <p class="text-danger fw-semibold mt-3 mb-1" style="font-size: 0.9rem;">لقد قمت بفتح نزاع بالفعل لهذا الطلب. فريق الدعم يقوم بمراجعة الحالة حالياً وسيتواصل معك قريباً.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="muted" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 15px;">
+                            إذا لم تكن راضياً عن العمل المنفذ أو حدثت مشكلة مع الفني، يمكنك فتح نزاع وسيتدخل فريق الدعم فوراً لحلها وضمان كامل حقوقك.
+                        </p>
+                        <a href="/Customer/Review/RaiseDispute?id=@Model.Booking.Id" 
+                           class="btn w-100 d-flex align-items-center justify-content-center gap-2" 
+                           style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; font-weight: 700; padding: 10px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15);"
+                           onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 10px 20px rgba(220, 38, 38, 0.25)';"
+                           onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 16px rgba(220, 38, 38, 0.15)';">
+                            <i class="bi bi-shield-fill-exclamation"></i>
+                            <span>تقديم شكوى / رفع نزاع</span>
+                        </a>
+                    }
+                </div>
+            }
+
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
             <div class="card mt-4">

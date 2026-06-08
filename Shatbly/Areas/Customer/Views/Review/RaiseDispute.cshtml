@@ -1,0 +1,232 @@
+@{
+    ViewData["Title"] = "تقديم شكوى / نزاع";
+}
+
+<style>
+    /* Override layout overflow restriction to allow scrolling */
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+    }
+
+    .dispute-container {
+        max-width: 680px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .dispute-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid #fee2e2;
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 20px 45px rgba(220, 38, 38, 0.05);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .dispute-card:hover {
+        box-shadow: 0 24px 50px rgba(220, 38, 38, 0.08);
+    }
+
+    /* Danger Alert Callout */
+    .danger-callout {
+        background: #fff5f5;
+        border-right: 5px solid #dc2626;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        color: #991b1b;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .danger-callout h5 {
+        color: #7f1d1d;
+        font-weight: 800;
+        margin-top: 0;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Form Styles */
+    .form-group label {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .custom-textarea {
+        border-radius: 16px;
+        border: 1.5px solid #cbd5e1;
+        padding: 15px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+        resize: none;
+        min-height: 140px;
+    }
+
+    .custom-textarea:focus {
+        border-color: #dc2626;
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+        outline: none;
+    }
+
+    /* Metadata Info Badge */
+    .meta-badge {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        padding: 14px 20px;
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    .meta-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+    }
+
+    .meta-item strong {
+        color: #0f172a;
+    }
+
+    /* Buttons */
+    .btn-submit {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        font-weight: 700;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: none;
+        transition: all 0.3s;
+        box-shadow: 0 8px 16px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(220, 38, 38, 0.3);
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        padding: 14px 28px;
+        border-radius: 16px;
+        border: 1px solid #cbd5e1;
+        transition: all 0.3s;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+</style>
+
+<div class="dispute-container">
+    <div class="dispute-card">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-3" style="width: 64px; height: 64px;">
+                <i class="bi bi-exclamation-triangle-fill fs-2"></i>
+            </div>
+            <h2 class="fw-bold text-dark mb-2">تقديم شكوى / رفع نزاع للطلب</h2>
+            <p class="text-secondary fs-6">يرجى توضيح المشكلة التي واجهتك بكل دقة ليقوم فريق الدعم لدينا بدراسة الحالة والتدخل الفوري.</p>
+        </div>
+
+        <!-- Booking & Worker Metadata -->
+        <div class="meta-badge">
+            <div class="meta-item">
+                <span>رقم الطلب:</span>
+                <strong>#@ViewBag.OrderId</strong>
+            </div>
+            <hr class="my-2" style="border-color: #e2e8f0;" />
+            <div class="meta-item">
+                <span>الخدمة المطلوبة:</span>
+                <strong>@ViewBag.ServiceName</strong>
+            </div>
+            <hr class="my-2" style="border-color: #e2e8f0;" />
+            <div class="meta-item">
+                <span>الفني المسؤول:</span>
+                <strong>@ViewBag.WorkerName</strong>
+            </div>
+        </div>
+
+        <!-- Warning Callout -->
+        <div class="danger-callout">
+            <h5>
+                <i class="bi bi-info-circle-fill"></i>
+                ماذا يحدث عند رفع نزاع؟
+            </h5>
+            <p class="mb-0">
+                سيتم تجميد حالة الطلب فوراً وتحويل الملف إلى قسم النزاعات والمراجعة الفنية في شطبلي. سيتواصل معك أحد ممثلي الدعم الفني خلال 24 ساعة للتحقق من تفاصيل الشكوى والتنسيق مع الفني للوصول إلى حل يضمن كامل حقوقك.
+            </p>
+        </div>
+
+        <!-- Dispute Form -->
+        <form asp-action="RaiseDispute" method="post" id="disputeForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@ViewBag.OrderId" />
+
+            <div class="form-group mb-4">
+                <label for="reason">اكتب سبب النزاع وتفاصيل الشكوى بالتفصيل <span class="text-danger">*</span></label>
+                <textarea name="reason" id="reason" class="form-control custom-textarea" placeholder="يرجى كتابة الشكوى بوضوح (مثال: عدم اكتمال العمل المنفذ، تلف أجزاء من الخامات، سلوك غير لائق...)"></textarea>
+                <div class="text-danger fw-semibold mt-2 small" id="validationError" style="display: none;">
+                    <i class="bi bi-exclamation-circle-fill me-1"></i> يرجى إدخال سبب الشكوى/النزاع للاستمرار.
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end gap-3 border-top pt-4">
+                <a href="/Customer/BookingSystem/DetailsBooking/@ViewBag.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">تراجع</a>
+                <button type="submit" class="btn btn-submit flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2">
+                    <span>تأكيد ورفع النزاع</span>
+                    <i class="bi bi-send-fill fs-6"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const form = $('#disputeForm');
+            const reasonInput = $('#reason');
+            const validationError = $('#validationError');
+
+            form.on('submit', function (e) {
+                const reasonText = reasonInput.val().trim();
+                if (!reasonText) {
+                    e.preventDefault(); // Block submit
+                    validationError.fadeIn(200);
+                    reasonInput.addClass('is-invalid');
+                    reasonInput.focus();
+                } else {
+                    validationError.hide();
+                    reasonInput.removeClass('is-invalid');
+                }
+            });
+
+            reasonInput.on('input', function () {
+                if ($(this).val().trim()) {
+                    validationError.fadeOut(150);
+                    $(this).removeClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}
