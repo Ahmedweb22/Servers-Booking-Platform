@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuestPDF.Fluent;
 using Shatbly.Reports;
@@ -108,30 +108,36 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserVM createUserVM)
         {
-            //ModelState.Remove("Id");
-            //ModelState.Remove("User");
-            //ModelState.Remove("Roles");
+            ModelState.Remove("Id");
+            ModelState.Remove("Roles");
 
-            //if (!ModelState.IsValid)
-            //{
-            //    foreach (var error in ModelState)
-            //    {
-            //        Console.WriteLine(error.Key);
-            //        foreach (var subError in error.Value.Errors)
-            //        {
-            //            Console.WriteLine(subError.ErrorMessage);
-            //        }
-            //    }
+            if (!ModelState.IsValid)
+            {
+                TempData["error-notification"] = "Invalid Data";
+                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+                return View(createUserVM);
+            }
 
-            //    TempData["error-notification"] = "Invalid Data";
-            //    createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
-            //    return View(createUserVM);
-            //}
-
-            var existingUser = await _userManager.FindByEmailAsync(createUserVM.Email);
-            if (existingUser != null)
+            var existingUserByEmail = await _userManager.FindByEmailAsync(createUserVM.Email);
+            if (existingUserByEmail != null)
             {
                 ModelState.AddModelError("Email", "Email already exists");
+                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+                return View(createUserVM);
+            }
+
+            var existingUserByUsername = await _userManager.FindByNameAsync(createUserVM.UserName);
+            if (existingUserByUsername != null)
+            {
+                ModelState.AddModelError("UserName", "Username already exists");
+                createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
+                return View(createUserVM);
+            }
+
+            var existingUserByPhone = await _userManager.Users.FirstOrDefaultAsync(u => u.Phone == createUserVM.Phone);
+            if (existingUserByPhone != null)
+            {
+                ModelState.AddModelError("Phone", "Phone number already exists");
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -140,7 +146,7 @@ namespace Shatbly.Areas.Admin.Controllers
             {
                 FName = createUserVM.FName,
                 LName = createUserVM.LName,
-                Name = createUserVM.FName + createUserVM.LName,
+                Name = createUserVM.FName + " " + createUserVM.LName,
                 UserName = createUserVM.UserName,
                 Email = createUserVM.Email,
                 Phone = createUserVM.Phone
@@ -160,10 +166,10 @@ namespace Shatbly.Areas.Admin.Controllers
                 return View(createUserVM);
             }
 
-            //if (!string.IsNullOrEmpty(createUserVM.RoleName))
-            //{
-            //    await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
-            //}
+            if (!string.IsNullOrEmpty(createUserVM.RoleName))
+            {
+                await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
+            }
 
             TempData["success-notification"] = "Save Successful";
             return RedirectToAction(nameof(Index));
