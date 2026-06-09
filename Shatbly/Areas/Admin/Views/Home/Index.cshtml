@@ -1,12 +1,13 @@
-﻿@{
+﻿@model DashboardStatsCardCountVM
+@{
     ViewBag.Title = "Dashboard";
 
     var stats = new[]
     {
-        new { Title = "Total Users", Value = "12,480", Icon = "fa-solid fa-users", IconBgClass = "bg-soft-primary", Trend = "+8.2%", TrendClass = "text-success" },
-        new { Title = "Total Services", Value = "326", Icon = "fa-solid fa-briefcase", IconBgClass = "bg-soft-warning", Trend = "+3.4%", TrendClass = "text-success" },
-        new { Title = "Total Orders", Value = "1,942", Icon = "fa-solid fa-cart-shopping", IconBgClass = "bg-soft-success", Trend = "+11.6%", TrendClass = "text-success" },
-        new { Title = "Revenue", Value = "$48,920", Icon = "fa-solid fa-dollar-sign", IconBgClass = "bg-soft-danger", Trend = "-1.2%", TrendClass = "text-danger" }
+        new { Title = "Total Users", Value = Model.UsersCount.ToString("N0"), Icon = "fa-solid fa-users", IconBgClass = "bg-soft-primary", Trend = "+8.2%", TrendClass = "text-success" },
+        new { Title = "Total Services", Value = Model.ServicesCategoriesCount.ToString("N0"), Icon = "fa-solid fa-briefcase", IconBgClass = "bg-soft-warning", Trend = "+3.4%", TrendClass = "text-success" },
+        new { Title = "Total Orders", Value = Model.OrdersCount.ToString("N0"), Icon = "fa-solid fa-cart-shopping", IconBgClass = "bg-soft-success", Trend = "+11.6%", TrendClass = "text-success" },
+        new { Title = "Revenue", Value = "$" + (Model.OrdersCount * 25).ToString("N0"), Icon = "fa-solid fa-dollar-sign", IconBgClass = "bg-soft-danger", Trend = "-1.2%", TrendClass = "text-danger" }
     };
 
     var recentOrders = new[]
