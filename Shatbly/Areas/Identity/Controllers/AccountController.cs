@@ -52,8 +52,8 @@ namespace Shatbly.Areas.Identity.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterVM model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            //if (!ModelState.IsValid)
+            //    return View(model);
 
             User applicationUser = new()
             {
@@ -61,6 +61,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 Email = model.Email,
                FName = model.FName,
                LName = model.LName,
+               Name = model.FName + model.LName,
                Phone = model.Phone
            };
             var result = await _userManager.CreateAsync(applicationUser, model.Password);
