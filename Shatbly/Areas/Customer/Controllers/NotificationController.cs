@@ -13,6 +13,8 @@ namespace Shatbly.Areas.Customer.Controllers
         public async Task<IActionResult> MyNotification(CancellationToken cancellationToken)
         {
             var userId = GetCurrentUserId();
+            ViewBag.CurrentUserId = userId;
+
             if (string.IsNullOrWhiteSpace(userId))
             {
                 return Unauthorized();

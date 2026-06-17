@@ -1,0 +1,74 @@
+﻿@model Shatbly.ViewModels.ChatWorkerViewModel
+
+@{
+    ViewData["Title"] = "Chat";
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<div class="card shadow">
+
+    <div class="card-header">
+        <h5 class="mb-0">
+            Chat With @Model.ClientName
+        </h5>
+    </div>
+
+    <div class="card-body"
+         style="height:500px;overflow-y:auto;">
+
+        @foreach (var msg in Model.Messages)
+        {
+            bool mine = msg.SenderId == currentUserId;
+
+            <div class="d-flex mb-3 @(mine ? "justify-content-end" : "justify-content-start")">
+
+                <div class="card @(mine ? "bg-primary text-white" : "bg-light")"
+                     style="max-width:70%;">
+
+                    <div class="card-body p-2">
+
+                        <div>
+                            @msg.Message
+                        </div>
+
+                        <small class="d-block mt-1">
+                            @msg.SentAt.ToLocalTime().ToString("g")
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <div class="card-footer">
+
+        <form asp-action="Send" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="bookingId"
+                   value="@Model.BookingId" />
+
+            <div class="input-group">
+
+                <input name="message"
+                       class="form-control"
+                       placeholder="Write your message..." />
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Send
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

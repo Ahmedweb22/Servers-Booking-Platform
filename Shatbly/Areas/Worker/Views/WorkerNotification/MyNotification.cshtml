@@ -4,66 +4,111 @@
     ViewData["Title"] = "Notification";
 }
 
-@* <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Notifications</h1>
-</div> *@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Notifications</h1>
 
-    <form asp-area="Worker" asp-controller="WorkerNotification" asp-action="Test" method="post">
+    <form asp-area="Worker"
+          asp-controller="WorkerNotification"
+          asp-action="Test"
+          method="post">
+
         @Html.AntiForgeryToken()
+
         <button type="submit" class="btn btn-primary btn-sm">
             Test Notification
         </button>
     </form>
 </div>
-@* send *@
-<form asp-area="Worker" asp-controller="ChatTest" asp-action="Send" method="post">
-    @Html.AntiForgeryToken()
-
-    <input name="receiverId" placeholder="Receiver UserId" />
-    <input name="bookingId" type="number" placeholder="Booking Id" />
-    <input name="message" placeholder="Message" />
-
-    <button type="submit">Send Test Message</button>
-</form>
-
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">No notifications yet.</div>
+    <div class="alert alert-info">
+        No notifications yet.
+    </div>
 }
 else
 {
     <div class="list-group">
+
         @foreach (var notification in Model)
         {
             <div class="list-group-item d-flex justify-content-between align-items-start">
+
                 <div>
                     <div class="d-flex align-items-center gap-2">
+
                         <strong>@notification.Title</strong>
+
                         @if (!notification.IsRead)
                         {
-                            <span class="badge bg-primary">New</span>
+                            <span class="badge bg-primary">
+                                New
+                            </span>
                         }
+
                     </div>
-                    <p class="mb-1">@notification.Message</p>
-                    <small class="text-muted">@notification.Type - @notification.CreatedAt.ToLocalTime().ToString("g")</small>
+
+                    <p class="mb-1">
+                        @notification.Message
+                    </p>
+
+                    <small class="text-muted">
+                        @notification.Type -
+                        @notification.CreatedAt.ToLocalTime().ToString("g")
+                    </small>
                 </div>
+
                 <div class="d-flex gap-2">
+
+                    @if (notification.Type == NotificationType.Message
+                                && notification.BookingId.HasValue)
+                    {
+                        <a asp-area="Worker"
+                           asp-controller="Chat"
+                           asp-action="Conversation"
+                           asp-route-bookingId="@notification.BookingId"
+                           class="btn btn-sm btn-success">
+                            Open Chat
+                        </a>
+                    }
+
                     @if (!notification.IsRead)
                     {
                         <form asp-action="MarkAsRead" method="post">
-                            <input type="hidden" name="id" value="@notification.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Mark read</button>
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@notification.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-primary">
+                                Mark Read
+                            </button>
+
                         </form>
                     }
+
                     <form asp-action="Delete" method="post">
-                        <input type="hidden" name="id" value="@notification.Id" />
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@notification.Id" />
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger">
+                            Delete
+                        </button>
+
                     </form>
+
                 </div>
+
             </div>
         }
+
     </div>
 }

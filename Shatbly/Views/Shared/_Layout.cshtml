@@ -557,21 +557,24 @@
                 </span>
             </button>
 
-            <div class="dropdown">
-                <div class="d-flex align-items-center gap-2" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="text-end d-none d-md-block cursor-pointer">
-                        <p class="mb-0 fw-bold fs-6 lh-1">أحمد محمد</p>
-                        <small class="text-muted fw-semibold">عميل مميز</small>
+            @if(User.Identity.IsAuthenticated)
+            {
+                <div class="dropdown">
+                    <div class="d-flex align-items-center gap-2" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="text-end d-none d-md-block cursor-pointer">
+                            <p class="mb-0 fw-bold fs-6 lh-1">@User.Identity.Name</p>
+                            <small class="text-muted fw-semibold">عميل مميز</small>
+                        </div>
+                        <div class="user-circle shadow-sm">AM</div>
                     </div>
-                    <div class="user-circle shadow-sm">AM</div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-2" style="min-width: 200px;">
+                        <li><a class="dropdown-item py-2 rounded-3 fw-semibold" href="/Customer/Profile"><i class="bi bi-person me-2 fs-5 align-middle"></i> حسابي</a></li>
+                        <li><a class="dropdown-item py-2 rounded-3 fw-semibold" href="/Customer/Settings"><i class="bi bi-gear me-2 fs-5 align-middle"></i> الإعدادات</a></li>
+                        <li><hr class="dropdown-divider my-2"></li>
+                        <li><a class="dropdown-item py-2 rounded-3 fw-bold text-danger" asp-area="Identity" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right me-2 fs-5 align-middle"></i> تسجيل الخروج</a></li>
+                    </ul>
                 </div>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-2" style="min-width: 200px;">
-                    <li><a class="dropdown-item py-2 rounded-3 fw-semibold" href="/Customer/Profile"><i class="bi bi-person me-2 fs-5 align-middle"></i> حسابي</a></li>
-                    <li><a class="dropdown-item py-2 rounded-3 fw-semibold" href="/Customer/Settings"><i class="bi bi-gear me-2 fs-5 align-middle"></i> الإعدادات</a></li>
-                    <li><hr class="dropdown-divider my-2"></li>
-                    <li><a class="dropdown-item py-2 rounded-3 fw-bold text-danger" asp-area="Identity" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right me-2 fs-5 align-middle"></i> تسجيل الخروج</a></li>
-                </ul>
-            </div>
+            }
         </div>
     </header>
 
