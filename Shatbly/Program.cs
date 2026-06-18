@@ -148,7 +148,7 @@ namespace Shatbly
             builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
             builder.Services.AddSignalR();
             //Chat
-            //builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<Shatbly.Services.Chat.IChatService, ChatService>();
             //builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];

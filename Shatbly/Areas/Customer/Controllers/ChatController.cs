@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.Chat;
 using Shatbly.ViewModels;
+using IChatService = Shatbly.Services.Chat.IChatService;
 
 namespace Shatbly.Areas.Customer.Controllers
 {
@@ -40,16 +41,21 @@ namespace Shatbly.Areas.Customer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Send(
-            int bookingId,
-            string receiverId,
-            string message,
-            CancellationToken cancellationToken)
+      int bookingId,
+      string receiverId,
+      string message,
+      CancellationToken cancellationToken)
         {
             var senderId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(senderId))
             {
                 return Unauthorized();
+            }
+
+            if (string.IsNullOrWhiteSpace(receiverId))
+            {
+                return BadRequest("لا يمكن إرسال الرسالة، معرف المستلم مفقود.");
             }
 
             if (!string.IsNullOrWhiteSpace(message))
@@ -67,6 +73,7 @@ namespace Shatbly.Areas.Customer.Controllers
                 bookingId,
                 receiverId
             });
-        }
+        
+    }
     }
 }

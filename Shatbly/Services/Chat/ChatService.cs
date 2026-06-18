@@ -51,14 +51,27 @@ namespace Shatbly.Services.Chat
                 },
                 cancellationToken);
 
+            //await notificationService.CreateNotificationAsync(
+            //    receiverId,
+            //    "New message",
+            //    "You have received a new message.",
+            //    NotificationType.Message,
+            //    bookingId,
+            //    cancellationToken);
             await notificationService.CreateNotificationAsync(
-                receiverId,
-                "New message",
-                "You have received a new message.",
-                NotificationType.Message,
-                bookingId,
-                cancellationToken);
-
+    receiverId,
+    "New message",
+    message,
+    NotificationType.Message,
+    bookingId,
+    cancellationToken);
+    //        await notificationService.CreateNotificationAsync(
+    //receiverId,
+    //"New message",
+    //"Click to open conversation",
+    //NotificationType.Message,
+    //bookingId,
+    //cancellationToken);
             return chatMessage;
         }
 

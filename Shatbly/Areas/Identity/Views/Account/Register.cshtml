@@ -43,8 +43,13 @@
                         <div class="col-md-6">
                             <label asp-for="FName" class="form-label fw-bold">@Localizer["FirstName"]</label>
                             <div class="input-group">
+<<<<<<< HEAD
                                 <input asp-for="FName" class="form-control border-start-0 ps-0" id="firstName"
                                        placeholder="@Localizer["FirstNamePlaceholder"]" required minlength="2" autocomplete="given-name">
+=======
+                                <input asp-for="FName" class="form-control border-start-0 ps-0" id="FName" name="FName"
+                                       placeholder="محمد" required minlength="2" autocomplete="given-name">
+>>>>>>> bff7fec2380bddc43c338f40b8752bd11b1c62a6
                                  <span asp-validation-for="FName" class="text-danger"></span>
 
                                  <div class="invalid-feedback">@Localizer["FirstNameInvalid"]</div>
@@ -54,8 +59,13 @@
                             <label asp-for="LName" class="form-label fw-bold">@Localizer["LastName"]</label>
                             <div class="input-group">
                               
+<<<<<<< HEAD
                                 <input asp-for="LName" type="text" class="form-control border-start-0 ps-0" id="lastName"
                                        placeholder="@Localizer["LastNamePlaceholder"]" required minlength="2" autocomplete="family-name">
+=======
+                                <input asp-for="LName" type="text" class="form-control border-start-0 ps-0" id="LName" name="LName"
+                                       placeholder="أحمد" required minlength="2" autocomplete="family-name">
+>>>>>>> bff7fec2380bddc43c338f40b8752bd11b1c62a6
                                 <span asp-validation-for="LName" class="text-danger"></span>
 
                                  <div class="invalid-feedback">@Localizer["LastNameInvalid"]</div>

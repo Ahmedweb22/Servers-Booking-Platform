@@ -475,7 +475,12 @@
                     <i class="bi @(isFavorite ? "bi-heart-fill" : "bi-heart") fs-4 @(isFavorite ? "text-danger" : "text-danger")"></i>
                 </button>
             </form>
-            <a href="/Customer/Chat?workerId=@Model.UserId"
+            @* <a href="/Customer/Chat?workerId=@Model.UserId"
+               class="btn btn-dark me-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+               style="width: 60px; height: 60px;">
+                <i class="bi bi-chat-dots-fill fs-4 text-white"></i>
+            </a> *@
+            <a href="/Customer/Chat/Index?receiverId=@Model.UserId&bookingId=@Model.Id"
                class="btn btn-dark me-3 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
                style="width: 60px; height: 60px;">
                 <i class="bi bi-chat-dots-fill fs-4 text-white"></i>
