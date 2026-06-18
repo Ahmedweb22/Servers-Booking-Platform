@@ -1,7 +1,8 @@
 @model CustomerIndexVM
 
 @{
-    ViewData["Title"] = "الصفحة الرئيسية";
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+    ViewData["Title"] = Localizer["PageTitle"];
 }
 
 <style>
@@ -208,28 +209,28 @@
 <nav class="filter-bar">
     <div class="d-flex align-items-center gap-3 flex-grow-1 flex-wrap">
 
-        <!-- 🔍 البحث -->
+        <!-- 🔍 Search -->
         <div class="search-wrapper">
             <form asp-action="Index" method="get" id="filterForm">
                 <i class="bi bi-search"></i>
-                <input type="text" class="search-input" placeholder="ابحث عن فني، تخصص، أو خدمة..." value="@ViewData["SearchString"]" name="searchString" />
-                <button type="submit" class="search-btn">بحث</button>
+                <input type="text" class="search-input" placeholder="@Localizer["SearchPlaceholder"]" value="@ViewData["SearchString"]" name="searchString" />
+                <button type="submit" class="search-btn">@Localizer["SearchButton"]</button>
             </form>
         </div>
 
-        <!-- 📂 تصنيف الخدمات -->
+        <!-- 📂 Category Classification -->
         <div class="filter-group">
-            <span class="filter-label"><i class="bi bi-layers me-1"></i> التصنيف:</span>
+            <span class="filter-label"><i class="bi bi-layers me-1"></i> @Localizer["CategoryLabel"]</span>
             <div class="category-chips">
                 <div class="chip @(ViewData["SelectedCategory"] == null ? "active" : "")">
-                    <a href="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> الكل</a>
+                    <a href="/Customer/Home/Index"><i class="bi bi-grid-fill"></i> @Localizer["AllCategories"]</a>
                 </div>
                 @if (Model.Categories != null)
                 {
                     @foreach (var category in Model.Categories)
                     {
                         <div class="chip @(ViewData["SelectedCategory"]?.ToString() == category.Id.ToString() ? "active" : "")">
-                            <a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @category.NameAr</a>
+                            <a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @(isRtl ? category.NameAr : category.Name)</a>
                         </div>
                     }
                 }
@@ -237,23 +238,23 @@
         </div>
     </div>
 
-    <!-- 📍 فلتر الموقع: محافظة ← منطقة -->
+    <!-- 📍 Location Filter -->
     <div class="d-flex align-items-center gap-2 ms-3 border-start ps-3">
         <div class="location-filter-group">
-            <span class="filter-label"><i class="bi bi-geo-alt me-1"></i> الموقع:</span>
+            <span class="filter-label"><i class="bi bi-geo-alt me-1"></i> @Localizer["LocationLabel"]</span>
             <div class="d-flex align-items-center gap-2">
                 <select class="filter-select" id="governorateSelect">
-                    <option value="" selected disabled>اختر المحافظة</option>
+                    <option value="" selected disabled>@Localizer["SelectGovernorate"]</option>
                 </select>
                 <select class="filter-select" id="districtSelect" disabled>
-                    <option value="" selected disabled>اختر المنطقة</option>
+                    <option value="" selected disabled>@Localizer["SelectDistrict"]</option>
                 </select>
                 <button class="btn btn-dark fw-bold rounded-3 px-3 py-2" id="locationFilterBtn" type="button">
-                    <i class="bi bi-sliders me-1"></i> فلتر
+                    <i class="bi bi-sliders me-1"></i> @Localizer["FilterButton"]
                 </button>
                 @if (ViewData["SelectedCity"] != null || ViewData["SelectedDistrict"] != null)
                 {
-                    <a href="/Customer/Home/Index" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-bold" title="إزالة فلتر الموقع">
+                    <a href="/Customer/Home/Index" class="btn btn-outline-secondary rounded-3 px-3 py-2 fw-bold" title="@Localizer["ClearLocationFilter"]">
                         <i class="bi bi-x-circle"></i>
                     </a>
                 }
@@ -283,13 +284,13 @@
                         <div class="smart-banner-text">
 
                             <span class="smart-badge">
-                                إعلان مميز
+                                @Localizer["FeaturedBanner"]
                             </span>
 
                             <h2>@banner.Title</h2>
 
                             <p>
-                                اكتشف أفضل الخدمات والعروض المتاحة الآن
+                                @Localizer["BannerSubtitle"]
                             </p>
 
                             @if (!string.IsNullOrEmpty(banner.LinkUrl))
@@ -297,9 +298,9 @@
                                 <a href="@banner.LinkUrl"
                                    class="smart-banner-btn">
 
-                                    اكتشف الآن
+                                    @Localizer["DiscoverNow"]
 
-                                    <i class="bi bi-arrow-left"></i>
+                                    <i class="bi @(isRtl ? "bi-arrow-left" : "bi-arrow-right")"></i>
 
                                 </a>
                             }
@@ -360,16 +361,16 @@
     <!-- Sidebar: Workers List -->
     <aside class="workers-sidebar">
         <div class="d-flex justify-content-between align-items-center mb-1">
-            <h5 class="mb-0">فنيين متاحين في منطقتك</h5>
-            <span class="text-muted fw-bold small">@(Model.Workers?.Count() ?? 0) نتيجة</span>
+            <h5 class="mb-0">@Localizer["AvailableWorkersTitle"]</h5>
+            <span class="text-muted fw-bold small">@(Model.Workers?.Count() ?? 0) @Localizer["ResultLabel"]</span>
         </div>
 
         @if (Model.Workers == null || !Model.Workers.Any())
         {
             <div class="alert alert-info text-center">
                 <i class="bi bi-info-circle-fill fs-1 mb-2"></i>
-                <h5 class="fw-bold mb-0">لا يوجد فنيين متاحين</h5>
-                <p class="text-muted fw-semibold mb-0">يرجى تغيير الفلاتر أو المحاولة لاحقًا.</p>
+                <h5 class="fw-bold mb-0">@Localizer["NoWorkersAvailable"]</h5>
+                <p class="text-muted fw-semibold mb-0">@Localizer["NoWorkersSubtitle"]</p>
             </div>
         }
         else
@@ -388,10 +389,10 @@
                                     @(worker.User?.FName) @(worker.User?.LName)
                                     <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
                                 </h6>
-                                <p class="text-muted fw-semibold small mb-2">@(worker.WorkerServices?.Category?.Name ?? "غير محدد")</p>
+                                <p class="text-muted fw-semibold small mb-2">@(isRtl ? (worker.WorkerServices?.Category?.NameAr ?? Localizer["NotSpecified"].Value) : (worker.WorkerServices?.Category?.Name ?? Localizer["NotSpecified"].Value))</p>
                                 <div class="d-flex gap-2">
-                                    <span class="tag"><i class="bi bi-house-gear me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.District ?? "حي غير محدد")</span>
-                                    <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.City ?? "مدينة غير محددة")</span>
+                                    <span class="tag"><i class="bi bi-house-gear me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.District ?? Localizer["DistrictNotSpecified"].Value)</span>
+                                    <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.City ?? Localizer["CityNotSpecified"].Value)</span>
                                 </div>
                             </div>
                         </div>
@@ -411,7 +412,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">ج.م / معاينة</span></div>
+                        <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span></div>
                         <div class="d-flex gap-2">
                             @{
                                 var addr = worker.User?.Addresses?.FirstOrDefault();
@@ -419,15 +420,15 @@
                                 var lng = addr?.Lng ?? 31.2357;
                             }
                             <button class="btn btn-outline-primary rounded-3 px-3 py-1 fw-bold small" onclick="showWorkerOnMap(@lat, @lng, '@(worker.User?.FName) @(worker.User?.LName)')">
-                                <i class="bi bi-geo-alt-fill"></i> تحديد الموقع
+                                <i class="bi bi-geo-alt-fill"></i> @Localizer["LocateOnMap"]
                             </button>
-                            <a href="/Customer/Home/WorkerDetails/@worker.Id" class="btn-book">التفاصيل</a>
+                            <a href="/Customer/Home/WorkerDetails/@worker.Id" class="btn-book">@Localizer["DetailsButton"]</a>
                         </div>
                     </div>
 
                     <div class="stats-row">
                         <div class="stat-item"><div class="rating-box"><i class="bi bi-star-fill"></i> 4.7</div></div>
-                        <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 89 مهمة مكتملة</div>
+                        <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 89 @Localizer["CompletedTasks"]</div>
                     </div>
                 </div>
             }
@@ -439,14 +440,14 @@
         <div class="map-overlay">
             <div class="map-badge">
                 <i class="bi bi-geo-alt-fill fs-1 text-primary mb-2 d-block"></i>
-                <h4 class="fw-800 mb-1">خريطة الفنيين التفاعلية</h4>
-                <p class="text-muted fw-semibold mb-0">جاري تحميل الخريطة والمواقع المباشرة للفنيين...</p>
+                <h4 class="fw-800 mb-1">@Localizer["InteractiveMapTitle"]</h4>
+                <p class="text-muted fw-semibold mb-0">@Localizer["InteractiveMapLoading"]</p>
             </div>
 
             <!-- Emergency Button -->
             <button class="fab-emergency">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                طلب طوارئ سريع
+                @Localizer["EmergencyRequest"]
             </button>
         </div>
     </main>
@@ -467,6 +468,7 @@
             document.querySelector('.map-overlay').style.display = 'none';
         }
 
+        var mapPopupText = '@Localizer["MapPopupText"]';
         function showWorkerOnMap(lat, lng, name) {
             if (!map) initMap();
 
@@ -477,7 +479,7 @@
             map.setView([lat, lng], 15);
 
             marker = L.marker([lat, lng]).addTo(map)
-                .bindPopup("<b>" + name + "</b><br>موقع الفني المعتمد")
+                .bindPopup("<b>" + name + "</b><br>" + mapPopupText)
                 .openPopup();
         }
 
@@ -487,7 +489,7 @@
 
         // ===== Cascading Location Filter =====
         // Egypt governorates and their districts/places
-        var locationData = {
+        var locationDataAr = {
             "القاهرة": ["المعادي", "التجمع الخامس", "مدينة نصر", "مصر الجديدة", "وسط البلد", "الزمالك", "المقطم", "عين شمس", "شبرا", "حلوان"],
             "الإسكندرية": ["سموحة", "ميامي", "سيدي جابر", "المنتزه", "العجمي", "محرم بك", "كليوباترا", "ستانلي", "الشاطبي", "لوران"],
             "الجيزة": ["الدقي", "المهندسين", "الهرم", "فيصل", "6 أكتوبر", "الشيخ زايد", "أكتوبر", "العمرانية", "البدرشين", "الحوامدية"],
@@ -517,6 +519,39 @@
             "جنوب سيناء": ["شرم الشيخ", "دهب", "نويبع", "طابا", "سانت كاترين", "الطور"]
         };
 
+        var locationDataEn = {
+            "Cairo": ["Maadi", "Fifth Settlement", "Nasr City", "Heliopolis", "Downtown", "Zamalek", "Mokattam", "Ain Shams", "Shubra", "Helwan"],
+            "Alexandria": ["Smouha", "Miami", "Sidi Gaber", "Montaza", "Agami", "Moharam Bek", "Cleopatra", "Stanley", "Shatby", "Loran"],
+            "Giza": ["Dokki", "Mohandessin", "Haram", "Faisal", "6th of October", "Sheikh Zayed", "October", "Omraneya", "Badrashein", "Hawamdeya"],
+            "Qalyubia": ["Shubra El-Kheima", "Banha", "Qalyub", "El Qanater El Khayreya", "Toukh", "Kafr Shukr"],
+            "Sharqia": ["Zagazig", "10th of Ramadan", "Hehia", "Belbeis", "Faqous", "Abu Hammad"],
+            "Dakahlia": ["Mansoura", "Talkha", "Mit Ghamr", "Aga", "Dekernes", "Senbellawein"],
+            "Gharbia": ["Tanta", "El Mahalla El Kubra", "Kafr El Zayat", "Zefta", "El Santa", "Qutur"],
+            "Menofia": ["Shibin El Kom", "Menouf", "Ashmoun", "El Shohada", "Quwaysna", "Tala"],
+            "Beheira": ["Damanhour", "Kafr El Dawwar", "Rashid", "Itay El Baroud", "Abu Hummus", "Mahmoudiyah"],
+            "Kafr El Sheikh": ["Kafr El Sheikh", "Desouk", "Baltim", "Fouh", "Sidi Salem", "Hamoul"],
+            "Damietta": ["Damietta", "Ras El Bar", "Faraskour", "Kafr Saad", "Zarqa"],
+            "Port Said": ["Al Sharq", "Al Arab", "Al Manakh", "Al Dawahi", "Al Zohour"],
+            "Suez": ["Al Arbaeen", "Attaka", "Suez", "Al Ganayen", "Faisal"],
+            "Ismailia": ["Ismailia", "Fayed", "Qantara East", "El Tell El Kebir", "Abu Suweir"],
+            "Asyut": ["Asyut", "Dairut", "Manfalut", "Qusiya", "Abnoub", "Al Fath"],
+            "Sohag": ["Sohag", "Akhmim", "Tahta", "Girga", "Maragha", "Balyana"],
+            "Qena": ["Qena", "Nag Hammadi", "Qus", "Deshna", "Farshut", "Abu Tisht"],
+            "Luxor": ["Luxor", "Esna", "Armant", "Tud", "Qurna", "Bayadiya"],
+            "Aswan": ["Aswan", "Kom Ombo", "Edfu", "Daraw", "Nasr Nuba"],
+            "Minya": ["Minya", "Mallawi", "Bani Mazar", "Abu Qurqas", "Samalut", "Maghagha"],
+            "Beni Suef": ["Beni Suef", "Fashn", "Beba", "Ihnasiya", "Nasser", "Wasta"],
+            "Fayoum": ["Fayoum", "Tamiya", "Senouris", "Itsa", "Youssef El Sediq"],
+            "Red Sea": ["Hurghada", "Safaga", "Quseir", "Marsa Alam", "Ras Gharib"],
+            "New Valley": ["Kharga", "Dakhla", "Farafra", "Paris", "Balat"],
+            "Matrouh": ["Marsa Matrouh", "Hammam", "El Alamein", "Dabaa", "Siwa", "Sallum"],
+            "North Sinai": ["Arish", "Sheikh Zuwayed", "Rafah", "Bir El Abd", "Hasana"],
+            "South Sinai": ["Sharm El Sheikh", "Dahab", "Nuweiba", "Taba", "Saint Catherine", "El Tor"]
+        };
+
+        var isArabic = @(isRtl ? "true" : "false");
+        var locationData = isArabic ? locationDataAr : locationDataEn;
+
         var selectedCity = '@(ViewData["SelectedCity"] ?? "")';
         var selectedDistrict = '@(ViewData["SelectedDistrict"] ?? "")';
 
@@ -535,7 +570,7 @@
         // If a city was already selected, populate districts
         if (selectedCity && locationData[selectedCity]) {
             distSelect.disabled = false;
-            distSelect.innerHTML = '<option value="" selected disabled>اختر المنطقة</option>';
+            distSelect.innerHTML = '<option value="" selected disabled>' + '@Localizer["SelectDistrictLabel"]' + '</option>';
             locationData[selectedCity].forEach(function(dist) {
                 var opt = document.createElement('option');
                 opt.value = dist;
@@ -549,11 +584,11 @@
         govSelect.addEventListener('change', function() {
             var gov = this.value;
             distSelect.disabled = false;
-            distSelect.innerHTML = '<option value="" selected disabled>اختر المنطقة</option>';
+            distSelect.innerHTML = '<option value="" selected disabled>' + '@Localizer["SelectDistrictLabel"]' + '</option>';
             // Add "All districts" option
             var allOpt = document.createElement('option');
             allOpt.value = '__all__';
-            allOpt.textContent = 'كل المناطق';
+            allOpt.textContent = '@Localizer["AllDistricts"]';
             distSelect.appendChild(allOpt);
 
             if (locationData[gov]) {

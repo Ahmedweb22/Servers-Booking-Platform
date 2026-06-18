@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="PageTitle" xml:space="preserve"><value>استكشف الفنيين | Shtbly - شطبلي</value></data>
+  <data name="BrandName" xml:space="preserve"><value>شطبلي</value></data>
+  <data name="Explore" xml:space="preserve"><value>استكشف</value></data>
+  <data name="MyOrders" xml:space="preserve"><value>طلباتي</value></data>
+  <data name="Messages" xml:space="preserve"><value>الرسائل</value></data>
+  <data name="Favorites" xml:space="preserve"><value>المفضلة</value></data>
+  <data name="PremiumCustomer" xml:space="preserve"><value>عميل مميز</value></data>
+  <data name="MyAccount" xml:space="preserve"><value>حسابي</value></data>
+  <data name="Settings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="NewAlerts" xml:space="preserve"><value>تنبيهات جديدة</value></data>
+  <data name="Admin" xml:space="preserve"><value>مسؤول النظام</value></data>
+  <data name="SuperAdmin" xml:space="preserve"><value>المدير العام</value></data>
+  <data name="Worker" xml:space="preserve"><value>فني</value></data>
+  <data name="Customer" xml:space="preserve"><value>عميل</value></data>
+</root>

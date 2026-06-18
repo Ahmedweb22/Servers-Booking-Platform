@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Worker.Controllers
@@ -10,18 +10,22 @@ namespace Shatbly.Areas.Worker.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IRepository<WorkerProfile> _profileRepository;
-        public WorkerController(UserManager<User> userManager, IRepository<WorkerProfile> profileRepository)
+        private readonly IStringLocalizer<WorkerController> _localizer;
+        public WorkerController(UserManager<User> userManager, IRepository<WorkerProfile> profileRepository, IStringLocalizer<WorkerController> localizer)
         {
             _userManager = userManager;
             _profileRepository = profileRepository;
+            _localizer = localizer;
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult SendCV()
         {
             return View();
         }
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> SendCV (WorkerVM model )
         {
             if (!ModelState.IsValid)
@@ -50,7 +54,7 @@ namespace Shatbly.Areas.Worker.Controllers
             
                 await _profileRepository.CreateAsync(Worker);
                 await _profileRepository.CommitAsync();
-                TempData["Notification"] = "تم تسليم بياناتك بنجاح سيتم الرد عليك خلال يومين";
+                TempData["Notification"] = _localizer["CvSubmittedSuccess"].Value;
                 return RedirectToAction("Index", "Home", new { area = "Customer" });
             
         }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="WorkerProfile" xml:space="preserve"><value>Technician Profile</value></data>
+  <data name="Sunday" xml:space="preserve"><value>Sunday</value></data>
+  <data name="Monday" xml:space="preserve"><value>Monday</value></data>
+  <data name="Tuesday" xml:space="preserve"><value>Tuesday</value></data>
+  <data name="Wednesday" xml:space="preserve"><value>Wednesday</value></data>
+  <data name="Thursday" xml:space="preserve"><value>Thursday</value></data>
+  <data name="Friday" xml:space="preserve"><value>Friday</value></data>
+  <data name="Saturday" xml:space="preserve"><value>Saturday</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>Not specified</value></data>
+  <data name="AvailableNow" xml:space="preserve"><value>Available Now</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="GeneralRating" xml:space="preserve"><value>General Rating</value></data>
+  <data name="CompletedOrders" xml:space="preserve"><value>Completed Orders</value></data>
+  <data name="MemberSince" xml:space="preserve"><value>Member since</value></data>
+  <data name="AboutAndSchedule" xml:space="preserve"><value>About &amp; Schedule</value></data>
+  <data name="ServicesAndPrices" xml:space="preserve"><value>Services &amp; Prices</value></data>
+  <data name="AboutMe" xml:space="preserve"><value>About Me</value></data>
+  <data name="NoBioYet" xml:space="preserve"><value>No bio added yet</value></data>
+  <data name="WorkingHours" xml:space="preserve"><value>Official Working Hours</value></data>
+  <data name="PM" xml:space="preserve"><value>PM</value></data>
+  <data name="AM" xml:space="preserve"><value>AM</value></data>
+  <data name="FridayClosed" xml:space="preserve"><value>Friday: Closed for weekly holiday</value></data>
+  <data name="NoWorkingHours" xml:space="preserve"><value>No working hours specified</value></data>
+  <data name="ReviewsTitle" xml:space="preserve"><value>Reviews</value></data>
+  <data name="GeneralService" xml:space="preserve"><value>General Service</value></data>
+  <data name="EgpPerHour" xml:space="preserve"><value>EGP / hr</value></data>
+  <data name="AdditionalDetails" xml:space="preserve"><value>Additional Details</value></data>
+  <data name="ServiceStatus" xml:space="preserve"><value>Service Status</value></data>
+  <data name="Active" xml:space="preserve"><value>Active</value></data>
+  <data name="Inactive" xml:space="preserve"><value>Inactive</value></data>
+  <data name="AcceptsOnline" xml:space="preserve"><value>Accepts Online</value></data>
+  <data name="Yes" xml:space="preserve"><value>Yes</value></data>
+  <data name="No" xml:space="preserve"><value>No</value></data>
+  <data name="Location" xml:space="preserve"><value>Location</value></data>
+  <data name="NoServicesRegistered" xml:space="preserve"><value>No registered services</value></data>
+  <data name="BookAppointmentNow" xml:space="preserve"><value>Book Appointment Now</value></data>
+</root>

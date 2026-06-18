@@ -11,15 +11,18 @@ namespace Shatbly.Areas.Admin.Controllers
         private readonly IRepository<WorkerService> _workerServiceRepo;
         private readonly IRepository<ServiceCategory> _categoryRepo;
         private readonly IRepository<WorkerProfile> _workerRepo;
+        private readonly IStringLocalizer<WorkerServiceController> _localizer;
 
         public WorkerServiceController(
             IRepository<WorkerService> workerServiceRepo,
             IRepository<ServiceCategory> categoryRepo,
-            IRepository<WorkerProfile> workerRepo)
+            IRepository<WorkerProfile> workerRepo,
+            IStringLocalizer<WorkerServiceController> localizer)
         {
             _workerServiceRepo = workerServiceRepo;
             _categoryRepo = categoryRepo;
             _workerRepo = workerRepo;
+            _localizer = localizer;
         }
 
         // ───────── INDEX ─────────
@@ -84,7 +87,7 @@ namespace Shatbly.Areas.Admin.Controllers
                 model.Workers = await _workerRepo.GetAsync(
                     includes: new Expression<Func<WorkerProfile, object>>[] { w => w.User },
                     tracking: false);
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _localizer["FormErrors"].Value;
                 return View(model);
             }
 
@@ -98,7 +101,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             await _workerServiceRepo.CreateAsync(workerService);
             await _workerServiceRepo.CommitAsync();
-            TempData["success-notification"] = "Worker service created successfully";
+            TempData["success-notification"] = _localizer["CreatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -115,7 +118,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var ws = await _workerServiceRepo.GetOneAsync(e => e.Id == id, includes: includes, tracking: false);
             if (ws is null)
             {
-                TempData["error-notification"] = "Worker service not found.";
+                TempData["error-notification"] = _localizer["NotFound"].Value;
                 return NotFound();
             }
 
@@ -145,14 +148,14 @@ namespace Shatbly.Areas.Admin.Controllers
                 model.Workers = await _workerRepo.GetAsync(
                     includes: new Expression<Func<WorkerProfile, object>>[] { w => w.User },
                     tracking: false);
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _localizer["FormErrors"].Value;
                 return View(model);
             }
 
             var existing = await _workerServiceRepo.GetOneAsync(e => e.Id == model.Id, tracking: false);
             if (existing is null)
             {
-                TempData["error-notification"] = "Worker service not found.";
+                TempData["error-notification"] = _localizer["NotFound"].Value;
                 return NotFound();
             }
 
@@ -167,7 +170,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             _workerServiceRepo.Update(workerService);
             await _workerServiceRepo.CommitAsync();
-            TempData["success-notification"] = "Worker service updated successfully";
+            TempData["success-notification"] = _localizer["UpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -178,13 +181,13 @@ namespace Shatbly.Areas.Admin.Controllers
             var ws = await _workerServiceRepo.GetOneAsync(e => e.Id == id);
             if (ws is null)
             {
-                TempData["error-notification"] = "Worker service not found.";
+                TempData["error-notification"] = _localizer["NotFound"].Value;
                 return NotFound();
             }
 
             _workerServiceRepo.Delete(ws);
             await _workerServiceRepo.CommitAsync();
-            TempData["success-notification"] = "Worker service deleted successfully";
+            TempData["success-notification"] = _localizer["DeletedSuccess"].Value;
             return Ok();
         }
     }

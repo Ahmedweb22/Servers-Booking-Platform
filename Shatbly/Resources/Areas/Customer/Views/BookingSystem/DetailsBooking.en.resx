@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="BookingDetailsTitle" xml:space="preserve"><value>Booking Details</value></data>
+  <data name="BookingConfirmedHeader" xml:space="preserve"><value>Booking #{0} confirmed in the system</value></data>
+  <data name="BookingServiceDetails" xml:space="preserve"><value>Service: Service: {0} with {1}.</value></data>
+  <data name="ScheduledFor" xml:space="preserve"><value>Scheduled for {0}.</value></data>
+  <data name="BookingDetailsCardTitle" xml:space="preserve"><value>Booking details</value></data>
+  <data name="BookingDetailsCardSubtitle" xml:space="preserve"><value>Everything created by the 5-step wizard is summarized here, including pricing, recurrence, and worker confirmation timing.</value></data>
+  <data name="StatusLabel" xml:space="preserve"><value>Status</value></data>
+  <data name="BookingTypeLabel" xml:space="preserve"><value>Booking type</value></data>
+  <data name="CustomerLabel" xml:space="preserve"><value>Customer</value></data>
+  <data name="RecurringLabel" xml:space="preserve"><value>Recurring</value></data>
+  <data name="PaymentLabel" xml:space="preserve"><value>Payment</value></data>
+  <data name="ConfirmationDeadlineLabel" xml:space="preserve"><value>Confirmation deadline</value></data>
+  <data name="NotApplicable" xml:space="preserve"><value>Not applicable</value></data>
+  <data name="AddressLabel" xml:space="preserve"><value>Address</value></data>
+  <data name="NotesLabel" xml:space="preserve"><value>Notes</value></data>
+  <data name="NoNotes" xml:space="preserve"><value>No notes</value></data>
+  <data name="ServicePriceLabel" xml:space="preserve"><value>Service price</value></data>
+  <data name="ConvenienceFeeLabel" xml:space="preserve"><value>Convenience fee</value></data>
+  <data name="DiscountLabel" xml:space="preserve"><value>Discount</value></data>
+  <data name="TotalLabel" xml:space="preserve"><value>Total</value></data>
+  <data name="CurrencyFormat" xml:space="preserve"><value>EGP {0}</value></data>
+  <data name="RateServiceTitle" xml:space="preserve"><value>Rate Service &amp; Technician</value></data>
+  <data name="RatedSuccessfully" xml:space="preserve"><value>Rated Successfully</value></data>
+  <data name="RateSuccessMessage" xml:space="preserve"><value>Thank you! You have already rated this booking and helped us improve quality.</value></data>
+  <data name="RatePromptMessage" xml:space="preserve"><value>This order has been completed successfully! We would love to hear your feedback on the technician's performance and service level.</value></data>
+  <data name="RateServiceNow" xml:space="preserve"><value>Rate Service Now</value></data>
+  <data name="RescheduleHeader" xml:space="preserve"><value>Reschedule</value></data>
+  <data name="RescheduleSubtitle" xml:space="preserve"><value>Use a new date and time. If the slot is available, the booking moves to Rescheduled and the worker gets another 30-minute response window.</value></data>
+  <data name="NewSlot" xml:space="preserve"><value>New slot</value></data>
+  <data name="RescheduleBookingBtn" xml:space="preserve"><value>Reschedule booking</value></data>
+  <data name="CannotReschedule" xml:space="preserve"><value>This booking can no longer be rescheduled in its current status.</value></data>
+  <data name="CancelWithRefundHeader" xml:space="preserve"><value>Cancel with refund policy</value></data>
+  <data name="CancelRefundPolicyMessage" xml:space="preserve"><value>100% refund for 24+ hours, 50% for 2-24 hours, and no refund in the final 2 hours. Current estimated refund: &lt;strong&gt;EGP {0}&lt;/strong&gt;.</value></data>
+  <data name="ReasonLabel" xml:space="preserve"><value>Reason</value></data>
+  <data name="CancellationReasonPlaceholder" xml:space="preserve"><value>Optional explanation for the customer and operations team.</value></data>
+  <data name="CancelBookingBtn" xml:space="preserve"><value>Cancel booking</value></data>
+  <data name="CannotCancel" xml:space="preserve"><value>This booking can no longer be cancelled in its current status.</value></data>
+  <data name="FacingIssuesHeader" xml:space="preserve"><value>Facing issues with the service?</value></data>
+  <data name="UnderReviewDispute" xml:space="preserve"><value>Under Review (Open Dispute)</value></data>
+  <data name="DisputedAlreadyMessage" xml:space="preserve"><value>You have already raised a dispute for this order. Support team is currently reviewing it and will contact you soon.</value></data>
+  <data name="DisputePromptMessage" xml:space="preserve"><value>If you are not satisfied with the work executed or an issue occurred with the technician, you can raise a dispute and support team will intervene immediately to resolve it and guarantee your rights.</value></data>
+  <data name="RaiseDisputeBtn" xml:space="preserve"><value>Raise a Dispute / File a Complaint</value></data>
+  <data name="LiveTracking" xml:space="preserve"><value>Live Tracking</value></data>
+  <data name="TechnicianOnTheWay" xml:space="preserve"><value>Technician is on the way</value></data>
+
+  <!-- Enum Statuses / Types -->
+  <data name="Pending" xml:space="preserve"><value>Pending</value></data>
+  <data name="Confirmed" xml:space="preserve"><value>Confirmed</value></data>
+  <data name="Completed" xml:space="preserve"><value>Completed</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="NoResponse" xml:space="preserve"><value>No Response</value></data>
+  <data name="Rescheduled" xml:space="preserve"><value>Rescheduled</value></data>
+  <data name="Rejected" xml:space="preserve"><value>Rejected</value></data>
+  <data name="Scheduled" xml:space="preserve"><value>Scheduled</value></data>
+  <data name="Instant" xml:space="preserve"><value>Instant</value></data>
+  <data name="Cash" xml:space="preserve"><value>Cash</value></data>
+  <data name="Card" xml:space="preserve"><value>Card</value></data>
+  <data name="Wallet" xml:space="preserve"><value>Wallet</value></data>
+  <data name="Paid" xml:space="preserve"><value>Paid</value></data>
+  <data name="Failed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Refunded" xml:space="preserve"><value>Refunded</value></data>
+  <data name="None" xml:space="preserve"><value>None</value></data>
+  <data name="Daily" xml:space="preserve"><value>Daily</value></data>
+  <data name="Weekly" xml:space="preserve"><value>Weekly</value></data>
+  <data name="Monthly" xml:space="preserve"><value>Monthly</value></data>
+  <data name="Disputed" xml:space="preserve"><value>Disputed</value></data>
+</root>

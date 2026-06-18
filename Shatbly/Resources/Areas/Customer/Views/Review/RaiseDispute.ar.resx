@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>تقديم شكوى / نزاع</value></data>
+  <data name="CardTitle" xml:space="preserve"><value>تقديم شكوى / رفع نزاع للطلب</value></data>
+  <data name="CardSubtitle" xml:space="preserve"><value>يرجى توضيح المشكلة التي واجهتك بكل دقة ليقوم فريق الدعم لدينا بدراسة الحالة والتدخل الفوري.</value></data>
+  <data name="OrderIdLabel" xml:space="preserve"><value>رقم الطلب:</value></data>
+  <data name="RequiredServiceLabel" xml:space="preserve"><value>الخدمة المطلوبة:</value></data>
+  <data name="AssignedTechnicianLabel" xml:space="preserve"><value>الفني المسؤول:</value></data>
+  <data name="WhatHappensTitle" xml:space="preserve"><value>ماذا يحدث عند رفع نزاع؟</value></data>
+  <data name="WhatHappensDescription" xml:space="preserve"><value>سيتم تجميد حالة الطلب فوراً وتحويل الملف إلى قسم النزاعات والمراجعة الفنية في شطبلي. سيتواصل معك أحد ممثلي الدعم الفني خلال 24 ساعة للتحقق من تفاصيل الشكوى والتنسيق مع الفني للوصول إلى حل يضمن كامل حقوقك.</value></data>
+  <data name="DisputeReasonLabel" xml:space="preserve"><value>اكتب سبب النزاع وتفاصيل الشكوى بالتفصيل</value></data>
+  <data name="DisputeReasonPlaceholder" xml:space="preserve"><value>يرجى كتابة الشكوى بوضوح (مثال: عدم اكتمال العمل المنفذ، تلف أجزاء من الخامات، سلوك غير لائق...)</value></data>
+  <data name="ValidationErrorText" xml:space="preserve"><value>يرجى إدخال سبب الشكوى/النزاع للاستمرار.</value></data>
+  <data name="CancelBtn" xml:space="preserve"><value>تراجع</value></data>
+  <data name="ConfirmDisputeBtn" xml:space="preserve"><value>تأكيد ورفع النزاع</value></data>
+</root>

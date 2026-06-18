@@ -1,4 +1,4 @@
-﻿using Stripe;
+using Stripe;
 using BookingTypes = Shatbly.ViewModels.BookingTypes;
 using Review = Shatbly.Models.Review;
 
@@ -29,17 +29,20 @@ public class BookingSystemService : IBookingSystemService
     private readonly IRepository<Order> _orderRepository;
     private readonly IRepository<Review> _reviewRepository;
     private readonly UserManager<User> _userManager;
+    private readonly IStringLocalizer<BookingSystemService> _localizer;
 
     public BookingSystemService(
         UserManager<User> userManager,
         IRepository<ServiceCategory> serviceCategoryRepository,
         IRepository<Order> orderRepository,
-        IRepository<Review> reviewRepository)
+        IRepository<Review> reviewRepository,
+        IStringLocalizer<BookingSystemService> localizer)
     {
         _userManager = userManager;
         _serviceCategoryRepository = serviceCategoryRepository;
         _orderRepository = orderRepository;
         _reviewRepository = reviewRepository;
+        _localizer = localizer;
     }
 
     public async Task<BookingWizardViewModel> BuildCreateViewModelAsync(BookingWizardViewModel? model = null)
@@ -81,16 +84,16 @@ public class BookingSystemService : IBookingSystemService
             .ToList();
         model.PaymentOptions = new List<SelectListItem>
 {
-    new SelectListItem("Cash", PaymentMethods.Cash.ToString()),
-    new SelectListItem("Card", PaymentMethods.Card.ToString()),
-    new SelectListItem("Wallet", PaymentMethods.Wallet.ToString())
+    new SelectListItem(_localizer["Cash"].Value, PaymentMethods.Cash.ToString()),
+    new SelectListItem(_localizer["Card"].Value, PaymentMethods.Card.ToString()),
+    new SelectListItem(_localizer["Wallet"].Value, PaymentMethods.Wallet.ToString())
 };
 
         model.RecurrenceOptions = new List<SelectListItem>
 {
-    new SelectListItem("One-time", RecurrencePatterns.None.ToString()),
-    new SelectListItem("Weekly", RecurrencePatterns.Weekly.ToString()),
-    new SelectListItem("Monthly", RecurrencePatterns.Monthly.ToString())
+    new SelectListItem(_localizer["OneTime"].Value, RecurrencePatterns.None.ToString()),
+    new SelectListItem(_localizer["Weekly"].Value, RecurrencePatterns.Weekly.ToString()),
+    new SelectListItem(_localizer["Monthly"].Value, RecurrencePatterns.Monthly.ToString())
 };
 
         model.AddressPresets =
@@ -101,8 +104,8 @@ public class BookingSystemService : IBookingSystemService
         ];
 
         model.AvailabilityJson = JsonSerializer.Serialize(await BuildAvailabilityAsync(workers.Select(w => w.Id)));
-        model.SelectedServiceName = selectedService?.Name ?? "Choose a service";
-        model.SelectedWorkerName = selectedWorker?.Name ?? "Choose a worker";
+        model.SelectedServiceName = selectedService?.Name ?? _localizer["ChooseService"].Value;
+        model.SelectedWorkerName = selectedWorker?.Name ?? _localizer["ChooseWorkerLabel"].Value;
 
         model.ServicePrice = pricing.ServicePrice;
         model.ConvenienceFee = pricing.ConvenienceFee;
@@ -161,16 +164,16 @@ public class BookingSystemService : IBookingSystemService
         // �������: ��� ���� ������ �� ������ ����� ����� ������ �������
         if (worker is null)
         {
-            validationErrors[nameof(model.WorkerId)] = ["Choose a worker."];
+            validationErrors[nameof(model.WorkerId)] = [_localizer["ChooseWorker"].Value];
         }
         else if (!await _userManager.IsInRoleAsync(worker, SD.ROLE_WORKER))
         {
-            validationErrors[nameof(model.WorkerId)] = ["The selected worker is not available."];
+            validationErrors[nameof(model.WorkerId)] = [_localizer["WorkerNotAvailable"].Value];
         }
 
         if (service is null)
         {
-            validationErrors[nameof(model.ServiceId)] = ["The selected service is not available."];
+            validationErrors[nameof(model.ServiceId)] = [_localizer["ServiceNotAvailable"].Value];
         }
 
         var resolvedScheduledAt = service is not null && worker is not null
@@ -179,7 +182,7 @@ public class BookingSystemService : IBookingSystemService
 
         if (resolvedScheduledAt is not DateTime)
         {
-            validationErrors[nameof(model.SelectedTime)] = ["Choose an available date and time."];
+            validationErrors[nameof(model.SelectedTime)] = [_localizer["ChooseDateTime"].Value];
         }
 
         if (validationErrors.Count > 0)
@@ -230,7 +233,7 @@ public class BookingSystemService : IBookingSystemService
         {
             Succeeded = true,
             BookingId = order.Id,
-            SuccessMessage = "Booking created. The assigned worker has 30 minutes to accept or reject it."
+            SuccessMessage = _localizer["BookingCreatedSuccess"].Value
         };
     }
     public async Task<BookingDetailsViewModel?> GetDetailsAsync(int id)
@@ -266,7 +269,7 @@ public class BookingSystemService : IBookingSystemService
 
         if (!DateTime.TryParse(scheduledAt, out var parsedSlot) || booking.WorkerId is null)
         {
-            return FailAction(id, "Choose a valid slot to reschedule.");
+            return FailAction(id, _localizer["ChooseValidSlot"].Value);
         }
 
         var slot = await TryResolveScheduledAtAsync(
@@ -281,7 +284,7 @@ public class BookingSystemService : IBookingSystemService
 
         if (slot is not DateTime validSlot)
         {
-            return FailAction(id, "That slot is no longer available.");
+            return FailAction(id, _localizer["SlotNoLongerAvailable"].Value);
         }
 
         booking.ScheduledAt = validSlot;
@@ -297,7 +300,7 @@ public class BookingSystemService : IBookingSystemService
         {
             Succeeded = true,
             BookingId = id,
-            Message = "Booking rescheduled. Worker confirmation has been requested again."
+            Message = _localizer["BookingRescheduled"].Value
         };
     }
 
@@ -312,7 +315,7 @@ public class BookingSystemService : IBookingSystemService
         booking.Status = OrderStatuses.Cancelled;
         booking.CancelledAt = DateTime.UtcNow;
         booking.CancellationReason = string.IsNullOrWhiteSpace(cancellationReason)
-            ? "Cancelled by customer"
+            ? _localizer["CancelledByCustomer"].Value
             : cancellationReason.Trim();
         booking.RefundAmount = CalculateRefund(booking);
 
@@ -325,7 +328,7 @@ public class BookingSystemService : IBookingSystemService
         {
             Succeeded = true,
             BookingId = id,
-            Message = $"Booking cancelled. Estimated refund: EGP {booking.RefundAmount:0.00}."
+            Message = string.Format(_localizer["BookingCancelled"].Value, booking.RefundAmount.ToString("0.00"))
         };
     }
 
@@ -373,7 +376,7 @@ public class BookingSystemService : IBookingSystemService
             if (!createResult.Succeeded)
             {
                 var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"Customer creation failed: {errors}");
+                throw new InvalidOperationException(string.Format(_localizer["CustomerCreationFailed"].Value, errors));
             }
 
             await _userManager.AddToRoleAsync(customer, SD.ROLE_CUSTOMER);

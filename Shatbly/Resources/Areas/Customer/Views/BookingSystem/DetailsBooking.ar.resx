@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="BookingDetailsTitle" xml:space="preserve"><value>تفاصيل الحجز</value></data>
+  <data name="BookingConfirmedHeader" xml:space="preserve"><value>تم تأكيد الحجز رقم {0} في النظام</value></data>
+  <data name="BookingServiceDetails" xml:space="preserve"><value>الخدمة: {0} مع {1}.</value></data>
+  <data name="ScheduledFor" xml:space="preserve"><value>الموعد المحدد {0}.</value></data>
+  <data name="BookingDetailsCardTitle" xml:space="preserve"><value>تفاصيل الحجز</value></data>
+  <data name="BookingDetailsCardSubtitle" xml:space="preserve"><value>كل ما تم إنشاؤه بواسطة معالج الخطوات الخمس ملخص هنا، بما في ذلك التسعير والتكرار وتوقيت تأكيد الفني.</value></data>
+  <data name="StatusLabel" xml:space="preserve"><value>الحالة</value></data>
+  <data name="BookingTypeLabel" xml:space="preserve"><value>نوع الحجز</value></data>
+  <data name="CustomerLabel" xml:space="preserve"><value>العميل</value></data>
+  <data name="RecurringLabel" xml:space="preserve"><value>التكرار</value></data>
+  <data name="PaymentLabel" xml:space="preserve"><value>الدفع</value></data>
+  <data name="ConfirmationDeadlineLabel" xml:space="preserve"><value>مهلة التأكيد</value></data>
+  <data name="NotApplicable" xml:space="preserve"><value>غير مطبق</value></data>
+  <data name="AddressLabel" xml:space="preserve"><value>العنوان</value></data>
+  <data name="NotesLabel" xml:space="preserve"><value>ملاحظات</value></data>
+  <data name="NoNotes" xml:space="preserve"><value>لا توجد ملاحظات</value></data>
+  <data name="ServicePriceLabel" xml:space="preserve"><value>سعر الخدمة</value></data>
+  <data name="ConvenienceFeeLabel" xml:space="preserve"><value>رسوم الخدمة</value></data>
+  <data name="DiscountLabel" xml:space="preserve"><value>الخصم</value></data>
+  <data name="TotalLabel" xml:space="preserve"><value>الإجمالي</value></data>
+  <data name="CurrencyFormat" xml:space="preserve"><value>{0} ج.م</value></data>
+  <data name="RateServiceTitle" xml:space="preserve"><value>تقييم الخدمة والفني</value></data>
+  <data name="RatedSuccessfully" xml:space="preserve"><value>تم التقييم بنجاح</value></data>
+  <data name="RateSuccessMessage" xml:space="preserve"><value>شكراً لك! لقد قمت بتقييم هذا الطلب بالفعل وساعدتنا في تحسين الجودة.</value></data>
+  <data name="RatePromptMessage" xml:space="preserve"><value>لقد تم إتمام هذا الطلب بنجاح! يسعدنا جداً معرفة رأيك في أداء الفني ومستوى الخدمة المقدمة.</value></data>
+  <data name="RateServiceNow" xml:space="preserve"><value>تقييم الخدمة الآن</value></data>
+  <data name="RescheduleHeader" xml:space="preserve"><value>إعادة جدولة</value></data>
+  <data name="RescheduleSubtitle" xml:space="preserve"><value>استخدم تاريخاً ووقتاً جديداً. إذا كانت الفترة متاحة، ينتقل الحجز إلى 'معاد جدولته' ويحصل الفني على نافذة استجابة أخرى مدتها 30 دقيقة.</value></data>
+  <data name="NewSlot" xml:space="preserve"><value>فترة جديدة</value></data>
+  <data name="RescheduleBookingBtn" xml:space="preserve"><value>إعادة جدولة الحجز</value></data>
+  <data name="CannotReschedule" xml:space="preserve"><value>لا يمكن إعادة جدولة هذا الحجز في حالته الحالية.</value></data>
+  <data name="CancelWithRefundHeader" xml:space="preserve"><value>إلغاء مع سياسة الاسترداد</value></data>
+  <data name="CancelRefundPolicyMessage" xml:space="preserve"><value>استرداد بنسبة 100% خلال 24+ ساعة، و50% خلال 2-24 ساعة، ولا يوجد استرداد في آخر ساعتين. الاسترداد المقدر حالياً: &lt;strong&gt;{0} ج.م&lt;/strong&gt;.</value></data>
+  <data name="ReasonLabel" xml:space="preserve"><value>السبب</value></data>
+  <data name="CancellationReasonPlaceholder" xml:space="preserve"><value>توضيح اختياري للعميل وفريق العمليات.</value></data>
+  <data name="CancelBookingBtn" xml:space="preserve"><value>إلغاء الحجز</value></data>
+  <data name="CannotCancel" xml:space="preserve"><value>لا يمكن إلغاء هذا الحجز في حالته الحالية.</value></data>
+  <data name="FacingIssuesHeader" xml:space="preserve"><value>هل تواجه مشكلة في الخدمة؟</value></data>
+  <data name="UnderReviewDispute" xml:space="preserve"><value>قيد المراجعة (نزاع مفتوح)</value></data>
+  <data name="DisputedAlreadyMessage" xml:space="preserve"><value>لقد قمت بفتح نزاع بالفعل لهذا الطلب. فريق الدعم يقوم بمراجعة الحالة حالياً وسيتواصل معك قريباً.</value></data>
+  <data name="DisputePromptMessage" xml:space="preserve"><value>إذا لم تكن راضياً عن العمل المنفذ أو حدثت مشكلة مع الفني، يمكنك فتح نزاع وسيتدخل فريق الدعم فوراً لحلها وضمان كامل حقوقك.</value></data>
+  <data name="RaiseDisputeBtn" xml:space="preserve"><value>تقديم شكوى / رفع نزاع</value></data>
+  <data name="LiveTracking" xml:space="preserve"><value>تتبع الفني لايف</value></data>
+  <data name="TechnicianOnTheWay" xml:space="preserve"><value>الفني في الطريق إليك</value></data>
+
+  <!-- Enum Statuses / Types -->
+  <data name="Pending" xml:space="preserve"><value>قيد الانتظار</value></data>
+  <data name="Confirmed" xml:space="preserve"><value>مؤكد</value></data>
+  <data name="Completed" xml:space="preserve"><value>مكتمل</value></data>
+  <data name="Cancelled" xml:space="preserve"><value>ملغى</value></data>
+  <data name="NoResponse" xml:space="preserve"><value>لا استجابة</value></data>
+  <data name="Rescheduled" xml:space="preserve"><value>معاد جدولته</value></data>
+  <data name="Rejected" xml:space="preserve"><value>مرفوض</value></data>
+  <data name="Scheduled" xml:space="preserve"><value>مجدول</value></data>
+  <data name="Instant" xml:space="preserve"><value>فوري</value></data>
+  <data name="Cash" xml:space="preserve"><value>نقدي</value></data>
+  <data name="Card" xml:space="preserve"><value>بطاقة ائتمانية</value></data>
+  <data name="Wallet" xml:space="preserve"><value>محفظة إلكترونية</value></data>
+  <data name="Paid" xml:space="preserve"><value>مدفوع</value></data>
+  <data name="Failed" xml:space="preserve"><value>فاشل</value></data>
+  <data name="Refunded" xml:space="preserve"><value>مسترجع</value></data>
+  <data name="None" xml:space="preserve"><value>لا يوجد</value></data>
+  <data name="Daily" xml:space="preserve"><value>يومي</value></data>
+  <data name="Weekly" xml:space="preserve"><value>أسبوعي</value></data>
+  <data name="Monthly" xml:space="preserve"><value>شهري</value></data>
+  <data name="Disputed" xml:space="preserve"><value>متنازع عليه</value></data>
+</root>

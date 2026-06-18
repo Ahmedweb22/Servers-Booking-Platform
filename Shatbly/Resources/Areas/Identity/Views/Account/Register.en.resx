@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="RegisterTitle" xml:space="preserve"><value>Create New Account</value></data>
+  <data name="RegisterSubtitle" xml:space="preserve"><value>Enter your details to create your Shtbly account</value></data>
+  <data name="FirstName" xml:space="preserve"><value>First Name</value></data>
+  <data name="LastName" xml:space="preserve"><value>Last Name</value></data>
+  <data name="Email" xml:space="preserve"><value>Email</value></data>
+  <data name="Phone" xml:space="preserve"><value>Phone Number</value></data>
+  <data name="Username" xml:space="preserve"><value>Username</value></data>
+  <data name="UsernameHint" xml:space="preserve"><value>Only English letters, numbers, and underscores are allowed.</value></data>
+  <data name="Password" xml:space="preserve"><value>Password</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>Confirm Password</value></data>
+  <data name="CreateAccount" xml:space="preserve"><value>Create Account</value></data>
+  <data name="AlreadyHaveAccount" xml:space="preserve"><value>Already have an account? </value></data>
+  <data name="LoginNow" xml:space="preserve"><value>Login</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>Shtbly | Create New Account</value></data>
+  <data name="FirstNamePlaceholder" xml:space="preserve"><value>First Name</value></data>
+  <data name="LastNamePlaceholder" xml:space="preserve"><value>Last Name</value></data>
+  <data name="PasswordPlaceholder" xml:space="preserve"><value>At least 8 characters</value></data>
+  <data name="ConfirmPasswordPlaceholder" xml:space="preserve"><value>Confirm your password</value></data>
+  <data name="TogglePasswordVisibility" xml:space="preserve"><value>Show/Hide Password</value></data>
+  <data name="FirstNameInvalid" xml:space="preserve"><value>Enter first name (at least 2 characters).</value></data>
+  <data name="LastNameInvalid" xml:space="preserve"><value>Enter last name (at least 2 characters).</value></data>
+  <data name="EmailInvalid" xml:space="preserve"><value>Enter a valid email address.</value></data>
+  <data name="PhoneInvalid" xml:space="preserve"><value>Enter a valid Egyptian phone number (01xxxxxxxxx).</value></data>
+  <data name="UsernameInvalid" xml:space="preserve"><value>Username must contain letters and numbers only (at least 3 characters).</value></data>
+  <data name="PasswordInvalid" xml:space="preserve"><value>Password must be at least 8 characters long.</value></data>
+  <data name="ConfirmPasswordInvalid" xml:space="preserve"><value>Please confirm your password.</value></data>
+  <data name="PasswordsMismatch" xml:space="preserve"><value>Passwords do not match.</value></data>
+  <data name="AgreeTo" xml:space="preserve"><value>I agree to the</value></data>
+  <data name="TermsAndConditions" xml:space="preserve"><value>Terms and Conditions</value></data>
+  <data name="And" xml:space="preserve"><value>and</value></data>
+  <data name="PrivacyPolicy" xml:space="preserve"><value>Privacy Policy</value></data>
+  <data name="MustAgreeTerms" xml:space="preserve"><value>You must agree to the terms and conditions to proceed.</value></data>
+  <data name="PwdVeryWeak" xml:space="preserve"><value>Very Weak</value></data>
+  <data name="PwdWeak" xml:space="preserve"><value>Weak</value></data>
+  <data name="PwdMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="PwdStrong" xml:space="preserve"><value>Strong</value></data>
+  <data name="PwdStrengthLabel" xml:space="preserve"><value>Password strength: </value></data>
+</root>

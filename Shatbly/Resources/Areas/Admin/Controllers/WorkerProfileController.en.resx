@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <data name="WorkerProfileNotFound" xml:space="preserve"><value>Worker profile not found.</value></data>
+  <data name="WorkerProfileCreatedSuccess" xml:space="preserve"><value>Worker profile created successfully</value></data>
+  <data name="WorkerProfileUpdatedSuccess" xml:space="preserve"><value>Worker profile updated successfully</value></data>
+  <data name="WorkerProfileDeletedSuccess" xml:space="preserve"><value>Worker profile deleted successfully</value></data>
+</root>

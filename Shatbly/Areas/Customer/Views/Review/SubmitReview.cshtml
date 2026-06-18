@@ -1,6 +1,6 @@
 @model Shatbly.ViewModels.ReviewVM
 @{
-    ViewData["Title"] = "تقييم الخدمة";
+    ViewData["Title"] = Localizer["PageTitle"];
 }
 
 <style>
@@ -257,29 +257,29 @@
     <div class="review-card">
         <!-- Header -->
         <div class="text-center mb-4">
-            <h2 class="fw-bold text-dark mb-2">تقييم الخدمة والفني</h2>
-            <p class="text-secondary fs-6">نسعد بسماع رأيك عن تجربتك الأخيرة لمساعدتنا في تحسين خدماتنا باستمرار.</p>
+            <h2 class="fw-bold text-dark mb-2">@Localizer["CardTitle"]</h2>
+            <p class="text-secondary fs-6">@Localizer["CardSubtitle"]</p>
         </div>
-
+ 
         <!-- Service & Worker Metadata Badge -->
         <div class="service-info-badge">
             <i class="bi bi-patch-check-fill fs-5"></i>
             <div>
-                <span>خدمة <strong>@ViewBag.ServiceName</strong> مع الفني <strong>@ViewBag.WorkerName</strong></span>
+                <span>@Localizer["ServiceAndWorkerBadge", ViewBag.ServiceName ?? "", ViewBag.WorkerName ?? ""]</span>
             </div>
         </div>
-
+ 
         <form asp-action="SubmitReview" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="OrderId" />
             <input type="hidden" asp-for="RevieweeId" />
             <input type="hidden" asp-for="Rating" id="ratingInput" />
-
+ 
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
-
+ 
             <!-- Star Rating Row -->
             <div class="form-group text-center mb-4">
-                <label class="d-block mb-1">ما هو تقييمك العام للتجربة؟ <span class="text-danger">*</span></label>
+                <label class="d-block mb-1">@Localizer["OverallExperienceLabel"] <span class="text-danger">*</span></label>
                 
                 <div class="rating-wrapper">
                     <button type="button" class="star-btn" data-value="5"><i class="bi bi-star-fill"></i></button>
@@ -289,28 +289,28 @@
                     <button type="button" class="star-btn" data-value="1"><i class="bi bi-star-fill"></i></button>
                 </div>
                 
-                <div class="rating-hint text-center" id="ratingHint">اضغط على النجوم للتقييم</div>
+                <div class="rating-hint text-center" id="ratingHint">@Localizer["RateStarsPrompt"]</div>
                 <span asp-validation-for="Rating" class="text-danger d-block mt-2 fw-semibold"></span>
             </div>
-
+ 
             <!-- Comment Input -->
             <div class="form-group mb-4">
-                <label asp-for="Comment">اكتب تعليقك وتجربتك بالتفصيل <span class="text-muted">(اختياري)</span></label>
-                <textarea asp-for="Comment" class="form-control custom-textarea" placeholder="صف جودة العمل، التزام الفني بالمواعيد، والاحترافية..."></textarea>
+                <label asp-for="Comment">@Localizer["CommentLabel"] <span class="text-muted">(@Localizer["OptionalLabel"])</span></label>
+                <textarea asp-for="Comment" class="form-control custom-textarea" placeholder="@Localizer["CommentPlaceholder"]"></textarea>
                 <span asp-validation-for="Comment" class="text-danger fw-semibold"></span>
             </div>
-
+ 
             <!-- Image Upload Section -->
             <div class="form-group mb-5">
-                <label>أضف صور العمل المنفذ <span class="text-muted">(اختياري)</span></label>
-                <p class="text-muted small mt-0 mb-3">يمكنك إرفاق صور للمكان قبل وبدء العمل لتوضيح النتيجة ومشاركتها مع مجتمع شطبلي.</p>
+                <label>@Localizer["AddImagesLabel"] <span class="text-muted">(@Localizer["OptionalLabel"])</span></label>
+                <p class="text-muted small mt-0 mb-3">@Localizer["AddImagesDescription"]</p>
                 
                 <div class="upload-grid">
                     <!-- Before Image Upload -->
                     <div class="upload-box" id="beforeUploadBox">
                         <i class="bi bi-camera-fill upload-icon"></i>
-                        <span>صورة قبل العمل</span>
-                        <small>JPG, PNG حتى 5 ميجابايت</small>
+                        <span>@Localizer["BeforeImageLabel"]</span>
+                        <small>@Localizer["UploadSpecsBefore"]</small>
                         <input type="file" asp-for="BeforeImage" id="beforeFileInput" accept="image/*" />
                         
                         <div class="image-preview-container" id="beforePreviewContainer">
@@ -318,12 +318,12 @@
                             <img id="beforeImgPreview" src="" alt="Before Preview" />
                         </div>
                     </div>
-
+ 
                     <!-- After Image Upload -->
                     <div class="upload-box" id="afterUploadBox">
                         <i class="bi bi-camera-fill upload-icon"></i>
-                        <span>صورة بعد العمل</span>
-                        <small>JPG, PNG حتى 5 ميجابايت</small>
+                        <span>@Localizer["AfterImageLabel"]</span>
+                        <small>@Localizer["UploadSpecsAfter"]</small>
                         <input type="file" asp-for="AfterImage" id="afterFileInput" accept="image/*" />
                         
                         <div class="image-preview-container" id="afterPreviewContainer">
@@ -337,12 +337,12 @@
                     <span asp-validation-for="AfterImage" class="text-danger fw-semibold small"></span>
                 </div>
             </div>
-
+ 
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-3 border-top pt-4">
-                <a href="/Customer/BookingSystem/DetailsBooking/@Model.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">إلغاء</a>
+                <a href="/Customer/BookingSystem/DetailsBooking/@Model.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">@Localizer["CancelBtn"]</a>
                 <button type="submit" class="btn btn-submit flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2">
-                    <span>إرسال التقييم</span>
+                    <span>@Localizer["SubmitBtn"]</span>
                     <i class="bi bi-send-fill fs-6"></i>
                 </button>
             </div>
@@ -360,11 +360,11 @@
             const stars = $('.star-btn');
             
             const hintTexts = {
-                1: 'سيء جداً 😞',
-                2: 'سيء 😕',
-                3: 'مقبول 🙂',
-                4: 'جيد جداً 😊',
-                5: 'ممتاز وبطل! 🤩'
+                1: '@Localizer["RatingHint1"]',
+                2: '@Localizer["RatingHint2"]',
+                3: '@Localizer["RatingHint3"]',
+                4: '@Localizer["RatingHint4"]',
+                5: '@Localizer["RatingHint5"]'
             };
 
             // Set default rating if value already exists
@@ -393,7 +393,7 @@
                 if (selectedVal > 0) {
                     ratingHint.text(hintTexts[selectedVal]);
                 } else {
-                    ratingHint.text('اضغط على النجوم للتقييم');
+                    ratingHint.text('@Localizer["RateStarsPrompt"]');
                 }
                 updateStars(selectedVal);
             });

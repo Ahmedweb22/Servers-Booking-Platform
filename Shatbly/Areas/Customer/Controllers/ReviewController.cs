@@ -14,10 +14,15 @@ namespace Shatbly.Areas.Customer.Controllers
     {
         private readonly IBookingSystemService _bookingSystemService;
         private readonly IFileService _fileService;
-        public ReviewController(IBookingSystemService bookingSystemService, IFileService fileService)
+        private readonly IStringLocalizer<ReviewController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+        public ReviewController(IBookingSystemService bookingSystemService, IFileService fileService,
+            IStringLocalizer<ReviewController> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _bookingSystemService = bookingSystemService;
             _fileService = fileService;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
 
         public async Task<IActionResult> SubmitReview(ReviewVM reviewVM)
@@ -25,13 +30,13 @@ namespace Shatbly.Areas.Customer.Controllers
             var bookingDetails = await _bookingSystemService.GetDetailsAsync(reviewVM.OrderId);
             if (bookingDetails == null)
             {
-                TempData["Error"] = "الطلب غير موجود";
+                TempData["Error"] = _localizer["OrderNotFound"].Value;
                 return RedirectToAction("Index", "Home");
             }
             var order = bookingDetails.Booking;
 
-            ViewBag.WorkerName = order.Worker?.Name ?? "غير محدد";
-            ViewBag.ServiceName = order.Service?.Name ?? "غير محدد";
+            ViewBag.WorkerName = order.Worker?.Name ?? _sharedLocalizer["Unspecified"].Value;
+            ViewBag.ServiceName = order.Service?.Name ?? _sharedLocalizer["Unspecified"].Value;
 
             if (ModelState.IsValid)
             {
@@ -79,12 +84,12 @@ namespace Shatbly.Areas.Customer.Controllers
                 var result = await _bookingSystemService.AddReviewAsync(review);
                 if(result)
                 {
-                    TempData["Success"] = "تم تسجيل تقييمك بنجاح";
+                    TempData["Success"] = _localizer["ReviewSuccess"].Value;
                     return RedirectToAction("DetailsBooking", "BookingSystem", new { id = reviewVM.OrderId });
                 }
                 else
                 {
-                    ModelState.AddModelError("", "فشل تسجيل التقييم. تأكد من إتمام الطلب أولاً.");
+                    ModelState.AddModelError("", _localizer["ReviewFailed"].Value);
                 }
             }
             return View(reviewVM);
@@ -96,12 +101,12 @@ namespace Shatbly.Areas.Customer.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (bookingDetails == null || bookingDetails.Booking.UserId != userId)
             {
-                TempData["Error"] = "الحجز غير موجود أو لا تملك صلاحية الوصول إليه";
+                TempData["Error"] = _localizer["BookingNotFoundOrNoAccess"].Value;
                 return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
             }
 
-            ViewBag.WorkerName = bookingDetails.Booking.Worker?.Name ?? "غير محدد";
-            ViewBag.ServiceName = bookingDetails.Booking.Service?.Name ?? "غير محدد";
+            ViewBag.WorkerName = bookingDetails.Booking.Worker?.Name ?? _sharedLocalizer["Unspecified"].Value;
+            ViewBag.ServiceName = bookingDetails.Booking.Service?.Name ?? _sharedLocalizer["Unspecified"].Value;
             ViewBag.OrderId = id;
 
             return View();
@@ -115,22 +120,22 @@ namespace Shatbly.Areas.Customer.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (booking == null || booking.Booking.UserId != userId)
             {
-                TempData["Error"] = "الحجز غير موجود أو لا تملك صلاحية الوصول إليه";
+                TempData["Error"] = _localizer["BookingNotFoundOrNoAccess"].Value;
                 return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
             }
             if (string.IsNullOrEmpty(reason))
             {
-                TempData["Error"] = "يجب إدخال سبب النزاع";
+                TempData["Error"] = _localizer["DisputeReasonRequired"].Value;
                 return RedirectToAction(nameof(RaiseDispute), new { id });
             }
             var result = await _bookingSystemService.RaiseDisputeAsync(id, reason);
             if (result)
             {
-                TempData["Success"] = "تم رفع النزاع بنجاح";
+                TempData["Success"] = _localizer["DisputeSuccess"].Value;
             }
             else
             {
-                TempData["Error"] = "فشل في رفع النزاع. يرجى المحاولة مرة أخرى.";
+                TempData["Error"] = _localizer["DisputeFailed"].Value;
             }
             return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
         }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.Services.WithdrawalService;
@@ -13,15 +13,21 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IWithdrawalService _withdrawalService;
         private readonly ICurrentWorkerService _currentWorkerService;
         private readonly IEarningsService _earningsService;
+        private readonly IStringLocalizer<WithdrawalController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
         public WithdrawalController(
             IWithdrawalService withdrawalService,
             ICurrentWorkerService currentWorkerService,
-            IEarningsService earningsService)
+            IEarningsService earningsService,
+            IStringLocalizer<WithdrawalController> localizer,
+            IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _withdrawalService = withdrawalService;
             _currentWorkerService = currentWorkerService;
             _earningsService = earningsService;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
 
         [HttpGet]
@@ -31,7 +37,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (workerId is null)
             {
-                return NotFound("Worker profile was not found.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
             }
 
             var model = await _withdrawalService.GetRequestsAsync(workerId.Value);
@@ -45,7 +51,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (workerId is null)
             {
-                return NotFound("Worker profile was not found.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
             }
 
             var dashboard = await _earningsService.GetDashboardAsync(workerId.Value);
@@ -69,7 +75,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (workerId is null)
             {
-                return NotFound("Worker profile was not found.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
             }
 
             var result = await _withdrawalService.CreateRequestAsync(workerId.Value, model.Amount);
@@ -88,7 +94,7 @@ namespace Shatbly.Areas.Worker.Controllers
                 return View(model);
             }
 
-            TempData["Success"] = "Withdrawal request created successfully.";
+            TempData["Success"] = _localizer["WithdrawalCreatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
     }

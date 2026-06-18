@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="IAmCustomer" xml:space="preserve"><value>أنا عميل</value></data>
+  <data name="CustomerDescription" xml:space="preserve"><value>أبحث عن فني محترف لإنجاز أعمال الصيانة والتشطيب في منزلي بسرعة وجودة عالية.</value></data>
+  <data name="LoginAsCustomer" xml:space="preserve"><value>تسجيل الدخول كعميل</value></data>
+  <data name="CreateNewAccount" xml:space="preserve"><value>إنشاء حساب جديد</value></data>
+  <data name="IAmWorker" xml:space="preserve"><value>أنا فني</value></data>
+  <data name="WorkerDescription" xml:space="preserve"><value>أريد الانضمام لشبكة الفنيين المعتمدين، استقبال طلبات العمل المتواصلة وزيادة دخلي.</value></data>
+  <data name="LoginAsWorker" xml:space="preserve"><value>تسجيل الدخول كفني</value></data>
+  <data name="ApplyToJoin" xml:space="preserve"><value>تقديم طلب انضمام</value></data>
+  <data name="WhyChooseShtbly" xml:space="preserve"><value>لماذا تختار شطبلي؟</value></data>
+  <data name="WhyChooseSubtitle" xml:space="preserve"><value>نقدم لك تجربة متكاملة تجمع بين الجودة والأمان</value></data>
+  <data name="CompleteSafety" xml:space="preserve"><value>أمان تام</value></data>
+  <data name="SafetyDescription" xml:space="preserve"><value>جميع الفنيين موثقين بأوراقهم الرسمية ومجتازين لاختبارات الجودة لضمان سلامتك وراحتك.</value></data>
+  <data name="WideCoverage" xml:space="preserve"><value>تغطية واسعة</value></data>
+  <data name="CoverageDescription" xml:space="preserve"><value>نغطي أغلب مناطق الجمهورية بشبكة واسعة من الفنيين لنصل إليك أينما كنت في أسرع وقت.</value></data>
+  <data name="RealReviews" xml:space="preserve"><value>تقييمات حقيقية</value></data>
+  <data name="ReviewsDescription" xml:space="preserve"><value>نظام تقييم شفاف يتيح لك مشاهدة آراء العملاء السابقين قبل اتخاذ قرار اختيار الفني المناسب.</value></data>
+</root>

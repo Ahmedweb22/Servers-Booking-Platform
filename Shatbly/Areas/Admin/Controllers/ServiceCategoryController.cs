@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Admin.Controllers
@@ -8,9 +8,11 @@ namespace Shatbly.Areas.Admin.Controllers
     public class ServiceCategoryController : Controller
     {
         private IRepository<ServiceCategory> _serviceCategoryRepository;
-        public ServiceCategoryController(IRepository<ServiceCategory> categoryRepository)
+        private readonly IStringLocalizer<ServiceCategoryController> _localizer;
+        public ServiceCategoryController(IRepository<ServiceCategory> categoryRepository, IStringLocalizer<ServiceCategoryController> localizer)
         {
             _serviceCategoryRepository = categoryRepository;
+            _localizer = localizer;
         }
 
         public async Task<IActionResult> Index(string? name, int page = 1)
@@ -59,7 +61,7 @@ namespace Shatbly.Areas.Admin.Controllers
             await _serviceCategoryRepository.CreateAsync(serviceCategory);
             await _serviceCategoryRepository.CommitAsync();
 
-            TempData["Notification"] = "Service category created successfully";
+            TempData["Notification"] = _localizer["CategoryCreatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -110,7 +112,7 @@ namespace Shatbly.Areas.Admin.Controllers
             _serviceCategoryRepository.Update(serviceCategory);
             await _serviceCategoryRepository.CommitAsync();
 
-            TempData["Notification"] = "Service category updated successfully";
+            TempData["Notification"] = _localizer["CategoryUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -131,7 +133,7 @@ namespace Shatbly.Areas.Admin.Controllers
             _serviceCategoryRepository.Delete(serviceCategory);
             await _serviceCategoryRepository.CommitAsync();
 
-            TempData["Notification"] = "Service category deleted successfully";
+            TempData["Notification"] = _localizer["CategoryDeletedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
     }

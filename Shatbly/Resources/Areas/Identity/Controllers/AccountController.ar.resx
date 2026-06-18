@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="LoggedOutSuccess" xml:space="preserve"><value>تم تسجيل الخروج بنجاح.</value></data>
+  <data name="UserCreatedSuccess" xml:space="preserve"><value>تم إنشاء المستخدم بنجاح</value></data>
+  <data name="EmailConfirmedSuccess" xml:space="preserve"><value>تم تأكيد البريد الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.</value></data>
+  <data name="EmailConfirmError" xml:space="preserve"><value>حدث خطأ أثناء تأكيد بريدك الإلكتروني. يرجى المحاولة مرة أخرى.</value></data>
+  <data name="InvalidLoginAttempt" xml:space="preserve"><value>محاولة تسجيل دخول غير صالحة.</value></data>
+  <data name="ConfirmEmailFirst" xml:space="preserve"><value>يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول.</value></data>
+  <data name="AccountLockedOut" xml:space="preserve"><value>تم قفل حسابك. يرجى المحاولة لاحقاً.</value></data>
+  <data name="WelcomeBack" xml:space="preserve"><value>مرحباً بعودتك {0}!</value></data>
+  <data name="ResendConfirmationSent" xml:space="preserve"><value>إذا كان هناك حساب بهذا البريد أو اسم المستخدم ولم يتم تأكيده، فقد تم إعادة إرسال رسالة التأكيد.</value></data>
+  <data name="ConfirmEmailBeforeReset" xml:space="preserve"><value>يرجى تأكيد بريدك الإلكتروني قبل إعادة تعيين كلمة المرور.</value></data>
+  <data name="OtpSentSuccess" xml:space="preserve"><value>تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح.</value></data>
+  <data name="OtpLimitExceeded" xml:space="preserve"><value>لقد تجاوزت الحد الأقصى لطلبات رمز التحقق. يرجى المحاولة لاحقاً.</value></data>
+  <data name="InvalidOtp" xml:space="preserve"><value>رمز التحقق غير صالح.</value></data>
+  <data name="UserNotFound" xml:space="preserve"><value>المستخدم غير موجود.</value></data>
+  <data name="PasswordResetSuccess" xml:space="preserve"><value>تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.</value></data>
+  <data name="ExternalProviderError" xml:space="preserve"><value>خطأ من المزود الخارجي: {0}</value></data>
+  <data name="EmailClaimNotReceived" xml:space="preserve"><value>لم يتم استلام بيانات البريد الإلكتروني من المزود.</value></data>
+  <data name="ConfirmEmailLink" xml:space="preserve"><value>يرجى تأكيد حسابك بالضغط على هذا الرابط: &lt;a href='{0}'&gt;اضغط هنا لتأكيد حسابك&lt;/a&gt;</value></data>
+  <data name="OtpEmailBody" xml:space="preserve"><value>&lt;h1&gt;رمز التحقق لإعادة تعيين كلمة المرور هو: {0}. لا تشاركه مع أحد&lt;/h1&gt;</value></data>
+</root>

@@ -2,7 +2,8 @@
 @using Shatbly.Models
 
 @{
-    ViewData["Title"] = "Booking Details";
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+    ViewData["Title"] = Localizer["BookingDetailsTitle"];
 }
 
 <style>
@@ -154,11 +155,13 @@
 
 <div class="details-shell">
     <section class="banner">
-        <h1>Booking #@Model.Booking.Id confirmed in the system</h1>
+        <h1>@Localizer["BookingConfirmedHeader", Model.Booking.Id]</h1>
         <p>
-            @* this update *@
-            Service: <strong>@Model.Booking.Service</strong> with <strong>@Model.Booking.Worker?.Name</strong>.
-            Scheduled for <strong>@Model.Booking.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")</strong>.
+            @{
+                var svcName = isRtl ? (Model.Booking.Service?.NameAr ?? Model.Booking.Service?.Name ?? "") : (Model.Booking.Service?.Name ?? "");
+            }
+            @Localizer["BookingServiceDetails", svcName, Model.Booking.Worker?.Name ?? ""]
+            @Localizer["ScheduledFor", Model.Booking.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")]
         </p>
 
         @if (TempData["Success"] is string successMessage)
@@ -175,62 +178,62 @@
     <div class="grid">
         <section class="card stack">
             <div>
-                <h2 style="margin-top:0;">Booking details</h2>
-                <p class="muted">Everything created by the 5-step wizard is summarized here, including pricing, recurrence, and worker confirmation timing.</p>
+                <h2 style="margin-top:0;">@Localizer["BookingDetailsCardTitle"]</h2>
+                <p class="muted">@Localizer["BookingDetailsCardSubtitle"]</p>
             </div>
 
             <div class="stats">
                 <div class="stat">
-                    <label>Status</label>
-                    <strong>@Model.Booking.Status</strong>
+                    <label>@Localizer["StatusLabel"]</label>
+                    <strong>@Localizer[Model.Booking.Status.ToString()]</strong>
                 </div>
                 <div class="stat">
-                    <label>Booking type</label>
-                    <strong>@Model.Booking.BookingType</strong>
+                    <label>@Localizer["BookingTypeLabel"]</label>
+                    <strong>@Localizer[Model.Booking.BookingType.ToString()]</strong>
                 </div>
                 <div class="stat">
-                    <label>Customer</label>
+                    <label>@Localizer["CustomerLabel"]</label>
                     <strong>@Model.Booking.User?.Name</strong>
                 </div>
                 <div class="stat">
-                    <label>Recurring</label>
-                    <strong>@Model.Booking.RecurrencePattern</strong>
+                    <label>@Localizer["RecurringLabel"]</label>
+                    <strong>@Localizer[Model.Booking.RecurrencePattern.ToString()]</strong>
                 </div>
                 <div class="stat">
-                    <label>Payment</label>
-                    <strong>@Model.Booking.PaymentMethod / @Model.Booking.PaymentStatus</strong>
+                    <label>@Localizer["PaymentLabel"]</label>
+                    <strong>@Localizer[Model.Booking.PaymentMethod.ToString()] / @Localizer[Model.Booking.PaymentStatus.ToString()]</strong>
                 </div>
                 <div class="stat">
-                    <label>Confirmation deadline</label>
-                    <strong>@(Model.Booking.WorkerResponseDeadlineUtc?.ToLocalTime().ToString("dd MMM yyyy - hh:mm tt") ?? "Not applicable")</strong>
+                    <label>@Localizer["ConfirmationDeadlineLabel"]</label>
+                    <strong>@(Model.Booking.WorkerResponseDeadlineUtc?.ToLocalTime().ToString("dd MMM yyyy - hh:mm tt") ?? Localizer["NotApplicable"].Value)</strong>
                 </div>
                 <div class="stat">
-                    <label>Address</label>
+                    <label>@Localizer["AddressLabel"]</label>
                     <strong>@Model.Booking.AddressLabel</strong>
                     <div class="muted">@Model.Booking.AddressLine</div>
                 </div>
                 <div class="stat">
-                    <label>Notes</label>
-                    <strong>@(string.IsNullOrWhiteSpace(Model.Booking.Notes) ? "No notes" : Model.Booking.Notes)</strong>
+                    <label>@Localizer["NotesLabel"]</label>
+                    <strong>@(string.IsNullOrWhiteSpace(Model.Booking.Notes) ? Localizer["NoNotes"].Value : Model.Booking.Notes)</strong>
                 </div>
             </div>
 
             <div class="stats">
                 <div class="stat">
-                    <label>Service price</label>
-                    <strong>EGP @Model.Booking.ServicePrice.ToString("0.00")</strong>
+                    <label>@Localizer["ServicePriceLabel"]</label>
+                    <strong>@Localizer["CurrencyFormat", Model.Booking.ServicePrice.ToString("0.00")]</strong>
                 </div>
                 <div class="stat">
-                    <label>Convenience fee</label>
-                    <strong>EGP @Model.Booking.ConvenienceFee.ToString("0.00")</strong>
+                    <label>@Localizer["ConvenienceFeeLabel"]</label>
+                    <strong>@Localizer["CurrencyFormat", Model.Booking.ConvenienceFee.ToString("0.00")]</strong>
                 </div>
                 <div class="stat">
-                    <label>Discount</label>
-                    <strong>EGP @Model.Booking.DiscountAmount.ToString("0.00")</strong>
+                    <label>@Localizer["DiscountLabel"]</label>
+                    <strong>@Localizer["CurrencyFormat", Model.Booking.DiscountAmount.ToString("0.00")]</strong>
                 </div>
                 <div class="stat">
-                    <label>Total</label>
-                    <strong>EGP @Model.Booking.TotalPrice.ToString("0.00")</strong>
+                    <label>@Localizer["TotalLabel"]</label>
+                    <strong>@Localizer["CurrencyFormat", Model.Booking.TotalPrice.ToString("0.00")]</strong>
                 </div>
             </div>
         </section>
@@ -240,22 +243,22 @@
             {
                 <div class="card text-center" style="border: 2px solid #bbf7d0; background: #f0fdf4; border-radius: 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.08);">
                     <h3 style="margin-top:0; color: #166534; font-weight: 800; font-size: 1.25rem;">
-                        <i class="bi bi-stars text-warning me-1"></i> تقييم الخدمة والفني
+                        <i class="bi bi-stars text-warning me-1"></i> @Localizer["RateServiceTitle"]
                     </h3>
                     
                     @if (Model.HasReview)
                     {
                         <div class="py-2">
                             <span class="badge bg-success rounded-pill px-3 py-2 fs-6 fw-bold">
-                                <i class="bi bi-check-circle-fill me-1"></i> تم التقييم بنجاح
+                                <i class="bi bi-check-circle-fill me-1"></i> @Localizer["RatedSuccessfully"]
                             </span>
-                            <p class="text-success fw-semibold mt-3 mb-1" style="font-size: 0.95rem;">شكراً لك! لقد قمت بتقييم هذا الطلب بالفعل وساعدتنا في تحسين الجودة.</p>
+                            <p class="text-success fw-semibold mt-3 mb-1" style="font-size: 0.95rem;">@Localizer["RateSuccessMessage"]</p>
                         </div>
                     }
                     else
                     {
                         <p class="muted" style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 18px;">
-                            لقد تم إتمام هذا الطلب بنجاح! يسعدنا جداً معرفة رأيك في أداء الفني ومستوى الخدمة المقدمة.
+                            @Localizer["RatePromptMessage"]
                         </p>
                         <a href="/Customer/Review/SubmitReview?OrderId=@Model.Booking.Id&RevieweeId=@Model.Booking.WorkerId" 
                            class="btn w-100 d-flex align-items-center justify-content-center gap-2" 
@@ -263,15 +266,15 @@
                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 10px 20px rgba(16, 185, 129, 0.25)';"
                            onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 16px rgba(16, 185, 129, 0.15)';">
                             <i class="bi bi-star-fill text-warning"></i>
-                            <span>تقييم الخدمة الآن</span>
+                            <span>@Localizer["RateServiceNow"]</span>
                         </a>
                     }
                 </div>
             }
 
             <div class="card">
-                <h3 style="margin-top:0;">Reschedule</h3>
-                <p class="muted">Use a new date and time. If the slot is available, the booking moves to <strong>Rescheduled</strong> and the worker gets another 30-minute response window.</p>
+                <h3 style="margin-top:0;">@Localizer["RescheduleHeader"]</h3>
+                <p class="muted">@Localizer["RescheduleSubtitle"]</p>
 
                 @if (Model.CanReschedule)
                 {
@@ -279,23 +282,23 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Booking.Id" />
                         <div>
-                            <label for="scheduledAt">New slot</label>
+                            <label for="scheduledAt">@Localizer["NewSlot"]</label>
                             <input id="scheduledAt" name="scheduledAt" type="datetime-local" value="@Model.Booking.ScheduledAt.ToString("yyyy-MM-ddTHH:mm")" />
                         </div>
                         <div class="btn-row">
-                            <button type="submit" class="btn btn-primary">Reschedule booking</button>
+                            <button type="submit" class="btn btn-primary">@Localizer["RescheduleBookingBtn"]</button>
                         </div>
                     </form>
                 }
                 else
                 {
-                    <p class="muted">This booking can no longer be rescheduled in its current status.</p>
+                    <p class="muted">@Localizer["CannotReschedule"]</p>
                 }
             </div>
 
             <div class="card">
-                <h3 style="margin-top:0;">Cancel with refund policy</h3>
-                <p class="muted">100% refund for 24+ hours, 50% for 2-24 hours, and no refund in the final 2 hours. Current estimated refund: <strong>EGP @Model.RefundPreview.ToString("0.00")</strong>.</p>
+                <h3 style="margin-top:0;">@Localizer["CancelWithRefundHeader"]</h3>
+                <p class="muted">@Html.Raw(string.Format(Localizer["CancelRefundPolicyMessage"].Value, Model.RefundPreview.ToString("0.00")))</p>
 
                 @if (Model.CanCancel)
                 {
@@ -303,17 +306,17 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="id" value="@Model.Booking.Id" />
                         <div>
-                            <label for="cancellationReason">Reason</label>
-                            <textarea id="cancellationReason" name="cancellationReason" placeholder="Optional explanation for the customer and operations team."></textarea>
+                            <label for="cancellationReason">@Localizer["ReasonLabel"]</label>
+                            <textarea id="cancellationReason" name="cancellationReason" placeholder="@Localizer["CancellationReasonPlaceholder"]"></textarea>
                         </div>
                         <div class="btn-row">
-                            <button type="submit" class="btn btn-danger">Cancel booking</button>
+                            <button type="submit" class="btn btn-danger">@Localizer["CancelBookingBtn"]</button>
                         </div>
                     </form>
                 }
                 else
                 {
-                    <p class="muted">This booking can no longer be cancelled in its current status.</p>
+                    <p class="muted">@Localizer["CannotCancel"]</p>
                 }
             </div>
 
@@ -321,22 +324,22 @@
             {
                 <div class="card mt-3 text-center" style="border: 2px solid #fee2e2; background: #fffdfd; border-radius: 20px; box-shadow: 0 10px 25px rgba(220, 38, 38, 0.05);">
                     <h3 style="margin-top:0; color: #991b1b; font-weight: 800; font-size: 1.2rem;">
-                        <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> هل تواجه مشكلة في الخدمة؟
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> @Localizer["FacingIssuesHeader"]
                     </h3>
                     
                     @if (Model.Booking.Booking != null && Model.Booking.Booking.Status == BookingStatus.Disputed)
                     {
                         <div class="py-2">
                             <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 fw-bold">
-                                <i class="bi bi-shield-fill-exclamation me-1"></i> قيد المراجعة (نزاع مفتوح)
+                                <i class="bi bi-shield-fill-exclamation me-1"></i> @Localizer["UnderReviewDispute"]
                             </span>
-                            <p class="text-danger fw-semibold mt-3 mb-1" style="font-size: 0.9rem;">لقد قمت بفتح نزاع بالفعل لهذا الطلب. فريق الدعم يقوم بمراجعة الحالة حالياً وسيتواصل معك قريباً.</p>
+                            <p class="text-danger fw-semibold mt-3 mb-1" style="font-size: 0.9rem;">@Localizer["DisputedAlreadyMessage"]</p>
                         </div>
                     }
                     else
                     {
                         <p class="muted" style="font-size: 0.88rem; line-height: 1.5; margin-bottom: 15px;">
-                            إذا لم تكن راضياً عن العمل المنفذ أو حدثت مشكلة مع الفني، يمكنك فتح نزاع وسيتدخل فريق الدعم فوراً لحلها وضمان كامل حقوقك.
+                            @Localizer["DisputePromptMessage"]
                         </p>
                         <a href="/Customer/Review/RaiseDispute?id=@Model.Booking.Id" 
                            class="btn w-100 d-flex align-items-center justify-content-center gap-2" 
@@ -344,7 +347,7 @@
                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 10px 20px rgba(220, 38, 38, 0.25)';"
                            onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 16px rgba(220, 38, 38, 0.15)';">
                             <i class="bi bi-shield-fill-exclamation"></i>
-                            <span>تقديم شكوى / رفع نزاع</span>
+                            <span>@Localizer["RaiseDisputeBtn"]</span>
                         </a>
                     }
                 </div>
@@ -355,7 +358,7 @@
             <div class="card mt-4">
                 <input type="hidden" id="bookingIdStore" value="@Model.Booking.Id" />
                 <div class="card-header bg-primary text-white">
-                    <h5><i class="fas fa-map-marked-alt"></i> تتبع الفني لايف</h5>
+                    <h5><i class="fas fa-map-marked-alt"></i> @Localizer["LiveTracking"]</h5>
                 </div>
                 <div class="card-body">
                     <div id="map" style="height: 400px; width: 100%; border-radius: 8px;"></div>
@@ -382,7 +385,7 @@
 
         // 3. عمل علامة (Marker) افتراضية على الخريطة تمثل الفني
         var workerMarker = L.marker([30.0444, 31.2357]).addTo(map)
-        .bindPopup("<b>الفني في الطريق إليك</b>").openPopup();
+        .bindPopup("<b>@Localizer["TechnicianOnTheWay"].Value</b>").openPopup();
 
         // 4. الاتصال بماسورة التتبع بالـ SignalR
         const clientHubConn = new signalR.HubConnectionBuilder()

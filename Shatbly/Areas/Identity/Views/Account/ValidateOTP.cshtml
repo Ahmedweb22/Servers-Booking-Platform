@@ -1,6 +1,6 @@
-﻿@model ValidateOTPVM
+@model ValidateOTPVM
 
-    <title>Shtbly | شطبلي - التحقق من الهوية</title>
+    <title>@Localizer["PageTitle"]</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
@@ -49,9 +49,9 @@
                     <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width:70px;height:70px;font-size:2rem;">
                         <i class="bi bi-patch-check-fill"></i>
                     </div>
-                    <h2 class="fw-bold mb-1">التحقق من الرمز</h2>
-                    <p class="text-muted small mb-0">أدخل الرمز المكوّن من 6 أرقام الذي أُرسل إليك.</p>
-                    <p class="text-muted small"><i class="bi bi-envelope me-1"></i>تم الإرسال إلى بريدك الإلكتروني المسجّل.</p>
+                    <h2 class="fw-bold mb-1">@Localizer["VerifyTitle"]</h2>
+                    <p class="text-muted small mb-0">@Localizer["VerifySubtitle"]</p>
+                    <p class="text-muted small"><i class="bi bi-envelope me-1"></i>@Localizer["SentToEmail"]</p>
                 </div>
 
                 <form asp-action="ValidateOTP" method="post" novalidate id="verifyForm" autocomplete="off">
@@ -60,46 +60,46 @@
                 <input type="hidden" asp-for="UserId" />
 
                     <div class="mb-4">
-                        <label class="form-label fw-bold d-block text-center mb-3">رمز التحقق (OTP)</label>
+                        <label class="form-label fw-bold d-block text-center mb-3">@Localizer["OtpLabel"]</label>
 
                         <!-- 6 individual OTP digit inputs -->
-                        <div class="d-flex justify-content-center gap-2 flex-wrap" id="otpContainer" role="group" aria-label="رمز التحقق المكون من 6 أرقام">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 1" id="otp0" autocomplete="one-time-code">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 2" id="otp1">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 3" id="otp2">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 4" id="otp3">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 5" id="otp4">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="الرقم 6" id="otp5">
+                        <div class="d-flex justify-content-center gap-2 flex-wrap" id="otpContainer" role="group" aria-label="@Localizer["OtpAriaLabel"]">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit1"]" id="otp0" autocomplete="one-time-code">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit2"]" id="otp1">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit3"]" id="otp2">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit4"]" id="otp3">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit5"]" id="otp4">
+                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit6"]" id="otp5">
                         </div>
 
                         <!-- Hidden combined input for form submission -->
                         <input type="hidden" asp-for="OTP">
-                        <div class="text-center mt-2 d-none text-danger small" id="otpError">يرجى إدخال الرمز المكوّن من 6 أرقام كاملاً.</div>
+                        <div class="text-center mt-2 d-none text-danger small" id="otpError">@Localizer["OtpLengthError"]</div>
                     </div>
 
                     <!-- Countdown timer -->
                     <div class="text-center mb-4">
                         <div id="timerSection">
-                            <p class="small text-muted mb-1">ينتهي الرمز خلال:</p>
+                            <p class="small text-muted mb-1">@Localizer["TimerLabel"]</p>
                             <span class="badge bg-primary fs-6 px-3 py-2" id="countdown">05:00</span>
                         </div>
                         <div id="expiredSection" class="d-none">
-                            <p class="small text-danger mb-1"><i class="bi bi-clock-history me-1"></i>انتهت صلاحية الرمز.</p>
+                            <p class="small text-danger mb-1"><i class="bi bi-clock-history me-1"></i>@Localizer["CodeExpired"]</p>
                             <a asp-action="ResendOTP" class="btn btn-outline-primary btn-sm fw-bold" id="resendBtn" style="border-radius:8px;">
-                                <i class="bi bi-arrow-clockwise me-1"></i> إعادة الإرسال
+                                <i class="bi bi-arrow-clockwise me-1"></i> @Localizer["ResendButton"]
                             </a>
                         </div>
                     </div>
 
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary fw-bold py-2" style="border-radius:12px;" id="submitBtn">
-                            <i class="bi bi-patch-check me-1"></i> تأكيد الرمز
+                            <i class="bi bi-patch-check me-1"></i> @Localizer["ConfirmButton"]
                         </button>
                     </div>
 
                     <div class="text-center">
                         <a asp-action="Login" class="small text-primary text-decoration-none fw-bold">
-                            <i class="bi bi-arrow-right me-1"></i> العودة إلى تسجيل الدخول
+                            <i class="bi bi-arrow-right me-1"></i> @Localizer["BackToLogin"]
                         </a>
                     </div>
                 </form>
@@ -146,7 +146,10 @@
     });
 
     function updateHiddenCode() {
-        document.getElementById('code').value = otpInputs.map(i=>i.value).join('');
+        const otpInput = document.getElementById('OTP');
+        if (otpInput) {
+            otpInput.value = otpInputs.map(i=>i.value).join('');
+        }
     }
 
     // Countdown timer (5 min)
@@ -184,17 +187,18 @@
 
     // Form submit
     document.getElementById('verifyForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const code = document.getElementById('code').value;
+        updateHiddenCode();
+        const otpInput = document.getElementById('OTP');
+        const otpVal = otpInput ? otpInput.value : '';
         const errEl = document.getElementById('otpError');
-        if (code.length < 6) {
+        if (otpVal.length < 6) {
+            e.preventDefault(); // Block submit
             otpInputs.forEach(i => { if(!i.value) i.classList.add('is-invalid'); });
             errEl.classList.remove('d-none');
             return;
         }
         errEl.classList.add('d-none');
         otpInputs.forEach(i => i.classList.add('is-valid'));
-        // TODO: submit logic
     });
 </script>
 @section Scripts {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <data name="BookingCreatedTitle" xml:space="preserve"><value>Booking created</value></data>
+  <data name="BookingCreatedMessage" xml:space="preserve"><value>Your booking #{0} has been created and is pending confirmation.</value></data>
+  <data name="BookingAcceptedTitle" xml:space="preserve"><value>Booking accepted</value></data>
+  <data name="BookingAcceptedMessage" xml:space="preserve"><value>Your booking #{0} has been accepted.</value></data>
+  <data name="BookingCancelledTitle" xml:space="preserve"><value>Booking cancelled</value></data>
+  <data name="BookingCancelledMessage" xml:space="preserve"><value>Your booking #{0} has been cancelled.</value></data>
+  <data name="BookingCompletedTitle" xml:space="preserve"><value>Booking completed</value></data>
+  <data name="BookingCompletedMessage" xml:space="preserve"><value>Your booking #{0} has been completed.</value></data>
+  <data name="BookingNoResponseTitle" xml:space="preserve"><value>Booking no response</value></data>
+  <data name="BookingNoResponseMessage" xml:space="preserve"><value>Your booking #{0} was not accepted in time.</value></data>
+  <data name="BookingRescheduledTitle" xml:space="preserve"><value>Booking rescheduled</value></data>
+  <data name="BookingRescheduledMessage" xml:space="preserve"><value>Your booking #{0} has been rescheduled.</value></data>
+  <data name="BookingUpdatedTitle" xml:space="preserve"><value>Booking updated</value></data>
+  <data name="BookingUpdatedMessage" xml:space="preserve"><value>Your booking #{0} status is now {1}.</value></data>
+</root>

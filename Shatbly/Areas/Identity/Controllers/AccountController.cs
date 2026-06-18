@@ -21,8 +21,9 @@ namespace Shatbly.Areas.Identity.Controllers
         private readonly IAccountService _accountService;
         private readonly IRepository<OTP_Verification> _otpRepository;
         private readonly ITokenService _tokenService;
+        private readonly IStringLocalizer<AccountController> _localizer;
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IAccountService accountService,
-            IRepository<OTP_Verification> otpRepository,ITokenService tokenService)
+            IRepository<OTP_Verification> otpRepository, ITokenService tokenService, IStringLocalizer<AccountController> localizer)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -30,6 +31,7 @@ namespace Shatbly.Areas.Identity.Controllers
             _accountService = accountService;
             _otpRepository = otpRepository;
             _tokenService = tokenService;
+            _localizer = localizer;
         }
         public IActionResult Index()
         { 
@@ -40,7 +42,7 @@ namespace Shatbly.Areas.Identity.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            TempData["success-notification"] = "Logged out successfully.";
+            TempData["success-notification"] = _localizer["LoggedOutSuccess"].Value;
             return RedirectToAction("Login", "Account", new { area = "Identity" });
 
         }
@@ -78,11 +80,11 @@ namespace Shatbly.Areas.Identity.Controllers
             var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = applicationUser.Id, token = token }, Request.Scheme);
 
 
-            await _accountService.SendEmailAsync(EmailType.ConfirmEmail, $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>", applicationUser);
+            await _accountService.SendEmailAsync(EmailType.ConfirmEmail, string.Format(_localizer["ConfirmEmailLink"].Value, confirmationLink), applicationUser);
 
             await _userManager.AddToRoleAsync(applicationUser, SD.ROLE_CUSTOMER);
 
-            TempData["success-notification"] = "User created successfully";
+            TempData["success-notification"] = _localizer["UserCreatedSuccess"].Value;
             return RedirectToAction("Login");
         }
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
@@ -99,7 +101,7 @@ namespace Shatbly.Areas.Identity.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
-                TempData["success-notification"] = "Email confirmed successfully. You can now log in.";
+                TempData["success-notification"] = _localizer["EmailConfirmedSuccess"].Value;
             }
             else
             {
@@ -107,7 +109,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                TempData["error-notification"] = "Error confirming your email. Please try again.";
+                TempData["error-notification"] = _localizer["EmailConfirmError"].Value;
             }
             return RedirectToAction("Login", "Account", new { area = "Identity" });
         }
@@ -127,7 +129,7 @@ namespace Shatbly.Areas.Identity.Controllers
 
             if (user is null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
                 return View(model);
             }
  
@@ -136,51 +138,27 @@ namespace Shatbly.Areas.Identity.Controllers
             {
                 if (result.IsNotAllowed)
                 {
-                    ModelState.AddModelError("EmailOrUserName", "Confirm your email before logging in.");
+                    ModelState.AddModelError("EmailOrUserName", _localizer["ConfirmEmailFirst"].Value);
                     return View(model);
                 }
                 if (result.IsLockedOut)
                 {
-                    ModelState.AddModelError(string.Empty, "Your account is locked out. Please try again later.");
+                    ModelState.AddModelError(string.Empty, _localizer["AccountLockedOut"].Value);
                     return View(model);
                 }
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
                 return View(model);
             }
             if (await _userManager.IsInRoleAsync(user, SD.ROLE_WORKER))
             {
-                TempData["success-notification"] = $"Welcome back {user.UserName}!";
+                TempData["success-notification"] = string.Format(_localizer["WelcomeBack"].Value, user.UserName);
                 return RedirectToAction("Details" , "WorkerProfile", new {area = "Worker"});
             }
             else if (await _userManager.IsInRoleAsync(user, SD.ROLE_CUSTOMER))
             {
-                TempData["success-notification"] = $"Welcome back {user.UserName}!";
+                TempData["success-notification"] = string.Format(_localizer["WelcomeBack"].Value, user.UserName);
                 return RedirectToAction("Index", "Home", new { area = "Customer" });
             }
-        //    var Claims = new List<Claim>();
-        //    {
-        //        Claims.Add(new(ClaimTypes.NameIdentifier, user.Id));
-        //        Claims.Add(new(ClaimTypes.Name, user.UserName!));
-        //        Claims.Add(new(ClaimTypes.Email, user.Email!));
-        //        Claims.Add(new(JwtRegisteredClaimNames.Sub, user.Id));
-        //        Claims.Add(new Claim(
-        //JwtRegisteredClaimNames.Iat,
-        //new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
-        //ClaimValueTypes.Integer64));
-        //    }
-
-        //    var userRoles = await _userManager.GetRolesAsync(user);
-        //    foreach (var item in userRoles)
-        //    {
-        //        Claims.Add(new Claim(ClaimTypes.Role, item));
-        //    }
-        //    var accesstoken = _tokenService.GenerateAccessToken(Claims);
-        //    var refreshToken = _tokenService.GenerateRefreshToken();
-
-        //    user.RefreshToken = refreshToken;
-        //    user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
-
-        //    await _userManager.UpdateAsync(user);
 
             return RedirectToAction("Index", "Home" , new { area = "Admin" });
         }
@@ -201,10 +179,10 @@ namespace Shatbly.Areas.Identity.Controllers
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var confirmationLink = Url.Action("ResendConfirmationEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
-                await _accountService.SendEmailAsync(EmailType.ResendConfirmationEmail, $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>Click here to confirm your account</a>", user);
+                await _accountService.SendEmailAsync(EmailType.ResendConfirmationEmail, string.Format(_localizer["ConfirmEmailLink"].Value, confirmationLink), user);
             }
 
-            TempData["success-notification"] = "If an account with that email or username exists and is not confirmed, a confirmation email has been resent.";
+            TempData["success-notification"] = _localizer["ResendConfirmationSent"].Value;
             return RedirectToAction("Login");
         }
         [HttpGet]
@@ -223,13 +201,13 @@ namespace Shatbly.Areas.Identity.Controllers
             var userOtpsCount = (await _otpRepository.GetAsync(e => user.Id == e.UserId && e.CreatedAt >= DateTime.UtcNow.AddHours(-24))).Count();
             if (!user.EmailConfirmed)
             {
-                TempData["error-notification"] = "Please confirm your email before resetting your password.";
+                TempData["error-notification"] = _localizer["ConfirmEmailBeforeReset"].Value;
                 return RedirectToAction(" ResendEmailConfirmation");
             }
             if (user is not null && userOtpsCount < 5)
             {
                 string otp = new Random().Next(1000, 9999).ToString();
-                string msg = $"<h1>Your OTP for password reset is: {otp}. Don't share it</h1>";
+                string msg = string.Format(_localizer["OtpEmailBody"].Value, otp);
                 await _accountService.SendEmailAsync(EmailType.ForgetPassword, msg, user);
                 await _otpRepository.CreateAsync(new()
                 {
@@ -237,11 +215,11 @@ namespace Shatbly.Areas.Identity.Controllers
                     Code = otp,
                 });
                 await _otpRepository.CommitAsync();
-                TempData["success-notification"] = "Send OTP to your email Successfully.";
+                TempData["success-notification"] = _localizer["OtpSentSuccess"].Value;
             }
             else if (userOtpsCount >= 5)
             {
-                TempData["error-notification"] = "You have exceeded the maximum number of OTP requests. Please try again later.";
+                TempData["error-notification"] = _localizer["OtpLimitExceeded"].Value;
                 return RedirectToAction("ForgetPassword");
             }
 
@@ -265,14 +243,14 @@ namespace Shatbly.Areas.Identity.Controllers
             var user = await _userManager.FindByIdAsync(model.UserId);
             if (user is null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid OTP.");
+                ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
 
             var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
             if (otp == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid OTP.");
+                ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
             otp.IsUsed = true;
@@ -295,7 +273,7 @@ namespace Shatbly.Areas.Identity.Controllers
             var user = await _userManager.FindByIdAsync(model.UserId);
             if (user is null)
             {
-                ModelState.AddModelError(string.Empty, "User not found.");
+                ModelState.AddModelError(string.Empty, _localizer["UserNotFound"].Value);
                 return View(model);
             }
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -308,13 +286,12 @@ namespace Shatbly.Areas.Identity.Controllers
                 }
                 return View(model);
             }
-            TempData["success-notification"] = "Your password has been reset successfully. You can now log in with your new password.";
+            TempData["success-notification"] = _localizer["PasswordResetSuccess"].Value;
             return RedirectToAction("Login");
         }
         [HttpPost]
         public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            // ✅ validate الـ returnUrl الجاي من الـ form
             var safeReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : "/Customer/Home/Index";
 
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl = safeReturnUrl });
@@ -328,19 +305,16 @@ namespace Shatbly.Areas.Identity.Controllers
 
             if (remoteError != null)
             {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
+                ModelState.AddModelError(string.Empty, string.Format(_localizer["ExternalProviderError"].Value, remoteError));
                 return RedirectToAction(nameof(Login));
             }
 
-            // 1. الحصول على بيانات التسجيل من المزود الخارجي (جوجل مثلاً)
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 return RedirectToAction(nameof(Login));
             }
 
-            // 2. محاولة تسجيل الدخول باستخدام بيانات المزود الخارجي
-            // لو اليوزر سجل قبل كده وتم ربط حسابه، السطر ده هيدخله علطول
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
             if (signInResult.Succeeded)
@@ -348,20 +322,17 @@ namespace Shatbly.Areas.Identity.Controllers
                 return LocalRedirect(returnUrl);
             }
 
-            // 3. لو السطر اللي فوق فشل، ده معناه إن اليوزر أول مرة يسجل أو حسابه مش مربوط
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
             if (email == null)
             {
-                ModelState.AddModelError(string.Empty, "Email claim not received from provider.");
+                ModelState.AddModelError(string.Empty, _localizer["EmailClaimNotReceived"].Value);
                 return RedirectToAction(nameof(Login));
             }
 
-            // ابحث عن اليوزر في قاعدة البيانات بالإيميل
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
-                // إنشاء مستخدم جديد لو مش موجود
                 var username = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0];
                 Random random = new Random();
 
@@ -379,7 +350,6 @@ namespace Shatbly.Areas.Identity.Controllers
                 }
             }
 
-            // 4. ربط الحساب الخارجي بالحساب المحلي (لو مش مربوطين)
             var existingLogins = await _userManager.GetLoginsAsync(user);
             if (!existingLogins.Any(x => x.LoginProvider == info.LoginProvider))
             {
@@ -390,10 +360,8 @@ namespace Shatbly.Areas.Identity.Controllers
                 }
             }
 
-            // 5. أهم خطوة: تسجيل الدخول الفعلي بعد الإنشاء أو الربط
             await _signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
 
-            // ✅ كده
             return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
     }

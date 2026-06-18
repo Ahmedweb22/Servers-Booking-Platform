@@ -11,10 +11,15 @@ namespace Shatbly.Areas.Admin.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UserController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IStringLocalizer<UserController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+        public UserController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager,
+            IStringLocalizer<UserController> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
         public async Task<IActionResult> Index(string? name, int page = 1)
         {
@@ -113,7 +118,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (!ModelState.IsValid)
             {
-                TempData["error-notification"] = "Invalid Data";
+                TempData["error-notification"] = _sharedLocalizer["InvalidData"].Value;
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -121,7 +126,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var existingUserByEmail = await _userManager.FindByEmailAsync(createUserVM.Email);
             if (existingUserByEmail != null)
             {
-                ModelState.AddModelError("Email", "Email already exists");
+                ModelState.AddModelError("Email", _localizer["EmailAlreadyExists"].Value);
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -129,7 +134,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var existingUserByUsername = await _userManager.FindByNameAsync(createUserVM.UserName);
             if (existingUserByUsername != null)
             {
-                ModelState.AddModelError("UserName", "Username already exists");
+                ModelState.AddModelError("UserName", _localizer["UsernameAlreadyExists"].Value);
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -137,7 +142,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var existingUserByPhone = await _userManager.Users.FirstOrDefaultAsync(u => u.Phone == createUserVM.Phone);
             if (existingUserByPhone != null)
             {
-                ModelState.AddModelError("Phone", "Phone number already exists");
+                ModelState.AddModelError("Phone", _localizer["PhoneAlreadyExists"].Value);
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -161,7 +166,7 @@ namespace Shatbly.Areas.Admin.Controllers
                     ModelState.AddModelError("", error.Description);
                 }
 
-                TempData["error-notification"] = "Save Failed";
+                TempData["error-notification"] = _localizer["SaveFailed"].Value;
                 createUserVM.Roles = _roleManager.Roles.AsNoTracking().ToList();
                 return View(createUserVM);
             }
@@ -171,7 +176,7 @@ namespace Shatbly.Areas.Admin.Controllers
                 await _userManager.AddToRoleAsync(user, createUserVM.RoleName);
             }
 
-            TempData["success-notification"] = "Save Successful";
+            TempData["success-notification"] = _localizer["SaveSuccessful"].Value;
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -204,7 +209,7 @@ namespace Shatbly.Areas.Admin.Controllers
             ModelState.Remove("Roles");
             if (!ModelState.IsValid)
             {
-                TempData["error-notification"] = "Invalid Data";
+                TempData["error-notification"] = _sharedLocalizer["InvalidData"].Value;
                 var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
                 editUserVM.Roles = roles.AsEnumerable();
                 return View(editUserVM);
@@ -225,14 +230,14 @@ namespace Shatbly.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-                TempData["error-notification"] = $"Update Failed";
+                TempData["error-notification"] = _localizer["UpdateFailed"].Value;
             }
             else
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, userRoles);
                 await _userManager.AddToRoleAsync(user, editUserVM.RoleName);
-                TempData["success-notification"] = $"Update Successful";
+                TempData["success-notification"] = _localizer["UpdateSuccessful"].Value;
             }
             return RedirectToAction(nameof(Index));
 
@@ -247,11 +252,11 @@ namespace Shatbly.Areas.Admin.Controllers
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
-                TempData["error-notification"] = $"Delete Failed";
+                TempData["error-notification"] = _localizer["DeleteFailed"].Value;
             }
             else
             {
-                TempData["success-notification"] = $"Delete Successful";
+                TempData["success-notification"] = _localizer["DeleteSuccessful"].Value;
             }
             return RedirectToAction(nameof(Index));
         }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <data name="WorkerProfileNotFound" xml:space="preserve"><value>ملف العامل غير موجود.</value></data>
+  <data name="WorkerProfileCreatedSuccess" xml:space="preserve"><value>تم إنشاء ملف العامل بنجاح</value></data>
+  <data name="WorkerProfileUpdatedSuccess" xml:space="preserve"><value>تم تحديث ملف العامل بنجاح</value></data>
+  <data name="WorkerProfileDeletedSuccess" xml:space="preserve"><value>تم حذف ملف العامل بنجاح</value></data>
+</root>

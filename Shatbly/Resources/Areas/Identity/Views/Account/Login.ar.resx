@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="LoginTitle" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="LoginSubtitle" xml:space="preserve"><value>أدخل بياناتك للوصول إلى حسابك</value></data>
+  <data name="EmailOrUsername" xml:space="preserve"><value>البريد الإلكتروني أو اسم المستخدم</value></data>
+  <data name="Password" xml:space="preserve"><value>كلمة المرور</value></data>
+  <data name="ForgotPassword" xml:space="preserve"><value>نسيت كلمة المرور؟</value></data>
+  <data name="RememberMe" xml:space="preserve"><value>تذكّرني</value></data>
+  <data name="LoginButton" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="NoAccount" xml:space="preserve"><value>ليس لديك حساب؟ </value></data>
+  <data name="RegisterNow" xml:space="preserve"><value>سجّل الآن</value></data>
+  <data name="ResendConfirmation" xml:space="preserve"><value>إعادة إرسال بريد التأكيد</value></data>
+  <data name="ClickHere" xml:space="preserve"><value>اضغط هنا</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>شطبلي - تسجيل الدخول</value></data>
+  <data name="EmailOrUsernamePlaceholder" xml:space="preserve"><value>example@mail.com أو username123</value></data>
+  <data name="PasswordPlaceholder" xml:space="preserve"><value>أدخل كلمة المرور</value></data>
+  <data name="TogglePasswordVisibility" xml:space="preserve"><value>إظهار/إخفاء كلمة المرور</value></data>
+</root>

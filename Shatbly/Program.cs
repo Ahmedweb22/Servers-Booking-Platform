@@ -106,7 +106,10 @@ namespace Shatbly
             });
             builder.Services.AddScoped<IRepository<OTP_Verification>, Repository<OTP_Verification>>();
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+            builder.Services.AddControllersWithViews()
+                .AddDataAnnotationsLocalization()
+                .AddViewLocalization();
             builder.Services.AddScoped<IDbintialize, Dbintialize>();
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
             builder.Services.AddScoped<IRepository<WorkerProfile>, Repository<WorkerProfile>>();
@@ -149,7 +152,7 @@ namespace Shatbly
             //builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
-            //ai
+            // Register Chatbot Services
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IChatAiService, GroqChatService>();
             QuestPDF.Settings.License = LicenseType.Community;
@@ -195,6 +198,16 @@ namespace Shatbly
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+
+            // Localization middleware — must be after UseRouting, before UseAuthentication
+            var supportedCultures = new[] { "en", "ar" };
+            app.UseRequestLocalization(options =>
+            {
+                options.SetDefaultCulture("en")
+                       .AddSupportedCultures(supportedCultures)
+                       .AddSupportedUICultures(supportedCultures);
+                options.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
+            });
             var scope = app.Services.CreateScope();
             var Service = scope.ServiceProvider.GetService<IDbintialize>();
             //Service.Intializer();

@@ -1,4 +1,4 @@
-﻿namespace Shatbly.ViewModels
+namespace Shatbly.ViewModels
 {
     public class WorkerVM
     {
@@ -15,7 +15,6 @@
         [Phone]
         [Required]
         public string Phone { get; set; } = string.Empty;
-        [Required]
         public string Address { get; set; } = string.Empty;
         [Required]
         public IFormFile cv { get; set; }

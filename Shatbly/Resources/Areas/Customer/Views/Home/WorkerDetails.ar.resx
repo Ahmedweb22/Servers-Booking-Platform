@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="WorkerProfile" xml:space="preserve"><value>ملف الفني</value></data>
+  <data name="Sunday" xml:space="preserve"><value>الأحد</value></data>
+  <data name="Monday" xml:space="preserve"><value>الاثنين</value></data>
+  <data name="Tuesday" xml:space="preserve"><value>الثلاثاء</value></data>
+  <data name="Wednesday" xml:space="preserve"><value>الأربعاء</value></data>
+  <data name="Thursday" xml:space="preserve"><value>الخميس</value></data>
+  <data name="Friday" xml:space="preserve"><value>الجمعة</value></data>
+  <data name="Saturday" xml:space="preserve"><value>السبت</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>غير محدد</value></data>
+  <data name="AvailableNow" xml:space="preserve"><value>متاح الآن</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>غير متاح</value></data>
+  <data name="GeneralRating" xml:space="preserve"><value>التقييم العام</value></data>
+  <data name="CompletedOrders" xml:space="preserve"><value>طلب مكتمل</value></data>
+  <data name="MemberSince" xml:space="preserve"><value>عضو منذ</value></data>
+  <data name="AboutAndSchedule" xml:space="preserve"><value>نبذة ومواعيد</value></data>
+  <data name="ServicesAndPrices" xml:space="preserve"><value>الخدمات والأسعار</value></data>
+  <data name="AboutMe" xml:space="preserve"><value>نبذة عني</value></data>
+  <data name="NoBioYet" xml:space="preserve"><value>لم يتم إضافة نبذة بعد</value></data>
+  <data name="WorkingHours" xml:space="preserve"><value>مواعيد العمل الرسمية</value></data>
+  <data name="PM" xml:space="preserve"><value>مساءً</value></data>
+  <data name="AM" xml:space="preserve"><value>صباحاً</value></data>
+  <data name="FridayClosed" xml:space="preserve"><value>الجمعة: مغلق للإجازة الأسبوعية</value></data>
+  <data name="NoWorkingHours" xml:space="preserve"><value>لم يتم تحديد مواعيد العمل</value></data>
+  <data name="ReviewsTitle" xml:space="preserve"><value>التقييمات</value></data>
+  <data name="GeneralService" xml:space="preserve"><value>خدمة عامة</value></data>
+  <data name="EgpPerHour" xml:space="preserve"><value>ج.م / س</value></data>
+  <data name="AdditionalDetails" xml:space="preserve"><value>تفاصيل إضافية</value></data>
+  <data name="ServiceStatus" xml:space="preserve"><value>حالة الخدمة</value></data>
+  <data name="Active" xml:space="preserve"><value>نشطة</value></data>
+  <data name="Inactive" xml:space="preserve"><value>غير نشطة</value></data>
+  <data name="AcceptsOnline" xml:space="preserve"><value>يقبل أونلاين</value></data>
+  <data name="Yes" xml:space="preserve"><value>نعم</value></data>
+  <data name="No" xml:space="preserve"><value>لا</value></data>
+  <data name="Location" xml:space="preserve"><value>الموقع</value></data>
+  <data name="NoServicesRegistered" xml:space="preserve"><value>لا توجد خدمات مسجلة</value></data>
+  <data name="BookAppointmentNow" xml:space="preserve"><value>حجز ميعاد الآن</value></data>
+</root>

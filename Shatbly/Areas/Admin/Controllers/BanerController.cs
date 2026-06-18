@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Admin.Controllers
@@ -10,11 +10,13 @@ namespace Shatbly.Areas.Admin.Controllers
     {
         private readonly IRepository<Banner> _bannerRepo;
         private readonly UserManager<User> _userManager;
+        private readonly IStringLocalizer<BanerController> _localizer;
 
-        public BanerController(IRepository<Banner> bannerRepo, UserManager<User> userManager)
+        public BanerController(IRepository<Banner> bannerRepo, UserManager<User> userManager, IStringLocalizer<BanerController> localizer)
         {
             _bannerRepo = bannerRepo;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         public async Task<IActionResult> Index(string? title, int page = 1)
@@ -53,7 +55,7 @@ namespace Shatbly.Areas.Admin.Controllers
             ModelState.Remove("UserId");
             if (img == null)
             {
-                ModelState.AddModelError("ImageUrl", "Banner image is required");
+                ModelState.AddModelError("ImageUrl", _localizer["BannerImageRequired"].Value);
             }
             if (!ModelState.IsValid)
                 return View(banner);
@@ -70,7 +72,7 @@ namespace Shatbly.Areas.Admin.Controllers
             }
             else
             {
-                ModelState.AddModelError("ImageUrl", "Please upload an image.");
+                ModelState.AddModelError("ImageUrl", _localizer["PleaseUploadImage"].Value);
                 return View(banner);
             }
 
@@ -81,7 +83,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             await _bannerRepo.CreateAsync(banner);
             await _bannerRepo.CommitAsync();
-            TempData["Notification"] = "Banner created successfully";
+            TempData["Notification"] = _localizer["BannerCreatedSuccess"].Value;
 
             return RedirectToAction(nameof(Index));
         }
@@ -136,7 +138,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             _bannerRepo.Update(banner);
             await _bannerRepo.CommitAsync();
-            TempData["Notification"] = "Banner updated successfully";
+            TempData["Notification"] = _localizer["BannerUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
         [Authorize(Roles = $" {SD.ROLE_SUPER_ADMIN}")]
@@ -152,7 +154,7 @@ namespace Shatbly.Areas.Admin.Controllers
             }
             _bannerRepo.Delete(banner);
             await _bannerRepo.CommitAsync();
-            TempData["Notification"] = "Banner deleted successfully";
+            TempData["Notification"] = _localizer["BannerDeletedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
     }

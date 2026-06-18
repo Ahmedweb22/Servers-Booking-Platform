@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="RegisterTitle" xml:space="preserve"><value>إنشاء حساب جديد</value></data>
+  <data name="RegisterSubtitle" xml:space="preserve"><value>أدخل بياناتك لإنشاء حسابك على شطبلي</value></data>
+  <data name="FirstName" xml:space="preserve"><value>الاسم الأول</value></data>
+  <data name="LastName" xml:space="preserve"><value>الاسم الأخير</value></data>
+  <data name="Email" xml:space="preserve"><value>البريد الإلكتروني</value></data>
+  <data name="Phone" xml:space="preserve"><value>رقم الهاتف</value></data>
+  <data name="Username" xml:space="preserve"><value>اسم المستخدم</value></data>
+  <data name="UsernameHint" xml:space="preserve"><value>يُسمح بالحروف الإنجليزية والأرقام والشرطة السفلية فقط.</value></data>
+  <data name="Password" xml:space="preserve"><value>كلمة المرور</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور</value></data>
+  <data name="CreateAccount" xml:space="preserve"><value>إنشاء الحساب</value></data>
+  <data name="AlreadyHaveAccount" xml:space="preserve"><value>لديك حساب بالفعل؟ </value></data>
+  <data name="LoginNow" xml:space="preserve"><value>سجّل الدخول</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>شطبلي - إنشاء حساب جديد</value></data>
+  <data name="FirstNamePlaceholder" xml:space="preserve"><value>محمد</value></data>
+  <data name="LastNamePlaceholder" xml:space="preserve"><value>أحمد</value></data>
+  <data name="PasswordPlaceholder" xml:space="preserve"><value>8 أحرف على الأقل</value></data>
+  <data name="ConfirmPasswordPlaceholder" xml:space="preserve"><value>أعد إدخال كلمة المرور</value></data>
+  <data name="TogglePasswordVisibility" xml:space="preserve"><value>إظهار/إخفاء كلمة المرور</value></data>
+  <data name="FirstNameInvalid" xml:space="preserve"><value>أدخل الاسم الأول (حرفان على الأقل).</value></data>
+  <data name="LastNameInvalid" xml:space="preserve"><value>أدخل الاسم الأخير (حرفان على الأقل).</value></data>
+  <data name="EmailInvalid" xml:space="preserve"><value>أدخل بريداً إلكترونياً صحيحاً.</value></data>
+  <data name="PhoneInvalid" xml:space="preserve"><value>أدخل رقم هاتف مصري صحيح (01xxxxxxxxx).</value></data>
+  <data name="UsernameInvalid" xml:space="preserve"><value>اسم المستخدم يجب أن يحتوي على حروف وأرقام فقط (3 أحرف على الأقل).</value></data>
+  <data name="PasswordInvalid" xml:space="preserve"><value>كلمة المرور يجب أن تكون 8 أحرف على الأقل.</value></data>
+  <data name="ConfirmPasswordInvalid" xml:space="preserve"><value>يرجى تأكيد كلمة المرور.</value></data>
+  <data name="PasswordsMismatch" xml:space="preserve"><value>لا تتطابق كلمتا المرور.</value></data>
+  <data name="AgreeTo" xml:space="preserve"><value>أوافق على</value></data>
+  <data name="TermsAndConditions" xml:space="preserve"><value>الشروط والأحكام</value></data>
+  <data name="And" xml:space="preserve"><value>و</value></data>
+  <data name="PrivacyPolicy" xml:space="preserve"><value>سياسة الخصوصية</value></data>
+  <data name="MustAgreeTerms" xml:space="preserve"><value>يجب الموافقة على الشروط والأحكام للمتابعة.</value></data>
+  <data name="PwdVeryWeak" xml:space="preserve"><value>ضعيفة جداً</value></data>
+  <data name="PwdWeak" xml:space="preserve"><value>ضعيفة</value></data>
+  <data name="PwdMedium" xml:space="preserve"><value>متوسطة</value></data>
+  <data name="PwdStrong" xml:space="preserve"><value>قوية</value></data>
+  <data name="PwdStrengthLabel" xml:space="preserve"><value>قوة كلمة المرور: </value></data>
+</root>

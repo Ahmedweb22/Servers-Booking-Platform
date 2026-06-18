@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>File a Complaint / Dispute</value></data>
+  <data name="CardTitle" xml:space="preserve"><value>File a Complaint / Raise a Dispute</value></data>
+  <data name="CardSubtitle" xml:space="preserve"><value>Please describe the problem you encountered with precision so our support team can investigate and intervene immediately.</value></data>
+  <data name="OrderIdLabel" xml:space="preserve"><value>Order ID:</value></data>
+  <data name="RequiredServiceLabel" xml:space="preserve"><value>Requested Service:</value></data>
+  <data name="AssignedTechnicianLabel" xml:space="preserve"><value>Assigned Technician:</value></data>
+  <data name="WhatHappensTitle" xml:space="preserve"><value>What happens when you raise a dispute?</value></data>
+  <data name="WhatHappensDescription" xml:space="preserve"><value>The order status will be frozen immediately and the file referred to the Disputes and Technical Review Department in Shatbly. A support representative will contact you within 24 hours to verify the complaint details and coordinate with the technician to reach a solution that guarantees your rights.</value></data>
+  <data name="DisputeReasonLabel" xml:space="preserve"><value>Enter dispute reason and complaint details in detail</value></data>
+  <data name="DisputeReasonPlaceholder" xml:space="preserve"><value>Please write the complaint clearly (e.g. incomplete work, damaged materials, inappropriate behavior...)</value></data>
+  <data name="ValidationErrorText" xml:space="preserve"><value>Please enter the reason for the complaint/dispute to continue.</value></data>
+  <data name="CancelBtn" xml:space="preserve"><value>Cancel</value></data>
+  <data name="ConfirmDisputeBtn" xml:space="preserve"><value>Confirm &amp; Raise Dispute</value></data>
+</root>

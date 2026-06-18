@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Shtbly | Technician Application</value></data>
+  <data name="SubmitCVCardTitle" xml:space="preserve"><value>Join as a Technician</value></data>
+  <data name="SubmitCVCardSubtitle" xml:space="preserve"><value>Enter your details to register on Shatbly</value></data>
+  <data name="FirstNameLabel" xml:space="preserve"><value>First Name</value></data>
+  <data name="FirstNamePlaceholder" xml:space="preserve"><value>First name</value></data>
+  <data name="FirstNameInvalid" xml:space="preserve"><value>Enter first name (at least 2 characters).</value></data>
+  <data name="LastNameLabel" xml:space="preserve"><value>Last Name</value></data>
+  <data name="LastNamePlaceholder" xml:space="preserve"><value>Last name</value></data>
+  <data name="LastNameInvalid" xml:space="preserve"><value>Enter last name (at least 2 characters).</value></data>
+  <data name="EmailLabel" xml:space="preserve"><value>Email Address</value></data>
+  <data name="EmailPlaceholder" xml:space="preserve"><value>example@mail.com</value></data>
+  <data name="EmailInvalid" xml:space="preserve"><value>Enter a valid email address.</value></data>
+  <data name="PhoneLabel" xml:space="preserve"><value>Phone Number</value></data>
+  <data name="PhonePlaceholder" xml:space="preserve"><value>01xxxxxxxxx</value></data>
+  <data name="PhoneInvalid" xml:space="preserve"><value>Enter a valid Egyptian phone number (01xxxxxxxxx).</value></data>
+  <data name="CvLabel" xml:space="preserve"><value>CV / Resume</value></data>
+  <data name="CvInvalid" xml:space="preserve"><value>Please upload your CV/Resume.</value></data>
+  <data name="SubmitBtn" xml:space="preserve"><value>Submit Application</value></data>
+</root>

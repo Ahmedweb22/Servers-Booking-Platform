@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.BookingSystem;
 using Stripe.Checkout;
@@ -12,10 +12,12 @@ namespace Shatbly.Areas.Customer.Controllers
     {
         private readonly IBookingSystemService _bookingSystemService;
         private readonly UserManager<User> _userManager;
-        public BookingSystemController(IBookingSystemService bookingSystemService , UserManager<User> userManager)
+        private readonly IStringLocalizer<BookingSystemController> _localizer;
+        public BookingSystemController(IBookingSystemService bookingSystemService, UserManager<User> userManager, IStringLocalizer<BookingSystemController> localizer)
         {
             _bookingSystemService = bookingSystemService;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -89,12 +91,12 @@ namespace Shatbly.Areas.Customer.Controllers
         var result = await _bookingSystemService.MarkAsPaidAsync(id);
             if (result)
             {
-                TempData["Success"] = "Payment successful";
+                TempData["Success"] = _localizer["PaymentSuccess"].Value;
 
             }
             else
             {
-                TempData["Error"] = "Payment failed";
+                TempData["Error"] = _localizer["PaymentFailed"].Value;
             }
 
       
@@ -141,8 +143,8 @@ namespace Shatbly.Areas.Customer.Controllers
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
-                            Name = $"خدمه فنيه من :{booking.Booking.User.Name}",
-                            Description = "حجز موعد صيانه",
+                            Name = string.Format(_localizer["TechnicalServiceFrom"].Value, booking.Booking.User.Name),
+                            Description = _localizer["MaintenanceBooking"].Value,
                         },
 
                     },

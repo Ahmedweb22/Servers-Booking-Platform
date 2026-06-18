@@ -1,0 +1,63 @@
+@using Microsoft.AspNetCore.Localization
+
+@{
+    var requestCulture = Context.Features.Get<IRequestCultureFeature>();
+    var currentCulture = requestCulture?.RequestCulture?.UICulture?.Name ?? "en";
+    var isArabic = currentCulture.StartsWith("ar");
+    var targetCulture = isArabic ? "en" : "ar";
+    var targetLabel = isArabic ? "EN" : "ع";
+    var targetFull = isArabic ? "English" : "العربية";
+    var currentFlag = isArabic ? "🇪🇬" : "🇬🇧";
+    var targetFlag = isArabic ? "🇬🇧" : "🇪🇬";
+}
+
+<form action="/Culture/SetCulture" method="post" class="d-inline-block">
+    <input type="hidden" name="culture" value="@targetCulture" />
+    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+    <button type="submit" class="lang-switch-btn" title="@targetFull" id="langSwitchBtn">
+        <span class="lang-flag">@targetFlag</span>
+        <span class="lang-label">@targetLabel</span>
+    </button>
+</form>
+
+<style>
+    .lang-switch-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 0.88rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+    }
+
+    .lang-switch-btn:hover {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-color: #3b82f6;
+        color: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .lang-switch-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.12);
+    }
+
+    .lang-flag {
+        font-size: 1.15rem;
+        line-height: 1;
+    }
+
+    .lang-label {
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
+</style>

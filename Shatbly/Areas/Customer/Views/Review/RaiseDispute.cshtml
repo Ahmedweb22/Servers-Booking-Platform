@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "تقديم شكوى / نزاع";
+    ViewData["Title"] = Localizer["PageTitle"];
 }
 
 <style>
@@ -143,24 +143,24 @@
             <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle p-3 mb-3" style="width: 64px; height: 64px;">
                 <i class="bi bi-exclamation-triangle-fill fs-2"></i>
             </div>
-            <h2 class="fw-bold text-dark mb-2">تقديم شكوى / رفع نزاع للطلب</h2>
-            <p class="text-secondary fs-6">يرجى توضيح المشكلة التي واجهتك بكل دقة ليقوم فريق الدعم لدينا بدراسة الحالة والتدخل الفوري.</p>
+            <h2 class="fw-bold text-dark mb-2">@Localizer["CardTitle"]</h2>
+            <p class="text-secondary fs-6">@Localizer["CardSubtitle"]</p>
         </div>
 
         <!-- Booking & Worker Metadata -->
         <div class="meta-badge">
             <div class="meta-item">
-                <span>رقم الطلب:</span>
+                <span>@Localizer["OrderIdLabel"]</span>
                 <strong>#@ViewBag.OrderId</strong>
             </div>
             <hr class="my-2" style="border-color: #e2e8f0;" />
             <div class="meta-item">
-                <span>الخدمة المطلوبة:</span>
+                <span>@Localizer["RequiredServiceLabel"]</span>
                 <strong>@ViewBag.ServiceName</strong>
             </div>
             <hr class="my-2" style="border-color: #e2e8f0;" />
             <div class="meta-item">
-                <span>الفني المسؤول:</span>
+                <span>@Localizer["AssignedTechnicianLabel"]</span>
                 <strong>@ViewBag.WorkerName</strong>
             </div>
         </div>
@@ -169,10 +169,10 @@
         <div class="danger-callout">
             <h5>
                 <i class="bi bi-info-circle-fill"></i>
-                ماذا يحدث عند رفع نزاع؟
+                @Localizer["WhatHappensTitle"]
             </h5>
             <p class="mb-0">
-                سيتم تجميد حالة الطلب فوراً وتحويل الملف إلى قسم النزاعات والمراجعة الفنية في شطبلي. سيتواصل معك أحد ممثلي الدعم الفني خلال 24 ساعة للتحقق من تفاصيل الشكوى والتنسيق مع الفني للوصول إلى حل يضمن كامل حقوقك.
+                @Localizer["WhatHappensDescription"]
             </p>
         </div>
 
@@ -182,18 +182,18 @@
             <input type="hidden" name="id" value="@ViewBag.OrderId" />
 
             <div class="form-group mb-4">
-                <label for="reason">اكتب سبب النزاع وتفاصيل الشكوى بالتفصيل <span class="text-danger">*</span></label>
-                <textarea name="reason" id="reason" class="form-control custom-textarea" placeholder="يرجى كتابة الشكوى بوضوح (مثال: عدم اكتمال العمل المنفذ، تلف أجزاء من الخامات، سلوك غير لائق...)"></textarea>
+                <label for="reason">@Localizer["DisputeReasonLabel"] <span class="text-danger">*</span></label>
+                <textarea name="reason" id="reason" class="form-control custom-textarea" placeholder="@Localizer["DisputeReasonPlaceholder"]"></textarea>
                 <div class="text-danger fw-semibold mt-2 small" id="validationError" style="display: none;">
-                    <i class="bi bi-exclamation-circle-fill me-1"></i> يرجى إدخال سبب الشكوى/النزاع للاستمرار.
+                    <i class="bi bi-exclamation-circle-fill me-1"></i> @Localizer["ValidationErrorText"]
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-3 border-top pt-4">
-                <a href="/Customer/BookingSystem/DetailsBooking/@ViewBag.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">تراجع</a>
+                <a href="/Customer/BookingSystem/DetailsBooking/@ViewBag.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">@Localizer["CancelBtn"]</a>
                 <button type="submit" class="btn btn-submit flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2">
-                    <span>تأكيد ورفع النزاع</span>
+                    <span>@Localizer["ConfirmDisputeBtn"]</span>
                     <i class="bi bi-send-fill fs-6"></i>
                 </button>
             </div>

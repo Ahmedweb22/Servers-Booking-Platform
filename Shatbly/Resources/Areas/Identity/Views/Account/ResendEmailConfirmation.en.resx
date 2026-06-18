@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Shtbly | Resend Confirmation Email</value></data>
+  <data name="InfoBannerTitle" xml:space="preserve"><value>Didn't receive the confirmation email?</value></data>
+  <data name="InfoBannerSubtitle" xml:space="preserve"><value>If you couldn't find the confirmation email in your inbox, you can request to resend it here.</value></data>
+  <data name="ResendTitle" xml:space="preserve"><value>Resend Confirmation</value></data>
+  <data name="ResendSubtitle" xml:space="preserve"><value>We will send a new confirmation link to your email address.</value></data>
+  <data name="EmailOrUsername" xml:space="preserve"><value>Email or Username</value></data>
+  <data name="EmailPlaceholder" xml:space="preserve"><value>example@mail.com or username123</value></data>
+  <data name="RequiredField" xml:space="preserve"><value>This field is required.</value></data>
+  <data name="ResendButton" xml:space="preserve"><value>Resend Email</value></data>
+  <data name="BackToLogin" xml:space="preserve"><value>Back to Login</value></data>
+  <data name="StepsTitle" xml:space="preserve"><value>Confirmation Steps:</value></data>
+  <data name="Step1" xml:space="preserve"><value>Enter your email or username.</value></data>
+  <data name="Step2" xml:space="preserve"><value>Check your inbox and find the email from Shtbly.</value></data>
+  <data name="Step3" xml:space="preserve"><value>Click the confirmation link inside the email.</value></data>
+  <data name="SendingState" xml:space="preserve"><value>Sending...</value></data>
+  <data name="SentState" xml:space="preserve"><value>Sent</value></data>
+</root>

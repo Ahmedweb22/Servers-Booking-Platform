@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.Portfolio;
 using System.Security.Claims;
@@ -11,10 +11,12 @@ namespace Shatbly.Areas.Worker.Controllers
     public class PortfolioController : Controller
     {
         private readonly IPortfolioService _portfolioService;
+        private readonly IStringLocalizer<PortfolioController> _localizer;
 
-        public PortfolioController(IPortfolioService portfolioService)
+        public PortfolioController(IPortfolioService portfolioService, IStringLocalizer<PortfolioController> localizer)
         {
             _portfolioService = portfolioService;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -62,7 +64,7 @@ namespace Shatbly.Areas.Worker.Controllers
                 return View(model);
             }
 
-            TempData["Success"] = "Portfolio media uploaded successfully.";
+            TempData["Success"] = _localizer["MediaUploadedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -80,7 +82,7 @@ namespace Shatbly.Areas.Worker.Controllers
             var result = await _portfolioService.DeleteMediaAsync(userId, id);
 
             TempData[result.Succeeded ? "Success" : "Error"] =
-                result.Succeeded ? "Media deleted successfully." : result.ErrorMessage;
+                result.Succeeded ? _localizer["MediaDeletedSuccess"].Value : result.ErrorMessage;
 
             return RedirectToAction(nameof(Index));
         }

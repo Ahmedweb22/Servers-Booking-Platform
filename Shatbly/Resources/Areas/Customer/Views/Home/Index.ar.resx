@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>الصفحة الرئيسية</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>ابحث عن فني، تخصص، أو خدمة...</value></data>
+  <data name="SearchButton" xml:space="preserve"><value>بحث</value></data>
+  <data name="CategoryLabel" xml:space="preserve"><value>التصنيف:</value></data>
+  <data name="AllCategories" xml:space="preserve"><value>الكل</value></data>
+  <data name="LocationLabel" xml:space="preserve"><value>الموقع:</value></data>
+  <data name="SelectGovernorate" xml:space="preserve"><value>اختر المحافظة</value></data>
+  <data name="SelectDistrict" xml:space="preserve"><value>اختر المنطقة</value></data>
+  <data name="FilterButton" xml:space="preserve"><value>فلتر</value></data>
+  <data name="ClearLocationFilter" xml:space="preserve"><value>إزالة فلتر الموقع</value></data>
+  <data name="FeaturedBanner" xml:space="preserve"><value>إعلان مميز</value></data>
+  <data name="BannerSubtitle" xml:space="preserve"><value>اكتشف أفضل الخدمات والعروض المتاحة الآن</value></data>
+  <data name="DiscoverNow" xml:space="preserve"><value>اكتشف الآن</value></data>
+  <data name="AvailableWorkersTitle" xml:space="preserve"><value>فنيين متاحين في منطقتك</value></data>
+  <data name="ResultLabel" xml:space="preserve"><value>نتيجة</value></data>
+  <data name="NoWorkersAvailable" xml:space="preserve"><value>لا يوجد فنيين متاحين</value></data>
+  <data name="NoWorkersSubtitle" xml:space="preserve"><value>يرجى تغيير الفلاتر أو المحاولة لاحقًا.</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>غير محدد</value></data>
+  <data name="DistrictNotSpecified" xml:space="preserve"><value>حي غير محدد</value></data>
+  <data name="CityNotSpecified" xml:space="preserve"><value>مدينة غير حددة</value></data>
+  <data name="InspectionFee" xml:space="preserve"><value>ج.م / معاينة</value></data>
+  <data name="LocateOnMap" xml:space="preserve"><value>تحديد الموقع</value></data>
+  <data name="DetailsButton" xml:space="preserve"><value>التفاصيل</value></data>
+  <data name="CompletedTasks" xml:space="preserve"><value>مهمة مكتملة</value></data>
+  <data name="InteractiveMapTitle" xml:space="preserve"><value>خريطة الفنيين التفاعلية</value></data>
+  <data name="InteractiveMapLoading" xml:space="preserve"><value>جاري تحميل الخريطة والمواقع المباشرة للفنيين...</value></data>
+  <data name="EmergencyRequest" xml:space="preserve"><value>طلب طوارئ سريع</value></data>
+  <data name="AllDistricts" xml:space="preserve"><value>كل المناطق</value></data>
+  <data name="MapPopupText" xml:space="preserve"><value>موقع الفني المعتمد</value></data>
+</root>

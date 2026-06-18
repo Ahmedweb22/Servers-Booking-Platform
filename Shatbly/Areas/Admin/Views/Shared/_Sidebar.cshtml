@@ -1,4 +1,4 @@
-﻿@{
+@{
     var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -10,7 +10,7 @@
         </div>
         <div>
             <h5 class="mb-0">AdminPro</h5>
-            <small>Control Center</small>
+            <small>@Localizer["ControlCenter"]</small>
         </div>
     </div>
 
@@ -18,61 +18,61 @@
         <a asp-area="Admin" asp-controller="Home" asp-action="Index"
            class="nav-item @(currentController == "Dashboard" ? "active" : "")">
             <i class="fa-solid fa-house"></i>
-            <span>Dashboard</span>
+            <span>@Localizer["Dashboard"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="User" asp-action="Index"
            class="nav-item @(currentController == "User" ? "active" : "")">
             <i class="fa-solid fa-users"></i>
-            <span>Users</span>
+            <span>@Localizer["Users"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Baner" asp-action="Index"
            class="nav-item @(currentController == "Baner" ? "active" : "")">
             <i class="fa-solid fa-calendar-check"></i>
-            <span>Banner</span>
+            <span>@Localizer["Banner"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Coupon" asp-action="Index"
            class="nav-item @(currentController == "Coupon" ? "active" : "")">
             <i class="fa-solid fa-ticket"></i>
-            <span>Coupons</span>
+            <span>@Localizer["Coupons"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Promotion" asp-action="Index"
                class="nav-item @(currentController == "Promotion" ? "active" : "")">
             <i class="fa-solid fa-ticket"></i>
-            <span>Promotions</span>
+            <span>@Localizer["Promotions"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="PromotionCode" asp-action="Index"
                class="nav-item @(currentController == "PromotionCode" ? "active" : "")">
             <i class="fa-solid fa-ticket"></i>
-            <span>Promotion Codes</span>
+            <span>@Localizer["PromotionCodes"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Booking" asp-action="Index"
            class="nav-item @(currentController == "Booking" ? "active" : "")">
             <i class="fa-solid fa-calendar-check"></i>
-            <span>Booking</span>
+            <span>@Localizer["Booking"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="ServiceCategory" asp-action="Index"
                class="nav-item @(currentController == "ServiceCategory" ? "active" : "")">
             <i class="fa-solid fa-briefcase"></i>
-            <span>Services</span>
+            <span>@Localizer["Services"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="WorkerService" asp-action="Index"
                class="nav-item @(currentController == "WorkerService" ? "active" : "")">
             <i class="fa-solid fa-briefcase"></i>
-            <span>Worker service</span>
+            <span>@Localizer["WorkerService"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="WorkerProfile" asp-action="Index"
                class="nav-item @(currentController == "WorkerProfile" ? "active" : "")">
             <i class="fa-solid fa-briefcase"></i>
-            <span>Worker profile</span>
+            <span>@Localizer["WorkerProfile"]</span>
         </a>
         @* Spam to Customer Area *@
         @* <a asp-area="Admin" asp-controller="BookingSystem" asp-action="Create"
@@ -84,13 +84,13 @@
         <a asp-area="Admin" asp-controller="Report" asp-action="Index"
            class="nav-item @(currentController == "Report" ? "active" : "")">
             <i class="fa-solid fa-chart-column"></i>
-            <span>Reports</span>
+            <span>@Localizer["Reports"]</span>
         </a>
 
         <a asp-area="Admin" asp-controller="Setting" asp-action="Index"
            class="nav-item @(currentController == "Setting" ? "active" : "")">
             <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
+            <span>@Localizer["Settings"]</span>
         </a>
     </nav>
 </aside>
