@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+
+  <data name="PasswordChangedSuccess" xml:space="preserve"><value>تم تحديث كلمة المرور بنجاح.</value></data>
+  <data name="CityAndStreetRequired" xml:space="preserve"><value>المدينة والشارع مطلوبان.</value></data>
+  <data name="AddressAddedSuccess" xml:space="preserve"><value>تم إضافة العنوان بنجاح.</value></data>
+  <data name="DefaultAddressUpdated" xml:space="preserve"><value>تم تحديث العنوان الافتراضي بنجاح.</value></data>
+  <data name="AddressDeletedSuccess" xml:space="preserve"><value>تم حذف العنوان بنجاح.</value></data>
+  <data name="Settings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="ChangePassword" xml:space="preserve"><value>تغيير كلمة المرور</value></data>
+  <data name="ManageAddresses" xml:space="preserve"><value>إدارة العناوين</value></data>
+  <data name="CurrentPassword" xml:space="preserve"><value>كلمة المرور الحالية</value></data>
+  <data name="NewPassword" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
+  <data name="ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة</value></data>
+  <data name="UpdatePassword" xml:space="preserve"><value>تحديث كلمة المرور</value></data>
+  <data name="AddAddress" xml:space="preserve"><value>إضافة عنوان جديد</value></data>
+  <data name="City" xml:space="preserve"><value>المدينة</value></data>
+  <data name="District" xml:space="preserve"><value>المنطقة / الحي</value></data>
+  <data name="Street" xml:space="preserve"><value>الشارع</value></data>
+  <data name="IsDefault" xml:space="preserve"><value>تعيين كعنوان افتراضي</value></data>
+  <data name="SetDefault" xml:space="preserve"><value>تعيين كافتراضي</value></data>
+  <data name="Delete" xml:space="preserve"><value>حذف</value></data>
+  <data name="NoAddresses" xml:space="preserve"><value>لم يتم العثور على عناوين. أضف عنواناً بالأسفل!</value></data>
+  <data name="SaveAddress" xml:space="preserve"><value>حفظ العنوان</value></data>
+  <data name="Cancel" xml:space="preserve"><value>إلغاء</value></data>
+</root>
