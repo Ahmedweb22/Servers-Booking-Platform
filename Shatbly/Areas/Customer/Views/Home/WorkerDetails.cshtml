@@ -1,17 +1,23 @@
 @model Shatbly.Models.WorkerProfile
 
 @{
-    ViewData["Title"] = $"{Model.User?.FName} {Model.User?.LName} - ملف الفني";
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+    ViewData["Title"] = $"{Model.User?.FName} {Model.User?.LName} - {Localizer["WorkerProfile"]}";
     var addr = Model.User?.Addresses?.FirstOrDefault();
     var isFavorite = (bool)(ViewData["IsFavorite"] ?? false);
     var dayNames = new Dictionary<string, string> {
-        {"Sunday", "الأحد"}, {"Monday", "الاثنين"}, {"Tuesday", "الثلاثاء"},
-        {"Wednesday", "الأربعاء"}, {"Thursday", "الخميس"}, {"Friday", "الجمعة"}, {"Saturday", "السبت"}
+        {"Sunday", Localizer["Sunday"].Value},
+        {"Monday", Localizer["Monday"].Value},
+        {"Tuesday", Localizer["Tuesday"].Value},
+        {"Wednesday", Localizer["Wednesday"].Value},
+        {"Thursday", Localizer["Thursday"].Value},
+        {"Friday", Localizer["Friday"].Value},
+        {"Saturday", Localizer["Saturday"].Value}
     };
     var memberYear = Model.CreatedAt.Year;
     var completedOrders = Model.WorkerBookings?.Count() ?? 0;
     var rating = Model.RatingAvg;
-    var categoryName = Model.WorkerServices?.Category?.NameAr ?? "غير محدد";
+    var categoryName = isRtl ? (Model.WorkerServices?.Category?.NameAr ?? Localizer["NotSpecified"].Value) : (Model.WorkerServices?.Category?.Name ?? Localizer["NotSpecified"].Value);
     var firstLetter = Model.User?.FName?.Substring(0, Math.Min(3, Model.User.FName.Length)) ?? "م";
     var avatarName = $"{Model.User?.FName}+{Model.User?.LName}";
 }
@@ -226,7 +232,7 @@
     <div class="container-fluid p-0">
         <div class="cover-photo shadow-sm">
             <a href="/Customer/Home/Index" class="wp-back-btn">
-                <i class="bi bi-arrow-right"></i>
+                <i class="bi @(isRtl ? "bi-arrow-right" : "bi-arrow-left")"></i>
             </a>
 
             <img src="https://ui-avatars.com/api/?name=@avatarName&background=0D8ABC&color=fff&size=200"
@@ -246,12 +252,12 @@
                 @if (Model.IsAvailable)
                 {
                     <span class="text-success">
-                        <i class="bi bi-circle-fill" style="font-size:0.8rem;"></i> متاح الآن
+                        <i class="bi bi-circle-fill" style="font-size:0.8rem;"></i> @Localizer["AvailableNow"]
                     </span>
                 }
                 else
                 {
-                    <span style="color: rgba(255,255,255,0.6);">غير متاح</span>
+                    <span style="color: rgba(255,255,255,0.6);">@Localizer["Unavailable"]</span>
                 }
             </p>
         </div>
@@ -265,19 +271,19 @@
             <div class="col-md-4 mb-3 mb-md-0">
                 <div class="stat-box">
                     <h3 class="fw-bold mb-0">@rating.ToString("F1") ⭐</h3>
-                    <span class="text-muted fw-bold fs-5">التقييم العام</span>
+                    <span class="text-muted fw-bold fs-5">@Localizer["GeneralRating"]</span>
                 </div>
             </div>
             <div class="col-md-4 mb-3 mb-md-0">
                 <div class="stat-box">
                     <h3 class="fw-bold mb-0">@completedOrders</h3>
-                    <span class="text-muted fw-bold fs-5">طلب مكتمل</span>
+                    <span class="text-muted fw-bold fs-5">@Localizer["CompletedOrders"]</span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-box">
                     <h3 class="fw-bold mb-0">@memberYear</h3>
-                    <span class="text-muted fw-bold fs-5">عضو منذ</span>
+                    <span class="text-muted fw-bold fs-5">@Localizer["MemberSince"]</span>
                 </div>
             </div>
         </div>
@@ -286,10 +292,10 @@
         <div class="mt-5">
             <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#about">نبذة ومواعيد</button>
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#about">@Localizer["AboutAndSchedule"]</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#services">الخدمات والأسعار</button>
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#services">@Localizer["ServicesAndPrices"]</button>
                 </li>
             </ul>
 
@@ -298,7 +304,7 @@
                 <!-- Tab: About & Schedule -->
                 <div class="tab-pane fade show active content-card" id="about">
                     <h5 class="fw-bold text-primary mb-3">
-                        <i class="bi bi-person-lines-fill me-2"></i> نبذة عني
+                        <i class="bi bi-person-lines-fill me-2"></i> @Localizer["AboutMe"]
                     </h5>
                     @if (!string.IsNullOrEmpty(Model.Bio))
                     {
@@ -306,13 +312,13 @@
                     }
                     else
                     {
-                        <p class="text-muted fs-5 lh-lg" style="text-align: center;">لم يتم إضافة نبذة بعد</p>
+                        <p class="text-muted fs-5 lh-lg" style="text-align: center;">@Localizer["NoBioYet"]</p>
                     }
 
                     <hr class="my-4 text-muted opacity-25">
 
                     <h5 class="fw-bold text-primary mb-3">
-                        <i class="bi bi-clock me-2"></i> مواعيد العمل الرسمية
+                        <i class="bi bi-clock me-2"></i> @Localizer["WorkingHours"]
                     </h5>
                     @if (Model.Availabilities?.Any() == true)
                     {
@@ -321,9 +327,11 @@
                             {
                                 var dayKey = avail.DayOfWeek.ToString();
                                 var dayAr = dayNames.ContainsKey(dayKey) ? dayNames[dayKey] : dayKey;
+                                var startTimeFormatted = $"{DateTime.Today.Add(avail.StartTime).ToString("hh:mm")} {(avail.StartTime.Hours >= 12 ? Localizer["PM"].Value : Localizer["AM"].Value)}";
+                                var endTimeFormatted = $"{DateTime.Today.Add(avail.EndTime).ToString("hh:mm")} {(avail.EndTime.Hours >= 12 ? Localizer["PM"].Value : Localizer["AM"].Value)}";
                                 <li class="mb-3">
                                     <i class="bi bi-calendar-check text-success me-2"></i>
-                                    @dayAr: @avail.StartTime.ToString(@"hh\:mm") صباحاً - @avail.EndTime.ToString(@"hh\:mm") مساءً
+                                    @dayAr: @startTimeFormatted - @endTimeFormatted
                                 </li>
                             }
 
@@ -334,7 +342,7 @@
                             {
                                 <li>
                                     <i class="bi bi-x-circle text-danger me-2"></i>
-                                    الجمعة: مغلق للإجازة الأسبوعية
+                                    @Localizer["FridayClosed"]
                                 </li>
                             }
                         </ul>
@@ -343,7 +351,7 @@
                     {
                         <div class="wp-empty">
                             <i class="bi bi-calendar-x"></i>
-                            لم يتم تحديد مواعيد العمل
+                            @Localizer["NoWorkingHours"]
                         </div>
                     }
 
@@ -352,7 +360,7 @@
                     {
                         <hr class="my-4 text-muted opacity-25">
                         <h5 class="fw-bold text-primary mb-3">
-                            <i class="bi bi-chat-square-heart-fill me-2"></i> التقييمات
+                            <i class="bi bi-chat-square-heart-fill me-2"></i> @Localizer["ReviewsTitle"]
                             <span class="badge bg-light text-primary border ms-2">@Model.WorkerReviews.Count()</span>
                         </h5>
                         @foreach (var review in Model.WorkerReviews.OrderByDescending(r => r.CreatedAt).Take(5))
@@ -389,9 +397,9 @@
                     {
                         <ul class="list-group list-group-flush rounded-4 services-list">
                             <li class="list-group-item d-flex justify-content-between align-items-center p-4 fs-5">
-                                <div class="fw-bold">@(Model.WorkerServices.Category?.NameAr ?? "خدمة عامة")</div>
+                                <div class="fw-bold">@(isRtl ? (Model.WorkerServices.Category?.NameAr ?? Localizer["GeneralService"].Value) : (Model.WorkerServices.Category?.Name ?? Localizer["GeneralService"].Value))</div>
                                 <span class="badge bg-light text-primary border px-4 py-2 rounded-pill">
-                                    @Model.WorkerServices.HourlyRate.ToString("N0") ج.م / س
+                                    @Model.WorkerServices.HourlyRate.ToString("N0") @Localizer["EgpPerHour"]
                                 </span>
                             </li>
                         </ul>
@@ -399,44 +407,44 @@
                         <!-- Service Details -->
                         <div class="p-4">
                             <h5 class="fw-bold text-primary mb-3">
-                                <i class="bi bi-info-circle me-2"></i> تفاصيل إضافية
+                                <i class="bi bi-info-circle me-2"></i> @Localizer["AdditionalDetails"]
                             </h5>
                             <div style="background: #f8fafc; border-radius: 14px; padding: 18px;">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="text-muted fw-semibold">حالة الخدمة</span>
+                                    <span class="text-muted fw-semibold">@Localizer["ServiceStatus"]</span>
                                     @if (Model.WorkerServices.IsActive)
                                     {
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
-                                            <i class="bi bi-check-circle-fill me-1"></i> نشطة
+                                            <i class="bi bi-check-circle-fill me-1"></i> @Localizer["Active"]
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
-                                            <i class="bi bi-pause-circle me-1"></i> غير نشطة
+                                            <i class="bi bi-pause-circle me-1"></i> @Localizer["Inactive"]
                                         </span>
                                     }
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="text-muted fw-semibold">يقبل أونلاين</span>
+                                    <span class="text-muted fw-semibold">@Localizer["AcceptsOnline"]</span>
                                     @if (Model.AcceptsOnline)
                                     {
                                         <span class="text-success fw-bold">
-                                            <i class="bi bi-wifi me-1"></i> نعم
+                                            <i class="bi bi-wifi me-1"></i> @Localizer["Yes"]
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="text-muted fw-bold">
-                                            <i class="bi bi-wifi-off me-1"></i> لا
+                                            <i class="bi bi-wifi-off me-1"></i> @Localizer["No"]
                                         </span>
                                     }
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span class="text-muted fw-semibold">الموقع</span>
+                                    <span class="text-muted fw-semibold">@Localizer["Location"]</span>
                                     <span class="fw-bold">
                                         <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                        @(addr?.City ?? "غير محدد")، @(addr?.District ?? "غير محدد")
+                                        @(addr?.City ?? Localizer["NotSpecified"].Value)، @(addr?.District ?? Localizer["NotSpecified"].Value)
                                     </span>
                                 </div>
                             </div>
@@ -446,7 +454,7 @@
                     {
                         <div class="wp-empty p-4">
                             <i class="bi bi-tools"></i>
-                            لا توجد خدمات مسجلة
+                            @Localizer["NoServicesRegistered"]
                         </div>
                     }
                 </div>
@@ -476,7 +484,7 @@
 
         <a href="/Customer/BookingSystem/CreateBooking?workerId=@Model.Id"
            class="btn btn-primary fw-bold fs-4 py-3 px-5 shadow-sm rounded-pill" style="min-width: 300px; text-decoration: none;">
-            حجز ميعاد الآن <i class="bi bi-calendar-check ms-2"></i>
+            @Localizer["BookAppointmentNow"] <i class="bi bi-calendar-check ms-2"></i>
         </a>
     </div>
 </div>

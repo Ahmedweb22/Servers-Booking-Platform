@@ -1,12 +1,15 @@
 @model IEnumerable<WorkerProfile>
+@{
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+}
 <div class="container my-4">
-	<h2 class="mb-4">المفضلة</h2>
+	<h2 class="mb-4">@Localizer["FavoritesTitle"]</h2>
     @if (!Model.Any())
     {
         <div class="alert alert-info text-center">
             <i class="bi bi-info-circle-fill fs-1 mb-2"></i>
-            <h5 class="fw-bold mb-0">لا يوجد فنيين متاحين</h5>
-            <p class="text-muted fw-semibold mb-0">يرجى تغيير الفلاتر أو المحاولة لاحقًا.</p>
+            <h5 class="fw-bold mb-0">@Localizer["NoFavoritesAvailable"]</h5>
+            <p class="text-muted fw-semibold mb-0">@Localizer["NoFavoritesSubtitle"]</p>
         </div>
     }
     else
@@ -27,29 +30,29 @@
                                 @(worker.User?.FName) @(worker.User?.LName)
                                 <i class="bi bi-patch-check-fill verified-icon ms-1"></i>
                             </h6>
-                            <p class="text-muted fw-semibold small mb-2">@(worker.WorkerServices?.Category?.Name ?? "غير محدد")</p>
+                            <p class="text-muted fw-semibold small mb-2">@(isRtl ? (worker.WorkerServices?.Category?.NameAr ?? Localizer["NotSpecified"].Value) : (worker.WorkerServices?.Category?.Name ?? Localizer["NotSpecified"].Value))</p>
                             <div class="d-flex gap-2">
-                                <span class="tag"><i class="bi bi-house-gear me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.District ?? "حي غير محدد")</span>
-                                <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.City ?? "مدينة غير محددة")</span>
+                                <span class="tag"><i class="bi bi-house-gear me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.District ?? Localizer["DistrictNotSpecified"].Value)</span>
+                                <span class="tag"><i class="bi bi-geo-alt-fill me-1"></i> @(worker.User?.Addresses?.FirstOrDefault()?.City ?? Localizer["CityNotSpecified"].Value)</span>
                             </div>
                         </div>
                     </div>
                     <form method="post" action="/Customer/Home/ToggleFavorite">
                         <input type="hidden" name="workerId" value="@worker.Id" />
                         <button class="btn btn-danger btn-sm" type="submit">
-                        ازاله من المفضله
+                        @Localizer["RemoveFromFavorites"]
                         </button>
                     </form>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">ج.م / معاينة</span></div>
-                    <button class="btn-book bg-light text-dark border">التفاصيل</button>
+                    <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span></div>
+                    <a href="/Customer/Home/WorkerDetails/@worker.Id" class="btn-book bg-light text-dark border" style="text-decoration: none;">@Localizer["DetailsButton"]</a>
                 </div>
 
                 <div class="stats-row">
                     <div class="stat-item"><div class="rating-box"><i class="bi bi-star-fill"></i> 4.7</div></div>
-                    <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 89 مهمة مكتملة</div>
+                    <div class="stat-item"><i class="bi bi-check-circle-fill text-success fs-6"></i> 89 @Localizer["CompletedTasks"]</div>
                 </div>
             </div>
         }

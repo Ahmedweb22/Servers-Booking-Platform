@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Rate Service</value></data>
+  <data name="CardTitle" xml:space="preserve"><value>Rate Service &amp; Technician</value></data>
+  <data name="CardSubtitle" xml:space="preserve"><value>We are pleased to hear your opinion about your recent experience to help us continuously improve our services.</value></data>
+  <data name="ServiceAndWorkerBadge" xml:space="preserve"><value>Service {0} with technician {1}</value></data>
+  <data name="OverallExperienceLabel" xml:space="preserve"><value>What is your overall rating of the experience?</value></data>
+  <data name="RateStarsPrompt" xml:space="preserve"><value>Click on the stars to rate</value></data>
+  <data name="CommentLabel" xml:space="preserve"><value>Write your review and experience in detail</value></data>
+  <data name="OptionalLabel" xml:space="preserve"><value>Optional</value></data>
+  <data name="CommentPlaceholder" xml:space="preserve"><value>Describe the quality of work, technician's punctuality, and professionalism...</value></data>
+  <data name="AddImagesLabel" xml:space="preserve"><value>Add photos of the completed work</value></data>
+  <data name="AddImagesDescription" xml:space="preserve"><value>You can attach photos of the place before and after starting work to show the result and share it with the Shatbly community.</value></data>
+  <data name="BeforeImageLabel" xml:space="preserve"><value>Before Work Photo</value></data>
+  <data name="UploadSpecsBefore" xml:space="preserve"><value>JPG, PNG up to 5 MB</value></data>
+  <data name="AfterImageLabel" xml:space="preserve"><value>After Work Photo</value></data>
+  <data name="UploadSpecsAfter" xml:space="preserve"><value>JPG, PNG up to 5 MB</value></data>
+  <data name="CancelBtn" xml:space="preserve"><value>Cancel</value></data>
+  <data name="SubmitBtn" xml:space="preserve"><value>Submit Review</value></data>
+  <data name="RatingHint1" xml:space="preserve"><value>Very Bad 😞</value></data>
+  <data name="RatingHint2" xml:space="preserve"><value>Bad 😕</value></data>
+  <data name="RatingHint3" xml:space="preserve"><value>Acceptable 🙂</value></data>
+  <data name="RatingHint4" xml:space="preserve"><value>Very Good 😊</value></data>
+  <data name="RatingHint5" xml:space="preserve"><value>Excellent! 🤩</value></data>
+</root>

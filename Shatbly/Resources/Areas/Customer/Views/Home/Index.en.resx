@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Home Page</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search for a technician, specialty, or service...</value></data>
+  <data name="SearchButton" xml:space="preserve"><value>Search</value></data>
+  <data name="CategoryLabel" xml:space="preserve"><value>Category:</value></data>
+  <data name="AllCategories" xml:space="preserve"><value>All</value></data>
+  <data name="LocationLabel" xml:space="preserve"><value>Location:</value></data>
+  <data name="SelectGovernorate" xml:space="preserve"><value>Select Governorate</value></data>
+  <data name="SelectDistrict" xml:space="preserve"><value>Select District</value></data>
+  <data name="FilterButton" xml:space="preserve"><value>Filter</value></data>
+  <data name="ClearLocationFilter" xml:space="preserve"><value>Clear Location Filter</value></data>
+  <data name="FeaturedBanner" xml:space="preserve"><value>Featured</value></data>
+  <data name="BannerSubtitle" xml:space="preserve"><value>Discover the best services and offers available now</value></data>
+  <data name="DiscoverNow" xml:space="preserve"><value>Discover Now</value></data>
+  <data name="AvailableWorkersTitle" xml:space="preserve"><value>Available Technicians in your area</value></data>
+  <data name="ResultLabel" xml:space="preserve"><value>results</value></data>
+  <data name="NoWorkersAvailable" xml:space="preserve"><value>No Technicians Available</value></data>
+  <data name="NoWorkersSubtitle" xml:space="preserve"><value>Please adjust filters or try again later.</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>Not specified</value></data>
+  <data name="DistrictNotSpecified" xml:space="preserve"><value>District not specified</value></data>
+  <data name="CityNotSpecified" xml:space="preserve"><value>City not specified</value></data>
+  <data name="InspectionFee" xml:space="preserve"><value>EGP / Inspection</value></data>
+  <data name="LocateOnMap" xml:space="preserve"><value>Locate</value></data>
+  <data name="DetailsButton" xml:space="preserve"><value>Details</value></data>
+  <data name="CompletedTasks" xml:space="preserve"><value>completed tasks</value></data>
+  <data name="InteractiveMapTitle" xml:space="preserve"><value>Interactive Technicians Map</value></data>
+  <data name="InteractiveMapLoading" xml:space="preserve"><value>Loading map and live locations of technicians...</value></data>
+  <data name="EmergencyRequest" xml:space="preserve"><value>Quick Emergency Request</value></data>
+  <data name="AllDistricts" xml:space="preserve"><value>All Districts</value></data>
+  <data name="MapPopupText" xml:space="preserve"><value>Verified Technician Location</value></data>
+</root>

@@ -14,13 +14,19 @@ namespace Shatbly.Areas.Admin.Controllers
     {
         private readonly IRepository<WorkerProfile> _workerProfileRepo;
         private readonly IRepository<User> _userRepo;
+        private readonly IStringLocalizer<WorkerProfileController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
         public WorkerProfileController(
             IRepository<WorkerProfile> workerProfileRepo,
-            IRepository<User> userRepo)
+            IRepository<User> userRepo,
+            IStringLocalizer<WorkerProfileController> localizer,
+            IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _workerProfileRepo = workerProfileRepo;
             _userRepo = userRepo;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
 
         // ───────── INDEX ─────────
@@ -76,7 +82,7 @@ namespace Shatbly.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 model.Users = await _userRepo.GetAsync(tracking: false);
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;
                 return View(model);
             }
 
@@ -106,7 +112,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             await _workerProfileRepo.CreateAsync(workerProfile);
             await _workerProfileRepo.CommitAsync();
-            TempData["success-notification"] = "Worker profile created successfully";
+            TempData["success-notification"] = _localizer["WorkerProfileCreatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -122,7 +128,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var wp = await _workerProfileRepo.GetOneAsync(e => e.Id == id, includes: includes, tracking: false);
             if (wp is null)
             {
-                TempData["error-notification"] = "Worker profile not found.";
+                TempData["error-notification"] = _localizer["WorkerProfileNotFound"].Value;
                 return NotFound();
             }
 
@@ -151,14 +157,14 @@ namespace Shatbly.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 model.Users = await _userRepo.GetAsync(tracking: false);
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;
                 return View(model);
             }
 
             var existing = await _workerProfileRepo.GetOneAsync(e => e.Id == model.Id, tracking: false);
             if (existing is null)
             {
-                TempData["error-notification"] = "Worker profile not found.";
+                TempData["error-notification"] = _localizer["WorkerProfileNotFound"].Value;
                 return NotFound();
             }
 
@@ -203,7 +209,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             _workerProfileRepo.Update(workerProfile);
             await _workerProfileRepo.CommitAsync();
-            TempData["success-notification"] = "Worker profile updated successfully";
+            TempData["success-notification"] = _localizer["WorkerProfileUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
 
@@ -214,7 +220,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var wp = await _workerProfileRepo.GetOneAsync(e => e.Id == id);
             if (wp is null)
             {
-                TempData["error-notification"] = "Worker profile not found.";
+                TempData["error-notification"] = _localizer["WorkerProfileNotFound"].Value;
                 return NotFound();
             }
 
@@ -229,7 +235,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
             _workerProfileRepo.Delete(wp);
             await _workerProfileRepo.CommitAsync();
-            TempData["success-notification"] = "Worker profile deleted successfully";
+            TempData["success-notification"] = _localizer["WorkerProfileDeletedSuccess"].Value;
             return Ok();
         }
     }

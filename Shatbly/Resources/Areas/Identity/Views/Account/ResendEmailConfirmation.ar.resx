@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Shtbly | شطبلي - إعادة إرسال بريد التأكيد</value></data>
+  <data name="InfoBannerTitle" xml:space="preserve"><value>لم تستلم رسالة التأكيد؟</value></data>
+  <data name="InfoBannerSubtitle" xml:space="preserve"><value>إذا لم تتمكن من العثور على رسالة التأكيد في بريدك الوارد، يمكنك طلب إعادة الإرسال من هنا.</value></data>
+  <data name="ResendTitle" xml:space="preserve"><value>إعادة إرسال التأكيد</value></data>
+  <data name="ResendSubtitle" xml:space="preserve"><value>سنرسل لك رابط تأكيد جديد على بريدك الإلكتروني.</value></data>
+  <data name="EmailOrUsername" xml:space="preserve"><value>البريد الإلكتروني أو اسم المستخدم</value></data>
+  <data name="EmailPlaceholder" xml:space="preserve"><value>example@mail.com أو username123</value></data>
+  <data name="RequiredField" xml:space="preserve"><value>هذا الحقل مطلوب.</value></data>
+  <data name="ResendButton" xml:space="preserve"><value>إعادة الإرسال</value></data>
+  <data name="BackToLogin" xml:space="preserve"><value>العودة إلى تسجيل الدخول</value></data>
+  <data name="StepsTitle" xml:space="preserve"><value>خطوات التأكيد:</value></data>
+  <data name="Step1" xml:space="preserve"><value>أدخل بريدك الإلكتروني أو اسم المستخدم.</value></data>
+  <data name="Step2" xml:space="preserve"><value>افتح البريد الوارد وابحث عن رسالة من Shtbly.</value></data>
+  <data name="Step3" xml:space="preserve"><value>اضغط على رابط التأكيد الموجود في الرسالة.</value></data>
+  <data name="SendingState" xml:space="preserve"><value>جاري الإرسال...</value></data>
+  <data name="SentState" xml:space="preserve"><value>تم الإرسال</value></data>
+</root>

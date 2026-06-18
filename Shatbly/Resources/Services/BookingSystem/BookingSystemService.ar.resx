@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <data name="ChooseWorker" xml:space="preserve"><value>اختر عاملاً.</value></data>
+  <data name="WorkerNotAvailable" xml:space="preserve"><value>العامل المحدد غير متاح.</value></data>
+  <data name="ServiceNotAvailable" xml:space="preserve"><value>الخدمة المحددة غير متاحة.</value></data>
+  <data name="ChooseDateTime" xml:space="preserve"><value>اختر تاريخ ووقت متاح.</value></data>
+  <data name="BookingCreatedSuccess" xml:space="preserve"><value>تم إنشاء الحجز. أمام العامل المعين 30 دقيقة لقبوله أو رفضه.</value></data>
+  <data name="ChooseValidSlot" xml:space="preserve"><value>اختر موعداً صالحاً لإعادة الجدولة.</value></data>
+  <data name="SlotNoLongerAvailable" xml:space="preserve"><value>هذا الموعد لم يعد متاحاً.</value></data>
+  <data name="BookingRescheduled" xml:space="preserve"><value>تمت إعادة جدولة الحجز. تم طلب تأكيد العامل مرة أخرى.</value></data>
+  <data name="CancelledByCustomer" xml:space="preserve"><value>تم الإلغاء بواسطة العميل</value></data>
+  <data name="BookingCancelled" xml:space="preserve"><value>تم إلغاء الحجز. المبلغ المقدر للاسترداد: {0} جنيه مصري.</value></data>
+  <data name="ChooseService" xml:space="preserve"><value>اختر خدمة</value></data>
+  <data name="ChooseWorkerLabel" xml:space="preserve"><value>اختر عاملاً</value></data>
+  <data name="Cash" xml:space="preserve"><value>نقداً</value></data>
+  <data name="Card" xml:space="preserve"><value>بطاقة</value></data>
+  <data name="Wallet" xml:space="preserve"><value>محفظة</value></data>
+  <data name="OneTime" xml:space="preserve"><value>مرة واحدة</value></data>
+  <data name="Weekly" xml:space="preserve"><value>أسبوعياً</value></data>
+  <data name="Monthly" xml:space="preserve"><value>شهرياً</value></data>
+  <data name="CustomerCreationFailed" xml:space="preserve"><value>فشل إنشاء العميل: {0}</value></data>
+</root>

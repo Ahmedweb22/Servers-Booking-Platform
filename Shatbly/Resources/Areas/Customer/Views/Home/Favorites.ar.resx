@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="FavoritesTitle" xml:space="preserve"><value>المفضلة</value></data>
+  <data name="NoFavoritesAvailable" xml:space="preserve"><value>لا يوجد فنيين في المفضلة</value></data>
+  <data name="NoFavoritesSubtitle" xml:space="preserve"><value>لم تقم بإضافة أي فنيين إلى قائمتك المفضلة بعد.</value></data>
+  <data name="RemoveFromFavorites" xml:space="preserve"><value>إزالة من المفضلة</value></data>
+  <data name="InspectionFee" xml:space="preserve"><value>ج.م / معاينة</value></data>
+  <data name="DetailsButton" xml:space="preserve"><value>التفاصيل</value></data>
+  <data name="CompletedTasks" xml:space="preserve"><value>مهمة مكتملة</value></data>
+  <data name="NotSpecified" xml:space="preserve"><value>غير محدد</value></data>
+  <data name="DistrictNotSpecified" xml:space="preserve"><value>حي غير محدد</value></data>
+  <data name="CityNotSpecified" xml:space="preserve"><value>مدينة غير حددة</value></data>
+</root>

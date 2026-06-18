@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>1.3</value></resheader>
+  <data name="CategoryCreatedSuccess" xml:space="preserve"><value>تم إنشاء فئة الخدمة بنجاح</value></data>
+  <data name="CategoryUpdatedSuccess" xml:space="preserve"><value>تم تحديث فئة الخدمة بنجاح</value></data>
+  <data name="CategoryDeletedSuccess" xml:space="preserve"><value>تم حذف فئة الخدمة بنجاح</value></data>
+</root>

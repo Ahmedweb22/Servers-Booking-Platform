@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -9,10 +9,15 @@ namespace Shatbly.Areas.Admin.Controllers
     public class CouponController : Controller
     {
         private readonly IRepository<Coupon> _couponRepo;
+        private readonly IStringLocalizer<CouponController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
-        public CouponController(IRepository<Coupon> couponRepo)
+        public CouponController(IRepository<Coupon> couponRepo,
+            IStringLocalizer<CouponController> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _couponRepo = couponRepo;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
 
         public async Task<IActionResult> Index(string? coupon, int Page = 1)
@@ -50,13 +55,13 @@ namespace Shatbly.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;
                 return View(coupon);
             }
              
             await _couponRepo.CreateAsync(coupon);
             await _couponRepo.CommitAsync();
-            TempData["success-notification"] = "Coupon created successfully";
+            TempData["success-notification"] = _localizer["CouponCreatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
         [HttpGet]
@@ -65,7 +70,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var coupon = await _couponRepo.GetOneAsync(c => c.Id == id, tracking: false);
             if (coupon is null)
             {
-                TempData["error-notification"] = "Coupon not found.";
+                TempData["error-notification"] = _localizer["CouponNotFound"].Value;
                 return NotFound();
             }
             return View(coupon);
@@ -75,12 +80,12 @@ namespace Shatbly.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["error-notification"] = "Please correct the errors in the form.";
+                TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;
                 return View(coupon);
             }
             _couponRepo.Update(coupon);
             await _couponRepo.CommitAsync();
-            TempData["success-notification"] = "Coupon updated successfully";
+            TempData["success-notification"] = _localizer["CouponUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));
         }
         [HttpDelete]
@@ -89,12 +94,12 @@ namespace Shatbly.Areas.Admin.Controllers
             var coupon = await _couponRepo.GetOneAsync(c => c.Id == id);
             if (coupon is null)
             {
-                TempData["error-notification"] = "Coupon not found.";
+                TempData["error-notification"] = _localizer["CouponNotFound"].Value;
                 return NotFound();
             }
             _couponRepo.Delete(coupon);
             await _couponRepo.CommitAsync();
-            TempData["success-notification"] = "Coupon deleted successfully";
+            TempData["success-notification"] = _localizer["CouponDeletedSuccess"].Value;
             return Ok();
         }
     }

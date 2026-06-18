@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="ControlCenter" xml:space="preserve"><value>Control Center</value></data>
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Users" xml:space="preserve"><value>Users</value></data>
+  <data name="Banner" xml:space="preserve"><value>Banner</value></data>
+  <data name="Coupons" xml:space="preserve"><value>Coupons</value></data>
+  <data name="Promotions" xml:space="preserve"><value>Promotions</value></data>
+  <data name="PromotionCodes" xml:space="preserve"><value>Promotion Codes</value></data>
+  <data name="Booking" xml:space="preserve"><value>Booking</value></data>
+  <data name="Services" xml:space="preserve"><value>Services</value></data>
+  <data name="WorkerService" xml:space="preserve"><value>Worker Service</value></data>
+  <data name="WorkerProfile" xml:space="preserve"><value>Worker Profile</value></data>
+  <data name="Reports" xml:space="preserve"><value>Reports</value></data>
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+</root>

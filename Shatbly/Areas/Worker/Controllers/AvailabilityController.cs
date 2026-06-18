@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.AvailabilityService;
 using System.Security.Claims;
@@ -11,13 +11,19 @@ public class AvailabilityController : Controller
 {
     private readonly IAvailabilityService _availabilityService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IStringLocalizer<AvailabilityController> _localizer;
+    private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
     public AvailabilityController(
         IAvailabilityService availabilityService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IStringLocalizer<AvailabilityController> localizer,
+        IStringLocalizer<SharedResource> sharedLocalizer)
     {
         _availabilityService = availabilityService;
         _unitOfWork = unitOfWork;
+        _localizer = localizer;
+        _sharedLocalizer = sharedLocalizer;
     }
 
     [HttpGet]
@@ -27,7 +33,7 @@ public class AvailabilityController : Controller
 
         if (workerProfile is null)
         {
-            return NotFound("Worker profile was not found.");
+            return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
         }
 
         var schedule = await _availabilityService.GetWorkerScheduleAsync(workerProfile.Id);
@@ -42,7 +48,7 @@ public class AvailabilityController : Controller
 
         if (workerProfile is null)
         {
-            return NotFound("Worker profile was not found.");
+            return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
         }
 
         return View(new CreateAvailabilityVM
@@ -59,7 +65,7 @@ public class AvailabilityController : Controller
 
         if (workerProfile is null)
         {
-            return NotFound("Worker profile was not found.");
+            return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
         }
 
         model.WorkerId = workerProfile.Id;
@@ -77,7 +83,7 @@ public class AvailabilityController : Controller
             return View(model);
         }
 
-        TempData["Success"] = "Availability slot added successfully.";
+        TempData["Success"] = _localizer["SlotAddedSuccess"].Value;
         return RedirectToAction(nameof(Index));
     }
 
@@ -88,7 +94,7 @@ public class AvailabilityController : Controller
 
         if (workerProfile is null)
         {
-            return NotFound("Worker profile was not found.");
+            return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
         }
 
         var schedule = await _availabilityService.GetWorkerScheduleAsync(workerProfile.Id);
@@ -117,7 +123,7 @@ public class AvailabilityController : Controller
 
         if (workerProfile is null)
         {
-            return NotFound("Worker profile was not found.");
+            return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
         }
 
         model.Id = id;
@@ -136,7 +142,7 @@ public class AvailabilityController : Controller
             return View(model);
         }
 
-        TempData["Success"] = "Availability slot updated successfully.";
+        TempData["Success"] = _localizer["SlotUpdatedSuccess"].Value;
         return RedirectToAction(nameof(Index));
     }
 
@@ -147,7 +153,7 @@ public class AvailabilityController : Controller
         var result = await _availabilityService.DeleteAvailabilityAsync(id);
 
         TempData[result.Succeeded ? "Success" : "Error"] =
-            result.Succeeded ? "Availability slot deleted successfully." : result.ErrorMessage;
+            result.Succeeded ? _localizer["SlotDeletedSuccess"].Value : result.ErrorMessage;
 
         return RedirectToAction(nameof(Index));
     }

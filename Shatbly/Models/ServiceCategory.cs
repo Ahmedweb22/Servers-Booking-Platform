@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shatbly.Models
 {
@@ -24,7 +24,12 @@ namespace Shatbly.Models
         public ICollection<BookingItem>? BookingItems { get; set; }
         public ICollection<Promotion>? Promotions { get; set; }
         public ICollection<Review>? Reviews { get; set; }
-        public string? Name { get; internal set; }
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string? Name
+        {
+            get => NameEn;
+            internal set => NameEn = value ?? string.Empty;
+        }
         public decimal Price { get; internal set; }
     }
 }

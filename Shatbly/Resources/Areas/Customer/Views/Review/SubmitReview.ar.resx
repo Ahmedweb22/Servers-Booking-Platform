@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>تقييم الخدمة</value></data>
+  <data name="CardTitle" xml:space="preserve"><value>تقييم الخدمة والفني</value></data>
+  <data name="CardSubtitle" xml:space="preserve"><value>نسعد بسماع رأيك عن تجربتك الأخيرة لمساعدتنا في تحسين خدماتنا باستمرار.</value></data>
+  <data name="ServiceAndWorkerBadge" xml:space="preserve"><value>خدمة {0} مع الفني {1}</value></data>
+  <data name="OverallExperienceLabel" xml:space="preserve"><value>ما هو تقييمك العام للتجربة؟</value></data>
+  <data name="RateStarsPrompt" xml:space="preserve"><value>اضغط على النجوم للتقييم</value></data>
+  <data name="CommentLabel" xml:space="preserve"><value>اكتب تعليقك وتجربتك بالتفصيل</value></data>
+  <data name="OptionalLabel" xml:space="preserve"><value>اختياري</value></data>
+  <data name="CommentPlaceholder" xml:space="preserve"><value>صف جودة العمل، التزام الفني بالمواعيد، والاحترافية...</value></data>
+  <data name="AddImagesLabel" xml:space="preserve"><value>أضف صور العمل المنفذ</value></data>
+  <data name="AddImagesDescription" xml:space="preserve"><value>يمكنك إرفاق صور للمكان قبل وبدء العمل لتوضيح النتيجة ومشاركتها مع مجتمع شطبلي.</value></data>
+  <data name="BeforeImageLabel" xml:space="preserve"><value>صورة قبل العمل</value></data>
+  <data name="UploadSpecsBefore" xml:space="preserve"><value>JPG, PNG حتى 5 ميجابايت</value></data>
+  <data name="AfterImageLabel" xml:space="preserve"><value>صورة بعد العمل</value></data>
+  <data name="UploadSpecsAfter" xml:space="preserve"><value>JPG, PNG حتى 5 ميجابايت</value></data>
+  <data name="CancelBtn" xml:space="preserve"><value>إلغاء</value></data>
+  <data name="SubmitBtn" xml:space="preserve"><value>إرسال التقييم</value></data>
+  <data name="RatingHint1" xml:space="preserve"><value>سيء جداً 😞</value></data>
+  <data name="RatingHint2" xml:space="preserve"><value>سيء 😕</value></data>
+  <data name="RatingHint3" xml:space="preserve"><value>مقبول 🙂</value></data>
+  <data name="RatingHint4" xml:space="preserve"><value>جيد جداً 😊</value></data>
+  <data name="RatingHint5" xml:space="preserve"><value>ممتاز وبطل! 🤩</value></data>
+</root>

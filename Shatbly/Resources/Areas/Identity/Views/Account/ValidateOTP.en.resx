@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>Shtbly | Verify Identity</value></data>
+  <data name="VerifyTitle" xml:space="preserve"><value>Verify Code</value></data>
+  <data name="VerifySubtitle" xml:space="preserve"><value>Enter the 6-digit code that was sent to you.</value></data>
+  <data name="SentToEmail" xml:space="preserve"><value>Sent to your registered email address.</value></data>
+  <data name="OtpLabel" xml:space="preserve"><value>Verification Code (OTP)</value></data>
+  <data name="OtpAriaLabel" xml:space="preserve"><value>6-digit verification code</value></data>
+  <data name="Digit1" xml:space="preserve"><value>Digit 1</value></data>
+  <data name="Digit2" xml:space="preserve"><value>Digit 2</value></data>
+  <data name="Digit3" xml:space="preserve"><value>Digit 3</value></data>
+  <data name="Digit4" xml:space="preserve"><value>Digit 4</value></data>
+  <data name="Digit5" xml:space="preserve"><value>Digit 5</value></data>
+  <data name="Digit6" xml:space="preserve"><value>Digit 6</value></data>
+  <data name="OtpLengthError" xml:space="preserve"><value>Please enter the complete 6-digit code.</value></data>
+  <data name="TimerLabel" xml:space="preserve"><value>Code expires in:</value></data>
+  <data name="CodeExpired" xml:space="preserve"><value>Code has expired.</value></data>
+  <data name="ResendButton" xml:space="preserve"><value>Resend Code</value></data>
+  <data name="ConfirmButton" xml:space="preserve"><value>Confirm Code</value></data>
+  <data name="BackToLogin" xml:space="preserve"><value>Back to Login</value></data>
+</root>

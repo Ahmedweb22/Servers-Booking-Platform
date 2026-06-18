@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search anything...</value></data>
+  <data name="AdminUser" xml:space="preserve"><value>Admin User</value></data>
+  <data name="SuperAdmin" xml:space="preserve"><value>Super Admin</value></data>
+  <data name="Profile" xml:space="preserve"><value>Profile</value></data>
+  <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Logout" xml:space="preserve"><value>Logout</value></data>
+</root>

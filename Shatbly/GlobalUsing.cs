@@ -1,4 +1,4 @@
-﻿global using Shatbly.Models;
+global using Shatbly.Models;
 global using Shatbly.DataAccess;
 global using Shatbly.ViewModels;
 global using Microsoft.EntityFrameworkCore;
@@ -15,9 +15,9 @@ global using Shatbly.UnitOfWork;
 global using DayOfWeek = Shatbly.Models.DayOfWeek;
 global using Shatbly.Services.WithdrawalService;
 global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-global using System.Text.Json;
 global using HealthChecks.UI.Client;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
 global using System.Text;
+global using Microsoft.Extensions.Localization;

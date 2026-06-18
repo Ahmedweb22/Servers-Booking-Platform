@@ -1,6 +1,6 @@
 @model LoginVM
 
-    <title>Shtbly | شطبلي - تسجيل الدخول</title>
+    <title>@Localizer["PageTitle"]</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
@@ -39,31 +39,31 @@
                         <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width:70px;height:70px;font-size:2rem;">
                             <i class="bi bi-person-check-fill"></i>
                         </div>
-                        <h2 class="fw-bold mb-1">تسجيل الدخول</h2>
-                        <p class="text-muted small">أدخل بياناتك للوصول إلى حسابك</p>
+                        <h2 class="fw-bold mb-1">@Localizer["LoginTitle"]</h2>
+                        <p class="text-muted small">@Localizer["LoginSubtitle"]</p>
                     </div>
 
                 <form asp-action="Login">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="EmailOrUserName" class="form-label fw-bold">البريد الإلكتروني أو اسم المستخدم</label>
+                        <label asp-for="EmailOrUserName" class="form-label fw-bold">@Localizer["EmailOrUsername"]</label>
                         <div class="input-group">
                             <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
-                            <input type="text" asp-for="EmailOrUserName" class="form-control" placeholder="example@mail.com أو username123" required autocomplete="username">
+                            <input type="text" asp-for="EmailOrUserName" class="form-control" placeholder="@Localizer["EmailOrUsernamePlaceholder"]" required autocomplete="username">
                         </div>
                         <span asp-validation-for="EmailOrUserName" class="text-danger d-block mt-1"></span>
                     </div>
 
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label asp-for="Password" class="form-label fw-bold mb-0">كلمة المرور</label>
-                            <a asp-action="ForgetPassword" class="small text-primary text-decoration-none">نسيت كلمة المرور؟</a>
+                            <label asp-for="Password" class="form-label fw-bold mb-0">@Localizer["Password"]</label>
+                            <a asp-action="ForgetPassword" class="small text-primary text-decoration-none">@Localizer["ForgotPassword"]</a>
                         </div>
                         <div class="input-group">
                             <span class="input-group-text bg-white text-muted"><i class="bi bi-lock"></i></span>
-                            <input asp-for="Password" class="form-control" placeholder="أدخل كلمة المرور" required autocomplete="current-password" id="Password">
-                            <button class="btn btn-outline-secondary bg-white text-muted" type="button" id="togglePassword" tabindex="-1" aria-label="إظهار/إخفاء كلمة المرور">
+                            <input asp-for="Password" class="form-control" placeholder="@Localizer["PasswordPlaceholder"]" required autocomplete="current-password" id="Password">
+                            <button class="btn btn-outline-secondary bg-white text-muted" type="button" id="togglePassword" tabindex="-1" aria-label="@Localizer["TogglePasswordVisibility"]">
                                 <i class="bi bi-eye" id="eyeIcon"></i>
                             </button>
                         </div>
@@ -73,23 +73,23 @@
                     <div class="mb-4">
                         <div class="form-check">
                             <input class="form-check-input" asp-for="RememberMe" />
-                            <label class="form-check-label" asp-for="RememberMe">تذكّرني</label>
+                            <label class="form-check-label" asp-for="RememberMe">@Localizer["RememberMe"]</label>
                         </div>
                     </div>
 
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary fw-bold py-2" style="border-radius:12px;">
-                            <i class="bi bi-box-arrow-in-right me-1"></i> تسجيل الدخول
+                            <i class="bi bi-box-arrow-in-right me-1"></i> @Localizer["LoginButton"]
                         </button>
                     </div>
 
                     <div class="text-center mb-2">
-                        <span class="text-muted small">ليس لديك حساب؟ </span>
-                        <a asp-action="Register" class="small text-primary fw-bold text-decoration-none">سجّل الآن</a>
+                        <span class="text-muted small">@Localizer["NoAccount"]</span>
+                        <a asp-action="Register" class="small text-primary fw-bold text-decoration-none">@Localizer["RegisterNow"]</a>
                     </div>
                     <div class="text-center">
-                        <span class="text-muted small">إعادة إرسال بريد التأكيد</span>
-                        <a asp-action="ResendEmailConfirmation" class="small text-primary fw-bold text-decoration-none">اضغط هنا</a>
+                        <span class="text-muted small">@Localizer["ResendConfirmation"]</span>
+                        <a asp-action="ResendEmailConfirmation" class="small text-primary fw-bold text-decoration-none">@Localizer["ClickHere"]</a>
                     </div>
                 </form>
                 <partial name="_ExternalAuthentication" />

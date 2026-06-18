@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.File_Service;
 using System.Security.Claims;
@@ -10,11 +10,16 @@ namespace Shatbly.Areas.Worker.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IFileService _fileService;
+        private readonly IStringLocalizer<WorkerProfileController> _localizer;
+        private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
 
-        public WorkerProfileController(IUnitOfWork unitOfWork, IFileService fileService)
+        public WorkerProfileController(IUnitOfWork unitOfWork, IFileService fileService,
+            IStringLocalizer<WorkerProfileController> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
         {
             _unitOfWork = unitOfWork;
             _fileService = fileService;
+            _localizer = localizer;
+            _sharedLocalizer = sharedLocalizer;
         }
 
         [HttpGet]
@@ -24,7 +29,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (profile is null)
             {
-                return NotFound("Worker profile was not found for the logged-in user.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFound"].Value);
             }
 
             return View(MapToDetailsVm(profile));
@@ -37,7 +42,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (profile is null)
             {
-                return NotFound("Worker profile was not found for the logged-in user.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFound"].Value);
             }
 
             return View(MapToEditVm(profile));
@@ -71,7 +76,7 @@ namespace Shatbly.Areas.Worker.Controllers
             _unitOfWork.WorkerProfiles.Update(profile);
             await _unitOfWork.CommitAsync();
 
-            TempData["Success"] = "Worker profile updated successfully.";
+            TempData["Success"] = _localizer["ProfileUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Details));
         }
 
@@ -92,8 +97,8 @@ namespace Shatbly.Areas.Worker.Controllers
             await _unitOfWork.CommitAsync();
 
             TempData["Success"] = profile.IsAvailable
-                ? "Worker is now available."
-                : "Worker is now unavailable.";
+                ? _localizer["WorkerNowAvailable"].Value
+                : _localizer["WorkerNowUnavailable"].Value;
 
             return RedirectToAction(nameof(Details));
         }
@@ -106,7 +111,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (profile is null)
             {
-                return NotFound("Worker profile was not found for the logged-in user.");
+                return NotFound(_sharedLocalizer["WorkerProfileNotFound"].Value);
             }
 
             if (model.Id != profile.Id)
@@ -116,7 +121,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (model.CVFile is null)
             {
-                TempData["Error"] = "Please choose a PDF file.";
+                TempData["Error"] = _localizer["ChoosePdfFile"].Value;
                 return RedirectToAction(nameof(Edit));
             }
 
@@ -137,7 +142,7 @@ namespace Shatbly.Areas.Worker.Controllers
             _unitOfWork.WorkerProfiles.Update(profile);
             await _unitOfWork.CommitAsync();
 
-            TempData["Success"] = "CV uploaded successfully.";
+            TempData["Success"] = _localizer["CvUploadedSuccess"].Value;
             return RedirectToAction(nameof(Details));
         }
 

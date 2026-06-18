@@ -1,9 +1,10 @@
-﻿namespace Shatbly.Services.Notification
+namespace Shatbly.Services.Notification
 {
     public class BookingNotificationService(
     INotificationService notificationService,
     IEmailService emailService,
-    ISmsService smsService) : IBookingNotificationService
+    ISmsService smsService,
+    IStringLocalizer<BookingNotificationService> localizer) : IBookingNotificationService
     {
         public async Task NotifyBookingCreatedAsync(
             string userId,
@@ -12,8 +13,8 @@
             int bookingId,
             CancellationToken cancellationToken = default)
         {
-            var title = "Booking created";
-            var message = $"Your booking #{bookingId} has been created and is pending confirmation.";
+            var title = localizer["BookingCreatedTitle"].Value;
+            var message = string.Format(localizer["BookingCreatedMessage"].Value, bookingId);
 
             await notificationService.CreateNotificationAsync(
                 userId,
@@ -37,28 +38,28 @@
             var (title, message) = status switch
             {
                 OrderStatuses.Confirmed => (
-                    "Booking accepted",
-                    $"Your booking #{bookingId} has been accepted."),
+                    localizer["BookingAcceptedTitle"].Value,
+                    string.Format(localizer["BookingAcceptedMessage"].Value, bookingId)),
 
                 OrderStatuses.Cancelled => (
-                    "Booking cancelled",
-                    $"Your booking #{bookingId} has been cancelled."),
+                    localizer["BookingCancelledTitle"].Value,
+                    string.Format(localizer["BookingCancelledMessage"].Value, bookingId)),
 
                 OrderStatuses.Completed => (
-                    "Booking completed",
-                    $"Your booking #{bookingId} has been completed."),
+                    localizer["BookingCompletedTitle"].Value,
+                    string.Format(localizer["BookingCompletedMessage"].Value, bookingId)),
 
                 OrderStatuses.NoResponse => (
-                    "Booking no response",
-                    $"Your booking #{bookingId} was not accepted in time."),
+                    localizer["BookingNoResponseTitle"].Value,
+                    string.Format(localizer["BookingNoResponseMessage"].Value, bookingId)),
 
                 OrderStatuses.Rescheduled => (
-                    "Booking rescheduled",
-                    $"Your booking #{bookingId} has been rescheduled."),
+                    localizer["BookingRescheduledTitle"].Value,
+                    string.Format(localizer["BookingRescheduledMessage"].Value, bookingId)),
 
                 _ => (
-                    "Booking updated",
-                    $"Your booking #{bookingId} status is now {status}.")
+                    localizer["BookingUpdatedTitle"].Value,
+                    string.Format(localizer["BookingUpdatedMessage"].Value, bookingId, status))
             };
 
             await notificationService.CreateNotificationAsync(
