@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -28,7 +28,6 @@
     <PackageReference Include="Stripe.net" Version="51.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Areas\Identity\Views\" />
     <Folder Include="Services\IServices\" />
     <Folder Include="wwwroot\img\banners\" />
     <Folder Include="wwwroot\img\service_categories\" />

@@ -103,6 +103,20 @@ namespace Shatbly
 
                 options.ClientSecret =
                     builder.Configuration["Authentication:Google:ClientSecret"];
+
+                options.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                options.CorrelationCookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+
+                options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+                {
+                    OnRemoteFailure = context =>
+                    {
+                        var failureMessage = context.Failure?.Message ?? "Remote authentication failed.";
+                        context.Response.Redirect(context.Request.PathBase + "/Identity/Account/Login?remoteError=" + System.Net.WebUtility.UrlEncode(failureMessage));
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    }
+                };
             });
             builder.Services.AddScoped<IRepository<OTP_Verification>, Repository<OTP_Verification>>();
             // Add services to the container.
@@ -155,6 +169,7 @@ namespace Shatbly
             // Register Chatbot Services
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IChatAiService, GroqChatService>();
+            builder.Services.AddScoped<IIdValidationService, IdValidationService>();
             QuestPDF.Settings.License = LicenseType.Community;
 
             var app = builder.Build();

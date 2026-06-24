@@ -79,7 +79,9 @@ namespace Shatbly.Areas.Customer.Controllers
                     RevieweeId = reviewVM.RevieweeId,
                     ReviewerId = User.FindFirstValue(ClaimTypes.NameIdentifier),
                     BeforeImageUrl = beforeUrl,
-                    AfterImageUrl = afterUrl
+                    AfterImageUrl = afterUrl,
+                    IsApproved = false,
+                    WorkerProfileId = order.Booking?.WorkerId
                 };
                 var result = await _bookingSystemService.AddReviewAsync(review);
                 if(result)
@@ -128,7 +130,7 @@ namespace Shatbly.Areas.Customer.Controllers
                 TempData["Error"] = _localizer["DisputeReasonRequired"].Value;
                 return RedirectToAction(nameof(RaiseDispute), new { id });
             }
-            var result = await _bookingSystemService.RaiseDisputeAsync(id, reason);
+            var result = await _bookingSystemService.RaiseDisputeAsync(id, reason, userId);
             if (result)
             {
                 TempData["Success"] = _localizer["DisputeSuccess"].Value;

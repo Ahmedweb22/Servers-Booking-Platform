@@ -1,0 +1,299 @@
+@model LoginVM
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = isRtl ? "تسجيل دخول الفنيين - شطبلي" : "Worker Login - Shatbly";
+}
+
+<style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #0f172a;
+        background-image: radial-gradient(circle at 10% 20%, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.2) 90%);
+        color: #f8fafc;
+    }
+
+    .worker-login-container {
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .worker-auth-card {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+
+    .benefit-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 18px;
+        padding: 16px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .benefit-item:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(242, 201, 76, 0.3);
+        transform: translateY(-3px);
+    }
+
+    .benefit-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(242, 201, 76, 0.1);
+        color: #F2C94C;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    .form-control-worker {
+        background-color: rgba(15, 23, 42, 0.6);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        color: #f8fafc !important;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-worker:focus {
+        background-color: rgba(15, 23, 42, 0.8);
+        border-color: #F2C94C;
+        box-shadow: 0 0 0 4px rgba(242, 201, 76, 0.15);
+        outline: none;
+    }
+
+    .form-control-worker::placeholder {
+        color: rgba(248, 258, 252, 0.4);
+    }
+
+    .input-group-worker-text {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+        border-right: none !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+
+    html[dir="rtl"] .input-group-worker-text {
+        border-left: none !important;
+        border-right: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    .input-group-worker-input {
+        border-left: none !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    html[dir="rtl"] .input-group-worker-input {
+        border-right: none !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+
+    .btn-worker-gold {
+        background: linear-gradient(135deg, #F2C94C 0%, #d97706 100%);
+        border: none;
+        color: #0f172a;
+        font-weight: 700;
+        border-radius: 14px;
+        padding: 14px 28px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .btn-worker-gold:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(242, 201, 76, 0.25);
+        background: linear-gradient(135deg, #ffd45d 0%, #e88916 100%);
+    }
+
+    .btn-worker-outline {
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        color: #f8fafc;
+        background: transparent;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-worker-outline:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: #F2C94C;
+        color: #F2C94C;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container worker-login-container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-11">
+            <div class="card worker-auth-card">
+                <div class="row g-0">
+                    
+                    <!-- Left Side: Motivation & Highlights -->
+                    <div class="col-lg-6 d-flex flex-column justify-content-between p-5 position-relative" style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid rgba(255, 255, 255, 0.05);">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <span class="badge bg-warning text-dark px-3 py-2 fw-bold" style="border-radius: 10px;">
+                                    @(isRtl ? "بوابة شركاء العمل" : "Partner Portal")
+                                </span>
+                                <h5 class="mb-0 fw-bold text-white">SHTBLY</h5>
+                            </div>
+                            
+                            <h2 class="fw-bold mb-3 text-white lh-base">
+                                @(isRtl ? "انضم إلى نخبة الفنيين وزد من دخلك اليومي" : "Join the elite technicians and grow your business today")
+                            </h2>
+                            <p class="text-light opacity-50 mb-5 fs-6">
+                                @(isRtl ? "نحن نوفر لك منصة متكاملة للوصول إلى آلاف العملاء وتنظيم حجوزاتك بكل سهولة ويسر." : "We provide you with an integrated platform to reach thousands of clients and organize your bookings easily.")
+                            </p>
+                            
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <div class="benefit-item d-flex align-items-center gap-3">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "تنظيم مرن للمواعيد" : "Flexible Scheduling")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "حدد ساعات عملك ومدى توافرك بما يناسبك" : "Define your working hours and availability as it suits you")</small>
+                                    </div>
+                                </div>
+                                <div class="benefit-item d-flex align-items-center gap-3">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-wallet2"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "دفع آمن وسريع" : "Secure & Fast Payments")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "سحب فوري وموثوق لأرباحك من الحجوزات" : "Instant and reliable withdrawals of your booking earnings")</small>
+                                    </div>
+                                </div>
+                                <div class="benefit-item d-flex align-items-center gap-3">
+                                    <div class="benefit-icon">
+                                        <i class="bi bi-chat-left-text"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "محادثات مباشرة" : "Direct Chat with Clients")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "تواصل مباشرة مع العميل للاتفاق وتحديد التفاصيل" : "Communicate directly with clients to discuss details")</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between pt-4 border-top border-secondary">
+                            <span class="small text-light opacity-50">@(isRtl ? "لست شريكاً معنا بعد؟" : "Not a partner yet?")</span>
+                            <a href="/Worker/Worker/SendCV" class="btn btn-worker-outline btn-sm">
+                                @(isRtl ? "قدم سيرتك الذاتية" : "Submit Your CV")
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Login Form -->
+                    <div class="col-lg-6 p-5 d-flex flex-column justify-content-center">
+                        <div class="mb-4">
+                            <h3 class="fw-bold text-white mb-2">@(isRtl ? "تسجيل دخول الشركاء" : "Partner Sign In")</h3>
+                            <p class="text-light opacity-50 small">@(isRtl ? "الرجاء إدخال بيانات الاعتماد للوصول للوحة التحكم" : "Please enter your credentials to access your dashboard")</p>
+                        </div>
+                        
+                        <form asp-action="WorkerLogin" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 text-danger rounded-4 py-3 small bg-danger bg-opacity-10 mb-4"></div>
+
+                            <div class="mb-4">
+                                <label asp-for="EmailOrUserName" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "البريد الإلكتروني أو اسم المستخدم" : "Email or Username")</label>
+                                <div class="input-group">
+                                    <span class="input-group-text input-group-worker-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" asp-for="EmailOrUserName" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "أدخل بريدك أو اسم المستخدم" : "Enter your email or username")" required autocomplete="username">
+                                </div>
+                                <span asp-validation-for="EmailOrUserName" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label asp-for="Password" class="form-label text-light opacity-75 fw-semibold mb-0">@(isRtl ? "كلمة المرور" : "Password")</label>
+                                    <a asp-action="ForgetPassword" class="small text-warning text-decoration-none">@(isRtl ? "نسيت كلمة المرور؟" : "Forgot password?")</a>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text input-group-worker-text"><i class="bi bi-lock"></i></span>
+                                    <input asp-for="Password" type="password" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "أدخل كلمة المرور" : "Enter your password")" required autocomplete="current-password" id="Password">
+                                    <button class="btn btn-outline-secondary form-control-worker" type="button" id="togglePassword" tabindex="-1" style="border-left: none;">
+                                        <i class="bi bi-eye text-light opacity-75" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="RememberMe" />
+                                    <label class="form-check-label text-light opacity-75 small" asp-for="RememberMe">
+                                        @(isRtl ? "تذكرني على هذا الجهاز" : "Remember me on this device")
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-worker-gold btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> @(isRtl ? "تسجيل الدخول" : "Sign In")
+                                </button>
+                            </div>
+
+                            <div class="text-center pt-3 border-top border-secondary">
+                                <span class="small text-light opacity-50">@(isRtl ? "بوابة العملاء؟" : "Are you a client?")</span>
+                                <a asp-action="Login" class="small text-warning fw-bold text-decoration-none ms-1">
+                                    @(isRtl ? "تسجيل دخول العملاء من هنا" : "Client Sign In here")
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', function () {
+                const pwd = document.getElementById('Password');
+                const icon = document.getElementById('eyeIcon');
+                if (pwd && icon) {
+                    if (pwd.type === 'password') { 
+                        pwd.type = 'text'; 
+                        icon.classList.replace('bi-eye', 'bi-eye-slash'); 
+                    } else { 
+                        pwd.type = 'password'; 
+                        icon.classList.replace('bi-eye-slash', 'bi-eye'); 
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

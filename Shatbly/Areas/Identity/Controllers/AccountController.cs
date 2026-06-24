@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using Shatbly.Services;
 using Shatbly.Services.TokenServices;
@@ -41,10 +42,19 @@ namespace Shatbly.Areas.Identity.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            bool isWorker = User.Identity?.IsAuthenticated == true && User.IsInRole(SD.ROLE_WORKER);
+            bool isAdmin = User.Identity?.IsAuthenticated == true && (User.IsInRole(SD.ROLE_ADMIN) || User.IsInRole(SD.ROLE_SUPER_ADMIN));
             await _signInManager.SignOutAsync();
             TempData["success-notification"] = _localizer["LoggedOutSuccess"].Value;
+            if (isAdmin)
+            {
+                return RedirectToAction("AdminLogin", "Account", new { area = "Identity" });
+            }
+            if (isWorker)
+            {
+                return RedirectToAction("WorkerLogin", "Account", new { area = "Identity" });
+            }
             return RedirectToAction("Login", "Account", new { area = "Identity" });
-
         }
         [HttpGet]
         public IActionResult Register()
@@ -54,8 +64,13 @@ namespace Shatbly.Areas.Identity.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterVM model)
         {
-            //if (!ModelState.IsValid)
-            //    return View(model);
+            // Check if phone number is already registered
+            var phoneExists = await _userManager.Users.AnyAsync(u => u.Phone == model.Phone);
+            if (phoneExists)
+            {
+                ModelState.AddModelError("Phone", _localizer["PhoneAlreadyExists"].Value);
+                return View(model);
+            }
 
             User applicationUser = new()
             {
@@ -114,8 +129,12 @@ namespace Shatbly.Areas.Identity.Controllers
             return RedirectToAction("Login", "Account", new { area = "Identity" });
         }
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string remoteError = null)
         {
+            if (!string.IsNullOrEmpty(remoteError))
+            {
+                ModelState.AddModelError(string.Empty, string.Format(_localizer["ExternalProviderError"].Value, remoteError));
+            }
             return View();
         }
         [HttpPost]
@@ -151,8 +170,21 @@ namespace Shatbly.Areas.Identity.Controllers
             }
             if (await _userManager.IsInRoleAsync(user, SD.ROLE_WORKER))
             {
-                TempData["success-notification"] = string.Format(_localizer["WelcomeBack"].Value, user.UserName);
-                return RedirectToAction("Details" , "WorkerProfile", new {area = "Worker"});
+                await _signInManager.SignOutAsync();
+                var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                var errorMsg = _localizer["WorkerCannotLoginFromClientPortal"].ResourceNotFound 
+                    ? (isRtl ? "غير مسموح للفنيين بتسجيل الدخول من بوابة العملاء. الرجاء تسجيل الدخول من بوابة الفنيين." : "Workers are not allowed to log in from the client portal. Please use the Worker Portal.") 
+                    : _localizer["WorkerCannotLoginFromClientPortal"].Value;
+                ModelState.AddModelError(string.Empty, errorMsg);
+                return View(model);
+            }
+            else if (await _userManager.IsInRoleAsync(user, SD.ROLE_ADMIN) || await _userManager.IsInRoleAsync(user, SD.ROLE_SUPER_ADMIN))
+            {
+                await _signInManager.SignOutAsync();
+                var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                var errorMsg = isRtl ? "غير مسموح للمسؤولين بتسجيل الدخول من بوابة العملاء. الرجاء استخدام بوابة الإدارة." : "Administrators are not allowed to log in from the client portal. Please use the Admin Portal.";
+                ModelState.AddModelError(string.Empty, errorMsg);
+                return View(model);
             }
             else if (await _userManager.IsInRoleAsync(user, SD.ROLE_CUSTOMER))
             {
@@ -161,6 +193,134 @@ namespace Shatbly.Areas.Identity.Controllers
             }
 
             return RedirectToAction("Index", "Home" , new { area = "Admin" });
+        }
+        [HttpGet]
+        public IActionResult WorkerLogin(string remoteError = null)
+        {
+            if (!string.IsNullOrEmpty(remoteError))
+            {
+                ModelState.AddModelError(string.Empty, string.Format(_localizer["ExternalProviderError"].Value, remoteError));
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> WorkerLogin(LoginVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
+                       await _userManager.FindByNameAsync(model.EmailOrUserName);
+
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            if (!result.Succeeded)
+            {
+                if (result.IsNotAllowed)
+                {
+                    ModelState.AddModelError("EmailOrUserName", _localizer["ConfirmEmailFirst"].Value);
+                    return View(model);
+                }
+                if (result.IsLockedOut)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["AccountLockedOut"].Value);
+                    return View(model);
+                }
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
+                return View(model);
+            }
+
+            var userWithProfile = await _userManager.Users
+                .Include(u => u.WorkerProfile)
+                .FirstOrDefaultAsync(u => u.Id == user.Id);
+
+            if (userWithProfile?.WorkerProfile != null && !userWithProfile.WorkerProfile.IsApproved)
+            {
+                await _signInManager.SignOutAsync();
+                var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                var errorMsg = isRtl 
+                    ? "حسابك لا يزال قيد المراجعة. لا يمكنك تسجيل الدخول حتى يتم قبول طلبك من قِبل الإدارة." 
+                    : "Your application is still under review. You cannot log in until your account is approved by an administrator.";
+                ModelState.AddModelError(string.Empty, errorMsg);
+                return View(model);
+            }
+
+            if (await _userManager.IsInRoleAsync(user, SD.ROLE_WORKER))
+            {
+                TempData["success-notification"] = string.Format(_localizer["WelcomeBack"].Value, user.UserName);
+                return RedirectToAction("Details", "WorkerProfile", new { area = "Worker" });
+            }
+            else if (await _userManager.IsInRoleAsync(user, SD.ROLE_ADMIN) || await _userManager.IsInRoleAsync(user, SD.ROLE_SUPER_ADMIN))
+            {
+                await _signInManager.SignOutAsync();
+                var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                var errorMsg = isRtl ? "بوابة الدخول هذه مخصصة للفنيين والشركاء فقط. الرجاء استخدام بوابة الإدارة." : "This portal is reserved for workers and partners only. Please use the Admin Portal.";
+                ModelState.AddModelError(string.Empty, errorMsg);
+                return View(model);
+            }
+
+            var isRtl2 = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+            var errorMsg2 = _localizer["NotAWorkerAccount"].ResourceNotFound 
+                ? (isRtl2 ? "بوابة الدخول هذه مخصصة للفنيين والشركاء فقط." : "This portal is reserved for workers and partners only.") 
+                : _localizer["NotAWorkerAccount"].Value;
+            ModelState.AddModelError(string.Empty, errorMsg2);
+            await _signInManager.SignOutAsync();
+            return View(model);
+        }
+        [HttpGet]
+        public IActionResult AdminLogin()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> AdminLogin(LoginVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
+                       await _userManager.FindByNameAsync(model.EmailOrUserName);
+
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            if (!result.Succeeded)
+            {
+                if (result.IsNotAllowed)
+                {
+                    ModelState.AddModelError("EmailOrUserName", _localizer["ConfirmEmailFirst"].Value);
+                    return View(model);
+                }
+                if (result.IsLockedOut)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["AccountLockedOut"].Value);
+                    return View(model);
+                }
+                ModelState.AddModelError(string.Empty, _localizer["InvalidLoginAttempt"].Value);
+                return View(model);
+            }
+
+            if (await _userManager.IsInRoleAsync(user, SD.ROLE_ADMIN) || await _userManager.IsInRoleAsync(user, SD.ROLE_SUPER_ADMIN))
+            {
+                TempData["success-notification"] = string.Format(_localizer["WelcomeBack"].Value, user.UserName);
+                return RedirectToAction("Index", "Home", new { area = "Admin" });
+            }
+
+            // Not an admin – sign out and show error
+            await _signInManager.SignOutAsync();
+            var isRtlAdmin = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+            var adminErrorMsg = isRtlAdmin ? "بوابة الدخول هذه مخصصة للمسؤولين فقط." : "This portal is reserved for administrators only.";
+            ModelState.AddModelError(string.Empty, adminErrorMsg);
+            return View(model);
         }
         [HttpGet]
         public IActionResult ResendEmailConfirmation()
@@ -198,13 +358,20 @@ namespace Shatbly.Areas.Identity.Controllers
 
             var user = await _userManager.FindByEmailAsync(model.EmailOrUserName) ??
                        await _userManager.FindByNameAsync(model.EmailOrUserName);
+
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, _localizer["UserNotFound"].Value);
+                return View(model);
+            }
+
             var userOtpsCount = (await _otpRepository.GetAsync(e => user.Id == e.UserId && e.CreatedAt >= DateTime.UtcNow.AddHours(-24))).Count();
             if (!user.EmailConfirmed)
             {
                 TempData["error-notification"] = _localizer["ConfirmEmailBeforeReset"].Value;
-                return RedirectToAction(" ResendEmailConfirmation");
+                return RedirectToAction("ResendEmailConfirmation");
             }
-            if (user is not null && userOtpsCount < 5)
+            if (userOtpsCount < 5)
             {
                 string otp = new Random().Next(1000, 9999).ToString();
                 string msg = string.Format(_localizer["OtpEmailBody"].Value, otp);
@@ -213,11 +380,14 @@ namespace Shatbly.Areas.Identity.Controllers
                 {
                     UserId = user.Id,
                     Code = otp,
+                    Type = Shatbly.Models.OtpType.PasswordReset,
+                    PhoneEmail = user.Email ?? string.Empty,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(5)
                 });
                 await _otpRepository.CommitAsync();
                 TempData["success-notification"] = _localizer["OtpSentSuccess"].Value;
             }
-            else if (userOtpsCount >= 5)
+            else
             {
                 TempData["error-notification"] = _localizer["OtpLimitExceeded"].Value;
                 return RedirectToAction("ForgetPassword");
@@ -248,12 +418,13 @@ namespace Shatbly.Areas.Identity.Controllers
             }
 
             var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
-            if (otp == null)
+            if (otp == null || otp.Code != model.OTP || otp.ExpiresAt < DateTime.UtcNow)
             {
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
             otp.IsUsed = true;
+            await _otpRepository.CommitAsync();
             return RedirectToAction("ResetPassword", new { userId = user.Id });
         }
         [HttpGet]
@@ -336,11 +507,34 @@ namespace Shatbly.Areas.Identity.Controllers
                 var username = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0];
                 Random random = new Random();
 
+                var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
+                var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
+
+                if (string.IsNullOrWhiteSpace(givenName))
+                {
+                    var fullName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0];
+                    var parts = fullName.Trim().Split(' ', 2);
+                    givenName = parts[0];
+                    surname = parts.Length > 1 ? parts[1] : parts[0];
+                }
+
+                string placeholderPhone;
+                bool phoneExists;
+                do
+                {
+                    placeholderPhone = "05" + random.Next(100000000, 999999999).ToString();
+                    phoneExists = await _userManager.Users.AnyAsync(u => u.Phone == placeholderPhone);
+                } while (phoneExists);
+
                 user = new User
                 {
                     UserName = username.Replace(" ", "") + random.Next(1000, 9999),
                     Email = email,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FName = givenName,
+                    LName = surname,
+                    Name = givenName + " " + surname,
+                    Phone = placeholderPhone
                 };
 
                 var createUserResult = await _userManager.CreateAsync(user);
@@ -348,6 +542,8 @@ namespace Shatbly.Areas.Identity.Controllers
                 {
                     return RedirectToAction(nameof(Login));
                 }
+
+                await _userManager.AddToRoleAsync(user, SD.ROLE_CUSTOMER);
             }
 
             var existingLogins = await _userManager.GetLoginsAsync(user);

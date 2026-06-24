@@ -24,4 +24,6 @@
   <data name="WorkerDashboard" xml:space="preserve"><value>لوحة تحكم الفني</value></data>
   <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
   <data name="FooterText" xml:space="preserve"><value>شطبلي - لوحة تحكم الفني</value></data>
+  <data name="Bookings" xml:space="preserve"><value>الحجوزات</value></data>
+  <data name="Reviews" xml:space="preserve"><value>التقييمات</value></data>
 </root>

@@ -7,10 +7,24 @@
     <div class="topbar-actions">
         @await Html.PartialAsync("_LanguageSwitcher")
 
-        <button class="icon-btn position-relative" type="button">
-            <i class="fa-regular fa-bell"></i>
-            <span class="notification-dot"></span>
-        </button>
+        <div class="dropdown">
+            <button class="icon-btn position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-regular fa-bell"></i>
+                @await Component.InvokeAsync("UnreadNotifications")
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0" aria-labelledby="notificationsDropdown" style="width: 340px; max-height: 450px; overflow-y: auto;">
+                <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-4">
+                    <h6 class="mb-0 fw-bold">@Localizer["Notifications"]</h6>
+                    <a href="/Customer/Notification/MyNotification" class="text-decoration-none small fw-semibold text-primary">@Localizer["ViewAll"]</a>
+                </li>
+                <div id="notifications-list" style="max-height: 350px; overflow-y: auto;">
+                    <div class="p-4 text-center text-muted">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-primary"></i>
+                        <p class="mb-0 small">@Localizer["LoadingNotifications"]</p>
+                    </div>
+                </div>
+            </ul>
+        </div>
 
         <div class="dropdown">
             <button class="profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -25,8 +39,119 @@
                 <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user me-2"></i>@Localizer["Profile"]</a></li>
                 <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-2"></i>@Localizer["Settings"]</a></li>
                 <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-right-from-bracket me-2"></i>@Localizer["Logout"]</a></li>
+                <li><a class="dropdown-item text-danger" href="/Identity/Account/Logout"><i class="fa-solid fa-right-from-bracket me-2"></i>@Localizer["Logout"]</a></li>
             </ul>
         </div>
     </div>
 </header>
+
+<style>
+    .hover-bg-light {
+        transition: background-color 0.2s ease;
+    }
+    .hover-bg-light:hover {
+        background-color: #f8fafc !important;
+    }
+    .unread-notification {
+        background-color: #f0f6ff !important;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const notificationsDropdownBtn = document.getElementById('notificationsDropdown');
+        if (notificationsDropdownBtn) {
+            notificationsDropdownBtn.addEventListener('show.bs.dropdown', function () {
+                const listContainer = document.getElementById('notifications-list');
+                
+                // Show loading spinner
+                listContainer.innerHTML = `
+                    <div class="p-4 text-center text-muted">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x mb-2 text-primary"></i>
+                        <p class="mb-0 small">@Localizer["LoadingNotifications"]</p>
+                    </div>
+                `;
+
+                fetch('/Customer/Notification/GetNotifications')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch notifications');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        listContainer.innerHTML = '';
+                        
+                        if (!data || data.length === 0) {
+                            listContainer.innerHTML = `
+                                <div class="p-4 text-center text-muted">
+                                    <i class="fa-regular fa-bell-slash fa-2x mb-2"></i>
+                                    <p class="mb-0 small">@Localizer["NoNotifications"]</p>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        data.forEach(notification => {
+                            const item = document.createElement('div');
+                            item.className = `p-3 border-bottom d-flex align-items-start gap-2 hover-bg-light ${notification.isRead ? '' : 'unread-notification'}`;
+                            item.style.cursor = 'pointer';
+                            
+                            // Handle click to mark read
+                            item.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                fetch(`/Customer/Notification/MarkAsReadApi/${notification.id}`, {
+                                    method: 'POST'
+                                }).then(res => {
+                                    if (res.ok) {
+                                        // Visually mark as read
+                                        item.classList.remove('unread-notification');
+                                        const badge = item.querySelector('.badge');
+                                        if (badge) badge.remove();
+                                        
+                                        // Decrement badge count in navbar
+                                        const mainBadge = notificationsDropdownBtn.querySelector('.badge');
+                                        if (mainBadge) {
+                                            let count = parseInt(mainBadge.textContent.trim());
+                                            if (!isNaN(count) && count > 0) {
+                                                count--;
+                                                if (count === 0) {
+                                                    mainBadge.remove();
+                                                } else {
+                                                    mainBadge.textContent = count;
+                                                }
+                                            }
+                                        }
+                                        notification.isRead = true;
+                                    }
+                                });
+                            });
+                            
+                            item.innerHTML = `
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold small text-dark text-truncate d-inline-block" style="max-width: 180px;">${notification.title}</span>
+                                        <span class="text-muted" style="font-size: 0.72rem; flex-shrink: 0;">${notification.createdAt}</span>
+                                    </div>
+                                    <p class="mb-0 text-secondary small" style="font-size: 0.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3;">
+                                        ${notification.message}
+                                    </p>
+                                </div>
+                                ${!notification.isRead ? '<span class="badge bg-primary rounded-circle p-1 align-self-center" style="width: 8px; height: 8px; flex-shrink: 0; min-width: auto; min-height: auto;"> </span>' : ''}
+                            `;
+                            listContainer.appendChild(item);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        listContainer.innerHTML = `
+                            <div class="p-4 text-center text-danger">
+                                <i class="fa-solid fa-triangle-exclamation fa-2x mb-2"></i>
+                                <p class="mb-0 small">@Localizer["ErrorLoadingNotifications"]</p>
+                            </div>
+                        `;
+                    });
+            });
+        }
+    });
+</script>

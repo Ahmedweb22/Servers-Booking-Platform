@@ -34,4 +34,7 @@
   <data name="CvLabel" xml:space="preserve"><value>CV / Resume</value></data>
   <data name="CvInvalid" xml:space="preserve"><value>Please upload your CV/Resume.</value></data>
   <data name="SubmitBtn" xml:space="preserve"><value>Submit Application</value></data>
+  <data name="CvUploadTitle" xml:space="preserve"><value>Upload CV / Resume</value></data>
+  <data name="CvUploadSubtitle" xml:space="preserve"><value>Drag &amp; drop your file here or click to browse (PDF, DOCX)</value></data>
+  <data name="ChangeFile" xml:space="preserve"><value>Change File</value></data>
 </root>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>My Bookings &amp; Orders</value></data>
+  <data name="PageSubtitle" xml:space="preserve"><value>Manage your scheduled home services, track technicians, and view payments.</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search orders...</value></data>
+  <data name="FilterAll" xml:space="preserve"><value>All Bookings</value></data>
+  <data name="FilterPending" xml:space="preserve"><value>Pending</value></data>
+  <data name="FilterActive" xml:space="preserve"><value>Active</value></data>
+  <data name="FilterCompleted" xml:space="preserve"><value>Completed</value></data>
+  <data name="FilterCancelled" xml:space="preserve"><value>Cancelled</value></data>
+  <data name="OrderNo" xml:space="preserve"><value>Order #{0}</value></data>
+  <data name="ScheduledFor" xml:space="preserve"><value>Scheduled For</value></data>
+  <data name="WorkerLabel" xml:space="preserve"><value>Technician</value></data>
+  <data name="PriceLabel" xml:space="preserve"><value>Total Price</value></data>
+  <data name="PaymentLabel" xml:space="preserve"><value>Payment</value></data>
+  <data name="ViewDetailsBtn" xml:space="preserve"><value>View Details</value></data>
+  <data name="PayNowBtn" xml:space="preserve"><value>Pay Now</value></data>
+  <data name="EmptyStateTitle" xml:space="preserve"><value>No bookings found</value></data>
+  <data name="EmptyStateSubtitle" xml:space="preserve"><value>You haven't booked any home maintenance services yet.</value></data>
+  <data name="BookNowBtn" xml:space="preserve"><value>Book a Service Now</value></data>
+  <data name="CurrencyFormat" xml:space="preserve"><value>EGP {0}</value></data>
+</root>

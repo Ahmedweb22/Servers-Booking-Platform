@@ -1,0 +1,728 @@
+@model IEnumerable<Order>
+@using Shatbly.Models
+
+@{
+    var curCulture = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "إدارة الحجوزات والطلبات" : "Manage Bookings & Orders";
+
+    Func<string, string> getCategoryClass = (categoryName) =>
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "cat-default";
+        var lower = categoryName.ToLower();
+        if (lower.Contains("clean")) return "cat-cleaning";
+        if (lower.Contains("plumb")) return "cat-plumbing";
+        if (lower.Contains("elect")) return "cat-electrical";
+        if (lower.Contains("ac") || lower.Contains("air")) return "cat-ac";
+        return "cat-default";
+    };
+
+    Func<string, string> getCategoryIcon = (categoryName) =>
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "bi-wrench";
+        var lower = categoryName.ToLower();
+        if (lower.Contains("clean")) return "bi-house-heart";
+        if (lower.Contains("plumb")) return "bi-droplet-half";
+        if (lower.Contains("elect")) return "bi-lightning-charge";
+        if (lower.Contains("ac") || lower.Contains("air")) return "bi-snow";
+        return "bi-wrench";
+    };
+
+    Func<Order, string> getStatusText = (order) =>
+    {
+        if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+        {
+            return isRtl ? "متنازع عليه" : "Disputed";
+        }
+        return order.Status switch
+        {
+            OrderStatuses.Pending => isRtl ? "قيد الانتظار" : "Pending",
+            OrderStatuses.Confirmed => isRtl ? "مؤكد" : "Confirmed",
+            OrderStatuses.Completed => isRtl ? "مكتمل" : "Completed",
+            OrderStatuses.Cancelled => isRtl ? "ملغي" : "Cancelled",
+            OrderStatuses.Rescheduled => isRtl ? "أعيد جدولته" : "Rescheduled",
+            OrderStatuses.Rejected => isRtl ? "مرفوض" : "Rejected",
+            _ => order.Status.ToString()
+        };
+    };
+
+    Func<Order, string> getStatusClass = (order) =>
+    {
+        if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+        {
+            return "status-disputed";
+        }
+        return order.Status switch
+        {
+            OrderStatuses.Pending => "status-pending",
+            OrderStatuses.Confirmed => "status-confirmed",
+            OrderStatuses.Completed => "status-completed",
+            OrderStatuses.Cancelled => "status-cancelled",
+            OrderStatuses.Rescheduled => "status-confirmed",
+            OrderStatuses.Rejected => "status-cancelled",
+            _ => "status-inprogress"
+        };
+    };
+
+    // Label Translations
+    var txtTitle = isRtl ? "الحجوزات والطلبات الواردة" : "Incoming Bookings & Orders";
+    var txtSubtitle = isRtl ? "تتبع وإدارة طلبات الحجز المرسلة من قبل العملاء" : "Track and manage booking requests sent by clients";
+    var txtSearchPlaceholder = isRtl ? "البحث باسم العميل، الخدمة، العنوان..." : "Search by customer, service, address...";
+    var txtFilterAll = isRtl ? "الكل" : "All";
+    var txtFilterPending = isRtl ? "قيد الانتظار" : "Pending";
+    var txtFilterActive = isRtl ? "قيد العمل" : "Active";
+    var txtFilterCompleted = isRtl ? "المكتملة" : "Completed";
+    var txtFilterCancelled = isRtl ? "الملغية / المرفوضة" : "Cancelled";
+    var txtEmptyTitle = isRtl ? "لا توجد حجوزات" : "No Bookings Found";
+    var txtEmptySubtitle = isRtl ? "لم يتم العثور على أي حجوزات تطابق هذا القسم حالياً." : "No bookings found matching this section at the moment.";
+    var txtOrderNo = isRtl ? "طلب رقم #{0}" : "Order #{0}";
+    var txtCustomer = isRtl ? "العميل" : "Client";
+    var txtPhone = isRtl ? "الهاتف" : "Phone";
+    var txtNotes = isRtl ? "ملاحظات العميل" : "Client Notes";
+    var txtNoNotes = isRtl ? "لا توجد ملاحظات إضافية" : "No special instructions provided";
+    var txtPriceLabel = isRtl ? "الأجر الإجمالي" : "Total Price";
+    var txtCurrency = isRtl ? "ج.م" : "EGP";
+    var txtPayment = isRtl ? "طريقة الدفع" : "Payment";
+    var txtLocation = isRtl ? "العنوان" : "Address";
+    
+    var txtAccept = isRtl ? "قبول وتأكيد" : "Accept & Confirm";
+    var txtReject = isRtl ? "رفض الطلب" : "Reject Request";
+    var txtComplete = isRtl ? "إكمال الخدمة" : "Complete Service";
+    var txtChat = isRtl ? "محادثة" : "Chat";
+}
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    /* Styling consistent with Worker Area theme */
+    .bookings-container {
+        font-family: inherit;
+    }
+
+    /* Hero Header */
+    .hero-panel {
+        background: linear-gradient(135deg, #101828 0%, #1d2939 100%);
+        border-radius: 16px;
+        padding: 32px;
+        color: white;
+        margin-bottom: 28px;
+        box-shadow: 0 10px 25px rgba(16, 24, 40, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-panel::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .hero-panel h1 {
+        color: white;
+        margin: 0 0 8px 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    .hero-panel p {
+        color: #98a2b3;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    /* Control Bar */
+    .control-panel {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    @@media (min-width: 768px) {
+        .control-panel {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    /* Search bar */
+    .search-wrapper {
+        position: relative;
+        flex-grow: 1;
+        max-width: 420px;
+    }
+    .search-wrapper i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #98a2b3;
+    }
+    html[dir="rtl"] .search-wrapper i {
+        left: auto;
+        right: 14px;
+    }
+    .search-control {
+        width: 100%;
+        padding: 10px 14px 10px 38px;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    html[dir="rtl"] .search-control {
+        padding: 10px 38px 10px 14px;
+    }
+    .search-control:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Tabs Filter */
+    .tabs-wrapper {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+    .tabs-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+    .tab-item {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid transparent;
+        background-color: #f2f4f7;
+        color: #475467;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .tab-item:hover {
+        background-color: #eaecf0;
+        color: #1d2939;
+    }
+    .tab-item.active {
+        background-color: #2563eb;
+        color: white;
+        border-color: #2563eb;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Booking Grid */
+    .booking-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    @@media (min-width: 992px) {
+        .booking-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Modern Card */
+    .booking-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(16, 24, 40, 0.02);
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+    }
+    .booking-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.06);
+        border-color: #d0d5dd;
+    }
+
+    /* Header */
+    .card-header-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed #eaecf0;
+    }
+    .service-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .service-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    /* Service Categories Styles */
+    .cat-cleaning { background-color: #ecfeff; color: #0891b2; }
+    .cat-plumbing { background-color: #f0fdf4; color: #16a34a; }
+    .cat-electrical { background-color: #fffbeb; color: #d97706; }
+    .cat-ac { background-color: #eff6ff; color: #2563eb; }
+    .cat-default { background-color: #f2f4f7; color: #475467; }
+
+    .service-meta h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #101828;
+    }
+    .order-reference {
+        font-size: 0.8rem;
+        color: #667085;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+    .status-pending { background-color: #fffbeb; color: #d97706; }
+    .status-confirmed { background-color: #eff6ff; color: #2563eb; }
+    .status-inprogress { background-color: #f3e8ff; color: #9333ea; }
+    .status-completed { background-color: #f0fdf4; color: #16a34a; }
+    .status-cancelled { background-color: #fef2f2; color: #dc2626; }
+    .status-disputed { background-color: #ffe4e6; color: #e11d48; }
+
+    /* Card Details */
+    .card-body-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .meta-detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        color: #475467;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    .meta-detail-item i {
+        color: #98a2b3;
+        font-size: 1rem;
+        margin-top: 2px;
+    }
+
+    /* Client Notes Panel */
+    .notes-box {
+        background-color: #f8fafc;
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        border-left: 3px solid #2563eb;
+    }
+    html[dir="rtl"] .notes-box {
+        border-left: none;
+        border-right: 3px solid #2563eb;
+    }
+
+    /* Footer Details and Pricing */
+    .card-footer-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 14px;
+        border-top: 1px solid #eaecf0;
+        margin-top: auto;
+    }
+    .price-container {
+        display: flex;
+        flex-direction: column;
+    }
+    .price-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #101828;
+    }
+    .payment-badge {
+        font-size: 0.72rem;
+        color: #667085;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 1px;
+    }
+
+    /* Action buttons */
+    .actions-panel {
+        display: flex;
+        gap: 6px;
+    }
+    .action-btn-custom {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .action-btn-success {
+        background-color: #16a34a;
+        color: white;
+    }
+    .action-btn-success:hover {
+        background-color: #15803d;
+    }
+    .action-btn-danger {
+        background-color: #fff;
+        color: #dc2626;
+        border: 1px solid #fda29b;
+    }
+    .action-btn-danger:hover {
+        background-color: #fef2f2;
+    }
+    .action-btn-primary {
+        background-color: #2563eb;
+        color: white;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+    }
+    .action-btn-primary:hover {
+        background-color: #1d4ed8;
+    }
+    .action-btn-outline {
+        background-color: #fff;
+        color: #344054;
+        border: 1px solid #d0d5dd;
+    }
+    .action-btn-outline:hover {
+        background-color: #f9fafb;
+    }
+
+    /* Empty State */
+    .empty-bookings-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 48px;
+        text-align: center;
+        border: 1.5px dashed #d0d5dd;
+        max-width: 520px;
+        margin: 40px auto;
+        display: none;
+    }
+    .empty-icon-circle {
+        width: 68px;
+        height: 68px;
+        background-color: #f2f4f7;
+        color: #98a2b3;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 16px;
+    }
+    .empty-bookings-box h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #101828;
+        margin-bottom: 6px;
+    }
+    .empty-bookings-box p {
+        color: #475467;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="bookings-container">
+    <!-- Hero Banner -->
+    <div class="hero-panel">
+        <h1>@txtTitle</h1>
+        <p>@txtSubtitle</p>
+    </div>
+
+    <!-- Live filter and search bar -->
+    <div class="control-panel">
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" id="bookingSearchInput" class="search-control" placeholder="@txtSearchPlaceholder" />
+        </div>
+
+        <div class="tabs-wrapper">
+            <button class="tab-item active" onclick="filterBookings('all')">@txtFilterAll</button>
+            <button class="tab-item" onclick="filterBookings('pending')">@txtFilterPending</button>
+            <button class="tab-item" onclick="filterBookings('active')">@txtFilterActive</button>
+            <button class="tab-item" onclick="filterBookings('completed')">@txtFilterCompleted</button>
+            <button class="tab-item" onclick="filterBookings('cancelled')">@txtFilterCancelled</button>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- No Bookings General Empty State -->
+        <div class="text-center py-5" style="display: block;">
+            <div class="empty-icon-circle">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <h3>@txtEmptyTitle</h3>
+            <p>@txtEmptySubtitle</p>
+        </div>
+    }
+    else
+    {
+        <!-- Bookings grid -->
+        <div class="booking-grid" id="bookingGrid">
+            @foreach (var order in Model)
+            {
+                var categoryName = order.Service?.NameEn ?? "";
+                var svcName = isRtl ? (order.Service?.NameAr ?? order.Service?.NameEn ?? "") : (order.Service?.NameEn ?? "");
+                var catClass = getCategoryClass(categoryName);
+                var catIcon = getCategoryIcon(categoryName);
+                var statusText = getStatusText(order);
+                var statusClass = getStatusClass(order);
+
+                // Filter tab categorization
+                var tabGroup = "pending";
+                if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+                {
+                    tabGroup = "active";
+                }
+                else
+                {
+                    tabGroup = order.Status switch
+                    {
+                        OrderStatuses.Pending => "pending",
+                        OrderStatuses.Confirmed => "active",
+                        OrderStatuses.Rescheduled => "active",
+                        OrderStatuses.Completed => "completed",
+                        OrderStatuses.Cancelled => "cancelled",
+                        OrderStatuses.Rejected => "cancelled",
+                        _ => "active"
+                    };
+                }
+
+                // Payment translation
+                var paymentMethodText = order.PaymentMethod switch
+                {
+                    PaymentMethods.Cash => isRtl ? "نقداً" : "Cash",
+                    PaymentMethods.Card => isRtl ? "بطاقة دفع" : "Card",
+                    PaymentMethods.Wallet => isRtl ? "المحفظة" : "Wallet",
+                    _ => order.PaymentMethod.ToString()
+                };
+
+                var paymentStatusText = order.PaymentStatus switch
+                {
+                    PaymentStatuses.Pending => isRtl ? "غير مدفوع" : "Unpaid",
+                    PaymentStatuses.Paid => isRtl ? "تم الدفع" : "Paid",
+                    PaymentStatuses.Failed => isRtl ? "فشلت عملية الدفع" : "Payment Failed",
+                    PaymentStatuses.Refunded => isRtl ? "مسترجع" : "Refunded",
+                    _ => order.PaymentStatus.ToString()
+                };
+
+                var searchToken = $"{order.Id} {svcName} {order.User?.Name} {order.AddressLine}".ToLower();
+
+                <div class="booking-card" data-tab-group="@tabGroup" data-search-content="@searchToken">
+                    <!-- Top section -->
+                    <div class="card-header-wrapper">
+                        <div class="service-container">
+                            <div class="service-icon-wrapper @catClass">
+                                <i class="bi @catIcon"></i>
+                            </div>
+                            <div class="service-meta">
+                                <h4>@svcName</h4>
+                                <div class="order-reference">@string.Format(txtOrderNo, order.Id)</div>
+                            </div>
+                        </div>
+                        <span class="status-badge @statusClass">@statusText</span>
+                    </div>
+
+                    <!-- Body details -->
+                    <div class="card-body-wrapper">
+                        <div class="meta-detail-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <span>@order.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")</span>
+                        </div>
+                        <div class="meta-detail-item">
+                            <i class="bi bi-person"></i>
+                            <span><strong>@txtCustomer:</strong> @(order.User?.Name ?? (isRtl ? "عميل غير معروف" : "Unknown Client"))</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(order.User?.PhoneNumber))
+                        {
+                            <div class="meta-detail-item">
+                                <i class="bi bi-telephone"></i>
+                                <span><strong>@txtPhone:</strong> <a href="tel:@order.User.PhoneNumber" class="text-decoration-none">@order.User.PhoneNumber</a></span>
+                            </div>
+                        }
+                        <div class="meta-detail-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span><strong>@txtLocation:</strong> @order.AddressLabel - @order.AddressLine</span>
+                        </div>
+                        
+                        <div class="notes-box mt-1">
+                            <i class="bi bi-info-circle me-1 text-primary"></i>
+                            <strong>@txtNotes:</strong>
+                            <div class="text-muted mt-1">
+                                @(string.IsNullOrWhiteSpace(order.Notes) ? txtNoNotes : order.Notes)
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer actions and prices -->
+                    <div class="card-footer-wrapper">
+                        <div class="price-container">
+                            <span class="price-text">@order.TotalPrice.ToString("0.00") @txtCurrency</span>
+                            <span class="payment-badge">
+                                <i class="bi bi-credit-card-2-front"></i>
+                                @paymentMethodText (@paymentStatusText)
+                            </span>
+                        </div>
+
+                        <div class="actions-panel">
+                            @if (order.Status == OrderStatuses.Pending)
+                            {
+                                <form asp-area="Worker" asp-controller="Booking" asp-action="UpdateStatus" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <input type="hidden" name="status" value="@OrderStatuses.Confirmed" />
+                                    <button type="submit" class="action-btn-custom action-btn-success">
+                                        <i class="bi bi-check-lg me-1"></i> @txtAccept
+                                    </button>
+                                </form>
+
+                                <form asp-area="Worker" asp-controller="Booking" asp-action="UpdateStatus" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <input type="hidden" name="status" value="@OrderStatuses.Rejected" />
+                                    <button type="submit" class="action-btn-custom action-btn-danger">
+                                        <i class="bi bi-x-lg me-1"></i> @txtReject
+                                    </button>
+                                </form>
+                            }
+                            else if (order.Status == OrderStatuses.Confirmed || order.Status == OrderStatuses.Rescheduled)
+                            {
+                                <form asp-area="Worker" asp-controller="Booking" asp-action="UpdateStatus" method="post" style="display:inline;">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <input type="hidden" name="status" value="@OrderStatuses.Completed" />
+                                    <button type="submit" class="action-btn-custom action-btn-primary">
+                                        <i class="bi bi-award me-1"></i> @txtComplete
+                                    </button>
+                                </form>
+
+                                <a href="/Worker/Chat/Conversation?bookingId=@order.BookingId" class="action-btn-custom action-btn-outline">
+                                    <i class="bi bi-chat-left-dots me-1"></i> @txtChat
+                                </a>
+
+                                @if (order.Booking != null && order.Booking.Status != BookingStatus.Disputed)
+                                {
+                                    <a href="/Worker/Booking/RaiseDispute?id=@order.Id" class="action-btn-custom action-btn-danger">
+                                        <i class="bi bi-shield-fill-exclamation me-1"></i> @(isRtl ? "تقديم نزاع" : "Raise Dispute")
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <a href="/Worker/Chat/Conversation?bookingId=@order.BookingId" class="action-btn-custom action-btn-outline">
+                                    <i class="bi bi-chat-left-dots me-1"></i> @txtChat
+                                </a>
+
+                                @if (order.Status == OrderStatuses.Completed && order.Booking != null && order.Booking.Status != BookingStatus.Disputed)
+                                {
+                                    <a href="/Worker/Booking/RaiseDispute?id=@order.Id" class="action-btn-custom action-btn-danger">
+                                        <i class="bi bi-shield-fill-exclamation me-1"></i> @(isRtl ? "تقديم نزاع" : "Raise Dispute")
+                                    </a>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Empty state displayed dynamically if filtering leaves nothing -->
+        <div id="dynamicEmptyStateBox" class="empty-bookings-box">
+            <div class="empty-icon-circle">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3>@txtEmptyTitle</h3>
+            <p>@txtEmptySubtitle</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        let currentFilterTab = 'all';
+
+        function filterBookings(tab) {
+            currentFilterTab = tab;
+
+            // Update active state in tabs
+            const items = document.querySelectorAll('.tab-item');
+            items.forEach(el => el.classList.remove('active'));
+
+            const targetBtn = Array.from(items).find(el => el.getAttribute('onclick').includes(tab));
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+
+            executeFilters();
+        }
+
+        function executeFilters() {
+            const query = document.getElementById('bookingSearchInput')?.value.toLowerCase().trim() || '';
+            const cards = document.querySelectorAll('.booking-card');
+            let displayed = 0;
+
+            cards.forEach(card => {
+                const group = card.getAttribute('data-tab-group');
+                const content = card.getAttribute('data-search-content') || '';
+
+                const isTabMatch = (currentFilterTab === 'all' || group === currentFilterTab);
+                const isSearchMatch = (query === '' || content.includes(query));
+
+                if (isTabMatch && isSearchMatch) {
+                    card.style.display = 'flex';
+                    displayed++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const dynEmptyBox = document.getElementById('dynamicEmptyStateBox');
+            const grid = document.getElementById('bookingGrid');
+
+            if (dynEmptyBox && grid) {
+                if (displayed === 0) {
+                    dynEmptyBox.style.display = 'block';
+                    grid.style.display = 'none';
+                } else {
+                    dynEmptyBox.style.display = 'none';
+                    grid.style.display = 'grid';
+                }
+            }
+        }
+
+        document.getElementById('bookingSearchInput')?.addEventListener('input', executeFilters);
+    </script>
+}

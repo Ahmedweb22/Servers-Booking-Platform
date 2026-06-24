@@ -1,0 +1,153 @@
+@model Shatbly.ViewModels.AdminReviewVM
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewBag.Title = isRtl ? "إنشاء تقييم جديد" : "Create New Review";
+}
+
+<style>
+    .form-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f0f0f0;
+        padding: 35px;
+        max-width: 650px;
+        margin: 0 auto;
+    }
+    .rating-wrapper {
+        direction: ltr; /* Keeps the stars in correct order */
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .star-btn {
+        background: none;
+        border: none;
+        font-size: 2.2rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: transform 0.2s, color 0.2s;
+        padding: 0;
+    }
+    .star-btn:hover {
+        transform: scale(1.15);
+    }
+    .star-btn.active, .star-btn.hovered {
+        color: #f59e0b;
+    }
+</style>
+
+<div class="mb-4 @(isRtl ? "text-end" : "text-start")">
+    <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none p-0">
+        <i class="bi bi-arrow-@(isRtl ? "right" : "left") me-1"></i> @(isRtl ? "العودة إلى القائمة" : "Back to List")
+    </a>
+    <h2 class="fw-bold mt-2">@(isRtl ? "إضافة تقييم يدوي" : "Create Review Manually")</h2>
+    <p class="text-muted">@(isRtl ? "إنشاء تقييم لطلب منتهي لا يحتوي على تقييم" : "Create a review for a completed booking that has no feedback yet")</p>
+</div>
+
+<div class="form-card @(isRtl ? "text-end" : "text-start")">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+        <!-- Booking Selection -->
+        <div class="mb-4">
+            <label asp-for="BookingId" class="form-label fw-bold">@(isRtl ? "الحجز المؤهل" : "Eligible Booking") <span class="text-danger">*</span></label>
+            <select asp-for="BookingId" asp-items="Model.Bookings" class="form-select border-2 p-2">
+                <option value="">@(isRtl ? "-- اختر حجزاً --" : "-- Select a Booking --")</option>
+            </select>
+            <span asp-validation-for="BookingId" class="text-danger fw-semibold small"></span>
+        </div>
+
+        <!-- Star Rating Selection -->
+        <div class="mb-4 text-center">
+            <label class="form-label fw-bold d-block">@(isRtl ? "التقييم" : "Rating") <span class="text-danger">*</span></label>
+            <input type="hidden" asp-for="Rating" id="ratingInput" />
+            
+            <div class="rating-wrapper">
+                <button type="button" class="star-btn" data-value="5"><i class="bi bi-star-fill"></i></button>
+                <button type="button" class="star-btn" data-value="4"><i class="bi bi-star-fill"></i></button>
+                <button type="button" class="star-btn" data-value="3"><i class="bi bi-star-fill"></i></button>
+                <button type="button" class="star-btn" data-value="2"><i class="bi bi-star-fill"></i></button>
+                <button type="button" class="star-btn" data-value="1"><i class="bi bi-star-fill"></i></button>
+            </div>
+            
+            <span asp-validation-for="Rating" class="text-danger fw-semibold d-block mt-2"></span>
+        </div>
+
+        <!-- Comment Textarea -->
+        <div class="mb-4">
+            <label asp-for="Comment" class="form-label fw-bold">@(isRtl ? "التعليق والرجوع" : "Comment / Feedback") <span class="text-danger">*</span></label>
+            <textarea asp-for="Comment" class="form-control border-2" rows="4" 
+                      placeholder="@(isRtl ? "اكتب تعليق التقييم هنا..." : "Type the review comment here...")"></textarea>
+            <span asp-validation-for="Comment" class="text-danger fw-semibold small"></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex justify-content-end gap-2 border-top pt-4">
+            <a asp-action="Index" class="btn btn-light px-4 py-2 fw-semibold border">@(isRtl ? "إلغاء" : "Cancel")</a>
+            <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                <i class="bi bi-check-circle me-1"></i> @(isRtl ? "حفظ التقييم" : "Save Review")
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ratingInput = document.getElementById('ratingInput');
+            const stars = document.querySelectorAll('.star-btn');
+
+            function updateStars(value) {
+                stars.forEach(star => {
+                    const starVal = parseInt(star.dataset.value);
+                    if (starVal <= value) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function () {
+                    const hoverVal = parseInt(this.dataset.value);
+                    stars.forEach(s => {
+                        const starVal = parseInt(s.dataset.value);
+                        if (starVal <= hoverVal) {
+                            s.classList.add('hovered');
+                        } else {
+                            s.classList.remove('hovered');
+                        }
+                    });
+                });
+
+                star.addEventListener('mouseleave', function () {
+                    stars.forEach(s => s.classList.remove('hovered'));
+                    const selectedVal = parseInt(ratingInput.value) || 0;
+                    updateStars(selectedVal);
+                });
+
+                star.addEventListener('click', function () {
+                    const selectedVal = parseInt(this.dataset.value);
+                    ratingInput.value = selectedVal;
+                    updateStars(selectedVal);
+                });
+            });
+
+            // Initialize on page load in case of postback validation failure
+            const initialRating = parseInt(ratingInput.value) || 0;
+            if (initialRating > 0) {
+                updateStars(initialRating);
+            }
+        });
+    </script>
+}

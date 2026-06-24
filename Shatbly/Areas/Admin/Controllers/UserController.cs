@@ -189,7 +189,7 @@ namespace Shatbly.Areas.Admin.Controllers
             }
             var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
             var userRoles = await _userManager.GetRolesAsync(user);
-            return View(new EditUserVM
+            var model = new EditUserVM
             {
                 Id = user.Id,
                 FName = user.FName,
@@ -199,14 +199,27 @@ namespace Shatbly.Areas.Admin.Controllers
                 Phone = user.Phone,
                 RoleName = userRoles.FirstOrDefault(),
                 Roles = roles.AsEnumerable()
-            });
+            };
+
+            if (TempData.TryGetValue("SavedPassword", out var savedPassword))
+            {
+                model.Password = savedPassword as string;
+            }
+
+            return View(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditUserVM editUserVM)
         {
             ModelState.Remove("Id");
             ModelState.Remove("User");
             ModelState.Remove("Roles");
+            if (string.IsNullOrEmpty(editUserVM.Password))
+            {
+                ModelState.Remove("Password");
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["error-notification"] = _sharedLocalizer["InvalidData"].Value;
@@ -214,15 +227,48 @@ namespace Shatbly.Areas.Admin.Controllers
                 editUserVM.Roles = roles.AsEnumerable();
                 return View(editUserVM);
             }
+
             var user = await _userManager.FindByIdAsync(editUserVM.Id);
             if (user == null)
             {
                 return NotFound();
             }
-                user.FName = editUserVM.FName;
+
+            // Duplicate checks
+            var existingUserByEmail = await _userManager.FindByEmailAsync(editUserVM.Email);
+            if (existingUserByEmail != null && existingUserByEmail.Id != editUserVM.Id)
+            {
+                ModelState.AddModelError("Email", _localizer["EmailAlreadyExists"].Value);
+            }
+
+            var existingUserByUsername = await _userManager.FindByNameAsync(editUserVM.UserName);
+            if (existingUserByUsername != null && existingUserByUsername.Id != editUserVM.Id)
+            {
+                ModelState.AddModelError("UserName", _localizer["UsernameAlreadyExists"].Value);
+            }
+
+            var existingUserByPhone = await _userManager.Users.FirstOrDefaultAsync(u => u.Phone == editUserVM.Phone);
+            if (existingUserByPhone != null && existingUserByPhone.Id != editUserVM.Id)
+            {
+                ModelState.AddModelError("Phone", _localizer["PhoneAlreadyExists"].Value);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["error-notification"] = _sharedLocalizer["InvalidData"].Value;
+                var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
+                editUserVM.Roles = roles.AsEnumerable();
+                return View(editUserVM);
+            }
+
+            user.FName = editUserVM.FName;
             user.LName = editUserVM.LName;
+            user.Name = editUserVM.FName + " " + editUserVM.LName;
             user.UserName = editUserVM.UserName;
             user.Email = editUserVM.Email;
+            user.Phone = editUserVM.Phone;
+            user.PhoneNumber = editUserVM.Phone;
+
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
@@ -231,16 +277,37 @@ namespace Shatbly.Areas.Admin.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
                 TempData["error-notification"] = _localizer["UpdateFailed"].Value;
+                var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
+                editUserVM.Roles = roles.AsEnumerable();
+                return View(editUserVM);
             }
-            else
-            {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                await _userManager.RemoveFromRolesAsync(user, userRoles);
-                await _userManager.AddToRoleAsync(user, editUserVM.RoleName);
-                TempData["success-notification"] = _localizer["UpdateSuccessful"].Value;
-            }
-            return RedirectToAction(nameof(Index));
 
+            // Update Password if provided
+            if (!string.IsNullOrEmpty(editUserVM.Password))
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var passwordResult = await _userManager.ResetPasswordAsync(user, token, editUserVM.Password);
+                if (!passwordResult.Succeeded)
+                {
+                    foreach (var error in passwordResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    TempData["error-notification"] = _localizer["UpdateFailed"].Value;
+                    var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
+                    editUserVM.Roles = roles.AsEnumerable();
+                    return View(editUserVM);
+                }
+                TempData["SavedPassword"] = editUserVM.Password;
+            }
+
+            // Update Roles
+            var userRoles = await _userManager.GetRolesAsync(user);
+            await _userManager.RemoveFromRolesAsync(user, userRoles);
+            await _userManager.AddToRoleAsync(user, editUserVM.RoleName);
+
+            TempData["success-notification"] = _localizer["UpdateSuccessful"].Value;
+            return RedirectToAction(nameof(Edit), new { id = editUserVM.Id });
         }
         public async Task<IActionResult> Delete(string id)
         {
@@ -261,14 +328,21 @@ namespace Shatbly.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> ExportPdf()
+        public async Task<IActionResult> ExportPdf([FromServices] Shatbly.DataAccess.ApplicationDbContext context)
         {
             var users = await _userManager.Users
                 .Include(u => u.Orders)
                 .Include(u => u.ClientBookings)
                 .ToListAsync();
 
-            var report = new SimpleReport(users);
+            var roles = await context.Roles.ToListAsync();
+            var userRoles = await context.UserRoles.ToListAsync();
+            var roleNames = roles.ToDictionary(r => r.Id, r => r.Name ?? "Unknown");
+            var userRoleMap = userRoles
+                .GroupBy(ur => ur.UserId)
+                .ToDictionary(g => g.Key, g => roleNames.GetValueOrDefault(g.First().RoleId, "Customer"));
+
+            var report = new SimpleReport(users, userRoleMap);
             var pdfBytes = report.GeneratePdf();
 
             return File(pdfBytes, "application/pdf", "UsersReport.pdf");

@@ -230,6 +230,38 @@ namespace Shatbly.Utilities.Dbintializes
             {
                 await _context.SaveChangesAsync();
             }
+
+            // Custom balance seed for worker 1
+            var worker1User = await _userManager.FindByNameAsync("Worker");
+            if (worker1User != null)
+            {
+                var worker1Profile = _context.WorkerProfiles.FirstOrDefault(wp => wp.UserId == worker1User.Id);
+                if (worker1Profile != null)
+                {
+                    var has5000Booking = _context.Bookings.Any(b => b.WorkerId == worker1Profile.Id && b.TotalPrice == 5000 && b.Status == BookingStatus.Completed);
+                    if (!has5000Booking)
+                    {
+                        var cust = await _userManager.FindByNameAsync("Customer");
+                        var addr = _context.Addresses.FirstOrDefault(a => a.UserId == cust.Id);
+                        if (cust != null && addr != null)
+                        {
+                            _context.Bookings.Add(new Booking
+                            {
+                                ClientId = cust.Id,
+                                WorkerId = worker1Profile.Id,
+                                AddressId = addr.Id,
+                                ScheduledAt = DateTime.UtcNow,
+                                DurationHours = 1,
+                                TotalPrice = 5000,
+                                DiscountAmt = 0,
+                                Status = BookingStatus.Completed,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -31,4 +31,6 @@
   <data name="EmailOrUsernamePlaceholder" xml:space="preserve"><value>example@mail.com or username123</value></data>
   <data name="PasswordPlaceholder" xml:space="preserve"><value>Enter your password</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>Show/Hide Password</value></data>
+  <data name="WorkerPortalPrompt" xml:space="preserve"><value>Are you a service provider or worker?</value></data>
+  <data name="WorkerPortalLink" xml:space="preserve"><value>Worker Portal Sign In</value></data>
 </root>

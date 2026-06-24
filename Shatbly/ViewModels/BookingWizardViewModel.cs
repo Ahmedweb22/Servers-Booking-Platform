@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shatbly.Models;
 
@@ -58,6 +58,10 @@ namespace Shatbly.ViewModels
         public IReadOnlyList<SelectListItem> RecurrenceOptions { get; set; } = [];
         public IReadOnlyList<SelectListItem> AddressPresets { get; set; } = [];
         public string AvailabilityJson { get; set; } = "{}";
+        public string WorkerDetailsJson { get; set; } = "{}";
+        public string ServiceDetailsJson { get; set; } = "{}";
+        public int? PromoCodeId { get; set; }
+        public string? PromoCodeText { get; set; }
         public string SelectedServiceName { get; set; } = string.Empty;
         public string SelectedWorkerName { get; set; } = string.Empty;
         public decimal ServicePrice { get; set; }

@@ -24,4 +24,6 @@
   <data name="WorkerDashboard" xml:space="preserve"><value>Worker Dashboard</value></data>
   <data name="Logout" xml:space="preserve"><value>Logout</value></data>
   <data name="FooterText" xml:space="preserve"><value>Shatbly Worker Panel</value></data>
+  <data name="Bookings" xml:space="preserve"><value>Bookings</value></data>
+  <data name="Reviews" xml:space="preserve"><value>Reviews</value></data>
 </root>

@@ -28,5 +28,10 @@
   <data name="WorkerService" xml:space="preserve"><value>Worker Service</value></data>
   <data name="WorkerProfile" xml:space="preserve"><value>Worker Profile</value></data>
   <data name="Reports" xml:space="preserve"><value>Reports</value></data>
+  <data name="Withdrawals" xml:space="preserve"><value>Withdrawals</value></data>
+  <data name="Reviews" xml:space="preserve"><value>Reviews</value></data>
   <data name="Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Messages" xml:space="preserve"><value>Messages &amp; Applications</value></data>
+  <data name="Logout" xml:space="preserve"><value>Logout</value></data>
+  <data name="Disputes" xml:space="preserve"><value>Disputes / Tickets</value></data>
 </root>

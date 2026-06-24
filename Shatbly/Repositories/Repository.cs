@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Shatbly.Repositories
 {
@@ -54,15 +54,7 @@ namespace Shatbly.Repositories
 
         public async Task<int> CommitAsync()
         {
-            try
-            {
-                return await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred while saving changes: {ex.Message}");
-                return 0;
-            }
+            return await _context.SaveChangesAsync();
         }
 
         public void Update(PromotionCode promotionCode)

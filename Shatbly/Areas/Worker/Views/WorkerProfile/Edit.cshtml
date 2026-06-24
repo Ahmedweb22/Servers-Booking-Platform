@@ -1,95 +1,284 @@
-﻿@model Shatbly.ViewModels.EditWorkerProfileVM
-
+@model Shatbly.ViewModels.EditWorkerProfileVM
+@using Microsoft.AspNetCore.Localization
 @{
-    ViewData["Title"] = "Edit Worker Profile";
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "تعديل الملف الشخصي - شطبلي" : "Edit Worker Profile - Shatbly";
+
+    var profilePictureUrl = "";
+    if (!string.IsNullOrEmpty(Model.ExistingProfilePicturePath))
+    {
+        var cleanedPath = Model.ExistingProfilePicturePath.Trim().Replace("\\", "/");
+        if (cleanedPath.StartsWith("~/"))
+        {
+            profilePictureUrl = Url.Content(cleanedPath);
+        }
+        else if (cleanedPath.StartsWith("/"))
+        {
+            profilePictureUrl = Url.Content("~" + cleanedPath);
+        }
+        else
+        {
+            profilePictureUrl = Url.Content("~/" + cleanedPath);
+        }
+    }
 }
 
+<style>
+    .edit-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(16, 24, 40, 0.04);
+        background: #ffffff;
+        border: 1px solid #f3f4f6;
+    }
+    .form-control-custom {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    .form-control-custom:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    .form-check-custom-input {
+        width: 1.6em;
+        height: 1.6em;
+        margin-top: 0;
+        cursor: pointer;
+    }
+    .current-photo-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #eff6ff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .photo-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #f3f4f6;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        border: 3px dashed #cbd5e1;
+    }
+    .section-header-pill {
+        display: inline-block;
+        padding: 6px 14px;
+        background: rgba(37, 99, 235, 0.06);
+        color: #2563eb;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+</style>
+
 <div class="container py-4">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">Edit Worker Profile</h2>
-            <p class="text-muted mb-0">Update profile information and CV</p>
+            <h2 class="mb-1 fw-bold">@(isRtl ? "تعديل الملف الشخصي" : "Edit Worker Profile")</h2>
+            <p class="text-muted mb-0">@(isRtl ? "تحديث النبذة التعريفية وحالة التوفر والملفات" : "Update your bio, availability settings, and media files")</p>
         </div>
 
-        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
-            Back to Details
+        <a asp-action="Details" class="btn btn-outline-secondary px-4 py-2 fw-semibold" style="border-radius: 10px;">
+            <i class="bi bi-arrow-left me-2"></i>@(isRtl ? "العودة للتفاصيل" : "Back to Details")
         </a>
     </div>
 
     @if (TempData["Error"] is not null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger mb-4" style="border-radius: 12px;">@TempData["Error"]</div>
     }
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-                @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+            <div class="card edit-card p-4">
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
 
-                <input asp-for="Id" type="hidden" />
-                <input asp-for="ExistingCVPath" type="hidden" />
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="ExistingCVPath" type="hidden" />
 
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="mb-3">
-                    <label asp-for="Bio" class="form-label"></label>
-                    <textarea asp-for="Bio" class="form-control" rows="6"></textarea>
-                    <span asp-validation-for="Bio" class="text-danger"></span>
-                </div>
+                    <!-- Bio -->
+                    <div class="mb-4 @(isRtl ? "text-end" : "text-start")">
+                        <label asp-for="Bio" class="form-label fw-bold text-dark mb-2">@(isRtl ? "النبذة التعريفية" : "Bio / Description")</label>
+                        <textarea asp-for="Bio" class="form-control form-control-custom" rows="6" placeholder="@(isRtl ? "اكتب نبذة عن خبراتك ومهاراتك في أعمال التشطيب والصيانة..." : "Tell clients about your work experience, skills, and specialties...")"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger small mt-1 d-block"></span>
+                    </div>
 
-                <div class="form-check mb-2">
-                    <input asp-for="IsAvailable" class="form-check-input" />
-                    <label asp-for="IsAvailable" class="form-check-label"></label>
-                </div>
+                    <!-- Category & Hourly Rate -->
+                    <div class="mb-4 @(isRtl ? "text-end" : "text-start")">
+                        <span class="section-header-pill mb-3">@(isRtl ? "بيانات الخدمة والتسعير" : "Service & Pricing Details")</span>
+                        
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label asp-for="CategoryId" class="form-label fw-bold text-dark mb-2">@(isRtl ? "القسم / التخصص" : "Service Category")</label>
+                                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control form-control-custom">
+                                    <option value="">@(isRtl ? "-- اختر التخصص --" : "-- Select Specialty --")</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="HourlyRate" class="form-label fw-bold text-dark mb-2">@(isRtl ? "سعر الساعة (بالجنيه)" : "Hourly Rate (EGP)")</label>
+                                <input asp-for="HourlyRate" type="number" step="0.01" min="0.01" class="form-control form-control-custom" placeholder="e.g. 150" />
+                                <span asp-validation-for="HourlyRate" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="form-check mb-4">
-                    <input asp-for="AcceptsOnline" class="form-check-input" />
-                    <label asp-for="AcceptsOnline" class="form-check-label"></label>
-                </div>
+                    <!-- Preferences Section -->
+                    <div class="mb-4 @(isRtl ? "text-end" : "text-start")">
+                        <span class="section-header-pill mb-3">@(isRtl ? "خيارات التوفر والعمل" : "Work Preferences")</span>
+                        
+                        <div class="d-flex flex-column gap-3 mt-3">
+                            <!-- IsAvailable -->
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3" style="background: #fafafa;">
+                                <div class="@(isRtl ? "text-end" : "text-start")">
+                                    <label asp-for="IsAvailable" class="form-label fw-bold mb-0 text-dark">@(isRtl ? "متاح حالياً لتلقي الطلبات" : "Available for Work")</label>
+                                    <small class="text-muted d-block mt-1">@(isRtl ? "سيظهر اسمك للعملاء في نتائج البحث عندما تكون متاحاً" : "Your profile will appear in searches for active bookings")</small>
+                                </div>
+                                <input asp-for="IsAvailable" class="form-check-input form-check-custom-input border-secondary" type="checkbox" />
+                            </div>
 
-                <button type="submit" class="btn btn-primary">
-                    Save Changes
-                </button>
-            </form>
+                            <!-- AcceptsOnline -->
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3" style="background: #fafafa;">
+                                <div class="@(isRtl ? "text-end" : "text-start")">
+                                    <label asp-for="AcceptsOnline" class="form-label fw-bold mb-0 text-dark">@(isRtl ? "قبول الحجوزات والدفع الإلكتروني" : "Accepts Online Bookings")</label>
+                                    <small class="text-muted d-block mt-1">@(isRtl ? "تفعيل الدفع الإلكتروني والحجز التلقائي من العملاء" : "Enable clients to schedule and pay directly through the portal")</small>
+                                </div>
+                                <input asp-for="AcceptsOnline" class="form-check-input form-check-custom-input border-secondary" type="checkbox" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="@(isRtl ? "text-end" : "text-start") mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary px-5 py-3 fw-bold" style="border-radius: 12px; width: 100%;">
+                            <i class="bi bi-check-circle me-2"></i>@(isRtl ? "حفظ التعديلات" : "Save Changes")
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h5 class="mb-3">CV Upload</h5>
-
-            @if (!string.IsNullOrWhiteSpace(Model.ExistingCVPath))
-            {
-                <p>
-                    Current CV:
-                    <a href="@Url.Content(Model.ExistingCVPath)" target="_blank">Download</a>
-                </p>
-            }
-
-            <form asp-action="UploadCv" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-
-                <input asp-for="Id" type="hidden" />
-                <input asp-for="Bio" type="hidden" />
-                <input asp-for="IsAvailable" type="hidden" />
-                <input asp-for="AcceptsOnline" type="hidden" />
-                <input asp-for="ExistingCVPath" type="hidden" />
-
-                <div class="mb-3">
-                    <label asp-for="CVFile" class="form-label"></label>
-                    <input asp-for="CVFile" type="file" accept="application/pdf,.pdf" class="form-control" />
-                    <span asp-validation-for="CVFile" class="text-danger"></span>
-                    <div class="form-text">PDF only. Maximum size: 5 MB.</div>
+        <!-- Sidebar / Media Column -->
+        <div class="col-lg-4">
+            <!-- Profile Photo Upload Card -->
+            <div class="card edit-card p-4 mb-4 text-center">
+                <span class="section-header-pill mb-3">@(isRtl ? "الصورة الشخصية" : "Profile Picture")</span>
+                
+                <div class="my-4 d-flex justify-content-center">
+                    @if (!string.IsNullOrEmpty(Model.ExistingProfilePicturePath))
+                    {
+                        <img src="@profilePictureUrl" class="current-photo-circle" alt="Current Photo" id="photoPreview" />
+                    }
+                    else
+                    {
+                        <div class="photo-placeholder" id="photoPlaceholder"><i class="bi bi-person"></i></div>
+                    }
                 </div>
 
-                <button type="submit" class="btn btn-outline-primary">
-                    Upload CV
-                </button>
-            </form>
+                <form asp-action="UploadProfilePicture" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="Id" type="hidden" />
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small text-secondary">@(isRtl ? "اختيار صورة جديدة" : "Choose New Photo")</label>
+                        <input asp-for="ProfilePictureFile" type="file" accept=".jpg,.jpeg,.png" class="form-control form-control-custom" id="photoFileInput" />
+                        <span asp-validation-for="ProfilePictureFile" class="text-danger small mt-1 d-block"></span>
+                        <div class="form-text mt-2 small text-muted">JPG, JPEG, PNG. Max: 10 MB.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-semibold" style="border-radius: 8px;">
+                        <i class="bi bi-upload me-1"></i>@(isRtl ? "رفع الصورة" : "Upload Photo")
+                    </button>
+                </form>
+            </div>
+
+            <!-- CV Upload Card -->
+            <div class="card edit-card p-4 text-center">
+                <span class="section-header-pill mb-3">@(isRtl ? "السيرة الذاتية (CV)" : "CV Upload")</span>
+                
+                <div class="my-3 text-secondary">
+                    @if (!string.IsNullOrWhiteSpace(Model.ExistingCVPath))
+                    {
+                        var isPath = Model.ExistingCVPath.Contains('/') || Model.ExistingCVPath.Contains('\\');
+                        var cvUrl = isPath ? Url.Content("~/" + Model.ExistingCVPath.Replace("\\", "/")) : Url.Content("~/img/worker/worker_cv/" + Model.ExistingCVPath);
+                        <div class="d-flex align-items-center justify-content-center gap-2 p-2 bg-light rounded-3 mb-3 border">
+                            <i class="bi bi-file-pdf-fill text-danger fs-4"></i>
+                            <a href="@cvUrl" target="_blank" class="fw-semibold text-decoration-none text-dark small">
+                                @(isRtl ? "تحميل السيرة الذاتية الحالية" : "Download Current CV")
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted small mb-3">
+                            <i class="bi bi-x-circle me-1"></i>@(isRtl ? "لم يتم رفع سيرة ذاتية بعد" : "No CV uploaded yet")
+                        </div>
+                    }
+                </div>
+
+                <form asp-action="UploadCv" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="Bio" type="hidden" />
+                    <input asp-for="IsAvailable" type="hidden" />
+                    <input asp-for="AcceptsOnline" type="hidden" />
+                    <input asp-for="ExistingCVPath" type="hidden" />
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold small text-secondary">@(isRtl ? "اختيار ملف السيرة الذاتية" : "Select CV File")</label>
+                        <input asp-for="CVFile" type="file" accept=".pdf" class="form-control form-control-custom" />
+                        <span asp-validation-for="CVFile" class="text-danger small mt-1 d-block"></span>
+                        <div class="form-text mt-2 small text-muted">PDF only. Max: 5 MB.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-semibold" style="border-radius: 8px;">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i>@(isRtl ? "رفع السيرة الذاتية" : "Upload CV")
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Live photo preview when file is selected
+            $('#photoFileInput').on('change', function () {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        // Replace or create preview image
+                        var preview = $('#photoPreview');
+                        if (preview.length > 0) {
+                            preview.attr('src', e.target.result);
+                        } else {
+                            var placeholder = $('#photoPlaceholder');
+                            placeholder.replaceWith('<img src="' + e.target.result + '" class="current-photo-circle" alt="Current Photo" id="photoPreview" />');
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
 }

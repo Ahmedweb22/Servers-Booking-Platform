@@ -1,0 +1,301 @@
+@model LoginVM
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = isRtl ? "تسجيل دخول الإدارة - شطبلي" : "Admin Login - Shatbly";
+}
+
+<style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #0a0a0f;
+        background-image: radial-gradient(circle at 15% 25%, rgba(127, 29, 29, 0.12) 0%, rgba(10, 10, 15, 0.2) 80%);
+        color: #f8fafc;
+    }
+
+    .admin-login-container {
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+        animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .admin-auth-card {
+        background: linear-gradient(145deg, #1a1a2e, #0a0a0f);
+        border: 1px solid rgba(220, 38, 38, 0.15);
+        border-radius: 30px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(220, 38, 38, 0.05);
+        overflow: hidden;
+    }
+
+    .benefit-item-admin {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 18px;
+        padding: 16px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .benefit-item-admin:hover {
+        background: rgba(220, 38, 38, 0.05);
+        border-color: rgba(220, 38, 38, 0.25);
+        transform: translateY(-3px);
+    }
+
+    .benefit-icon-admin {
+        width: 48px;
+        height: 48px;
+        background: rgba(220, 38, 38, 0.1);
+        color: #ef4444;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    .form-control-admin {
+        background-color: rgba(10, 10, 15, 0.7);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        color: #f8fafc !important;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-admin:focus {
+        background-color: rgba(10, 10, 15, 0.9);
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+        outline: none;
+    }
+
+    .form-control-admin::placeholder {
+        color: rgba(248, 250, 252, 0.3);
+    }
+
+    .input-group-admin-text {
+        background-color: rgba(10, 10, 15, 0.7) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+        border-right: none !important;
+        color: rgba(255, 255, 255, 0.35) !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+
+    html[dir="rtl"] .input-group-admin-text {
+        border-left: none !important;
+        border-right: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    .input-group-admin-input {
+        border-left: none !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    html[dir="rtl"] .input-group-admin-input {
+        border-right: none !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+
+    .btn-admin-red {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        border: none;
+        color: #ffffff;
+        font-weight: 700;
+        border-radius: 14px;
+        padding: 14px 28px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .btn-admin-red:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(220, 38, 38, 0.35);
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        color: #ffffff;
+    }
+
+    .admin-badge {
+        background: rgba(220, 38, 38, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .shield-glow {
+        width: 70px;
+        height: 70px;
+        background: rgba(220, 38, 38, 0.08);
+        border: 2px solid rgba(220, 38, 38, 0.2);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #ef4444;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 30px rgba(220, 38, 38, 0.1);
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container admin-login-container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-11">
+            <div class="card admin-auth-card">
+                <div class="row g-0">
+
+                    <!-- Left Side: Admin Highlights -->
+                    <div class="col-lg-6 d-flex flex-column justify-content-between p-5 position-relative" style="background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%); border-right: 1px solid rgba(255, 255, 255, 0.04);">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <span class="badge admin-badge px-3 py-2 fw-bold" style="border-radius: 10px;">
+                                    @(isRtl ? "لوحة تحكم الإدارة" : "Admin Dashboard")
+                                </span>
+                                <h5 class="mb-0 fw-bold text-white">SHTBLY</h5>
+                            </div>
+
+                            <div class="shield-glow">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+
+                            <h2 class="fw-bold mb-3 text-white lh-base">
+                                @(isRtl ? "وصول محمي للمسؤولين فقط" : "Restricted Access for Administrators Only")
+                            </h2>
+                            <p class="text-light opacity-40 mb-5 fs-6">
+                                @(isRtl ? "بوابة الدخول هذه مخصصة للمسؤولين والمشرفين فقط. تحكم في كافة جوانب المنصة من مكان واحد." : "This portal is exclusively for authorized administrators. Manage every aspect of the platform from a single control center.")
+                            </p>
+
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <div class="benefit-item-admin d-flex align-items-center gap-3">
+                                    <div class="benefit-icon-admin">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "إدارة المستخدمين" : "User Management")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "تحكم بجميع حسابات العملاء والفنيين" : "Control all customer and worker accounts")</small>
+                                    </div>
+                                </div>
+                                <div class="benefit-item-admin d-flex align-items-center gap-3">
+                                    <div class="benefit-icon-admin">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "التقارير والإحصائيات" : "Reports & Analytics")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "تتبع الإيرادات والحجوزات والأداء" : "Track revenue, bookings, and performance metrics")</small>
+                                    </div>
+                                </div>
+                                <div class="benefit-item-admin d-flex align-items-center gap-3">
+                                    <div class="benefit-icon-admin">
+                                        <i class="bi bi-gear-wide-connected"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-white">@(isRtl ? "إعدادات النظام" : "System Configuration")</h6>
+                                        <small class="text-light opacity-50">@(isRtl ? "ضبط الخدمات والكوبونات والعروض الترويجية" : "Configure services, coupons, and promotions")</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-top border-secondary">
+                            <span class="small text-light opacity-40">
+                                <i class="bi bi-info-circle me-1"></i>
+                                @(isRtl ? "إذا لم يكن لديك صلاحية الوصول، تواصل مع المشرف العام." : "If you don't have access, contact the Super Admin.")
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Login Form -->
+                    <div class="col-lg-6 p-5 d-flex flex-column justify-content-center">
+                        <div class="mb-4">
+                            <h3 class="fw-bold text-white mb-2">@(isRtl ? "تسجيل دخول الإدارة" : "Admin Sign In")</h3>
+                            <p class="text-light opacity-50 small">@(isRtl ? "أدخل بيانات الاعتماد للوصول إلى لوحة التحكم" : "Enter your credentials to access the admin dashboard")</p>
+                        </div>
+
+                        <form asp-action="AdminLogin" method="post">
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 text-danger rounded-4 py-3 small bg-danger bg-opacity-10 mb-4"></div>
+
+                            <div class="mb-4">
+                                <label asp-for="EmailOrUserName" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "البريد الإلكتروني أو اسم المستخدم" : "Email or Username")</label>
+                                <div class="input-group">
+                                    <span class="input-group-text input-group-admin-text"><i class="bi bi-person-badge"></i></span>
+                                    <input type="text" asp-for="EmailOrUserName" class="form-control form-control-admin input-group-admin-input" placeholder="@(isRtl ? "أدخل بريدك أو اسم المستخدم" : "Enter your email or username")" required autocomplete="username">
+                                </div>
+                                <span asp-validation-for="EmailOrUserName" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label asp-for="Password" class="form-label text-light opacity-75 fw-semibold mb-0">@(isRtl ? "كلمة المرور" : "Password")</label>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text input-group-admin-text"><i class="bi bi-lock-fill"></i></span>
+                                    <input asp-for="Password" type="password" class="form-control form-control-admin input-group-admin-input" placeholder="@(isRtl ? "أدخل كلمة المرور" : "Enter your password")" required autocomplete="current-password" id="Password">
+                                    <button class="btn btn-outline-secondary form-control-admin" type="button" id="togglePassword" tabindex="-1" style="border-left: none;">
+                                        <i class="bi bi-eye text-light opacity-75" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="RememberMe" />
+                                    <label class="form-check-label text-light opacity-75 small" asp-for="RememberMe">
+                                        @(isRtl ? "تذكرني على هذا الجهاز" : "Remember me on this device")
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-admin-red btn-lg">
+                                    <i class="bi bi-shield-lock-fill me-2"></i> @(isRtl ? "تسجيل الدخول" : "Sign In")
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const togglePasswordBtn = document.getElementById('togglePassword');
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', function () {
+                const pwd = document.getElementById('Password');
+                const icon = document.getElementById('eyeIcon');
+                if (pwd && icon) {
+                    if (pwd.type === 'password') {
+                        pwd.type = 'text';
+                        icon.classList.replace('bi-eye', 'bi-eye-slash');
+                    } else {
+                        pwd.type = 'password';
+                        icon.classList.replace('bi-eye-slash', 'bi-eye');
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+@section Scripts {
+    <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+}

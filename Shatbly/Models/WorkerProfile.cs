@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shatbly.Models
@@ -8,7 +8,7 @@ namespace Shatbly.Models
         [Key]
         public int Id { get; set; }
 
-        public string Bio { get; set; }
+        public string Bio { get; set; } = string.Empty;
 
         [Column(TypeName = "decimal(3,2)")]
         [Range(0.0, 5.0)]
@@ -24,6 +24,8 @@ namespace Shatbly.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? CVPath { get; set; }
+        public string? ProfilePicturePath { get; set; }
+        public string? IdCardPhotoPath { get; set; }
         public bool IsApproved { get; set; }
         public DateTime? InterviewDate { get; set; }
         public string? HRNotes { get; set; }

@@ -1,58 +1,636 @@
-﻿@model Shatbly.ViewModels.ChatViewModel
+@model Shatbly.ViewModels.ChatViewModel
 @using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
+@inject Shatbly.DataAccess.ApplicationDbContext DbContext
 
 @{
-    ViewData["Title"] = "Chat";
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    
     var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var receiver = await UserManager.FindByIdAsync(Model.ReceiverId);
+    var receiverName = receiver != null ? $"{receiver.FName} {receiver.LName}".Trim() : "";
+    if (string.IsNullOrWhiteSpace(receiverName))
+    {
+        receiverName = receiver?.UserName ?? "User";
+    }
+    
+    ViewData["Title"] = $"{Localizer["ChatWith"]} {receiverName}";
+    var receiverInitial = !string.IsNullOrEmpty(receiverName) ? receiverName.Substring(0, 1).ToUpper() : "U";
+
+    // Resolve worker profile
+    var workerProfile = await DbContext.WorkerProfiles.FirstOrDefaultAsync(w => w.UserId == Model.ReceiverId);
+    var workerProfileId = workerProfile?.Id ?? 0;
+
+    // Localized labels with high-quality default fallbacks
+    var noBookingLabel = Localizer["NoBooking"].IsResourceNotFound ? (isRtl ? "لا يوجد حجز" : "No Active Booking") : Localizer["NoBooking"].Value;
+    var bookingReqTitle = Localizer["BookingRequiredTitle"].IsResourceNotFound ? (isRtl ? "مطلوب حجز للتواصل" : "Booking Required to Chat") : Localizer["BookingRequiredTitle"].Value;
+    var bookingReqDesc = Localizer["BookingRequiredDesc"].IsResourceNotFound ? (isRtl ? "يجب أن يكون لديك حجز نشط أو سابق مع هذا الفني لكي تتمكن من بدء المحادثة معه." : "You must have an active or past booking with this worker in order to chat with them.") : Localizer["BookingRequiredDesc"].Value;
+    var bookBtnLabel = Localizer["BookAppointmentNow"].IsResourceNotFound ? (isRtl ? "احجز موعداً الآن" : "Book Appointment Now") : Localizer["BookAppointmentNow"].Value;
 }
 
+<style>
+    .chat-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px 0;
+    }
+
+    .chat-window {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        height: 600px;
+        overflow: hidden;
+    }
+
+    /* Chat Header */
+    .chat-header {
+        padding: 16px 24px;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 10;
+    }
+
+    .chat-user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .back-btn-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: var(--text-muted, #64748b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .back-btn-circle:hover {
+        background: #f1f5f9;
+        color: var(--primary-color, #0f172a);
+        transform: scale(1.05);
+    }
+
+    .chat-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--secondary-color, #3b82f6), #1d4ed8);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.15);
+    }
+
+    .chat-user-details h3 {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0;
+        color: var(--primary-color, #0f172a);
+    }
+
+    .chat-user-details span {
+        font-size: 0.8rem;
+        color: var(--text-muted, #64748b);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .online-indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--success-color, #10b981);
+        display: inline-block;
+    }
+
+    .booking-badge {
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: var(--text-muted, #64748b);
+        padding: 5px 12px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* Chat Messages Body */
+    .chat-body {
+        flex-grow: 1;
+        background: #f8fafc;
+        padding: 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        background-image: radial-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 0);
+        background-size: 24px 24px;
+    }
+
+    .chat-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    /* Message Bubble Groups */
+    .bubble-wrapper {
+        display: flex;
+        width: 100%;
+    }
+
+    .bubble-wrapper.mine {
+        justify-content: flex-end;
+    }
+
+    .bubble-wrapper.other {
+        justify-content: flex-start;
+    }
+
+    .message-bubble {
+        max-width: 65%;
+        padding: 12px 18px;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bubble-wrapper.mine .message-bubble {
+        background: linear-gradient(135deg, var(--secondary-color, #3b82f6), #2563eb);
+        color: #ffffff;
+        border-radius: 18px 18px 4px 18px;
+        @(isRtl ? "border-radius: 18px 18px 18px 4px;" : "")
+    }
+
+    .bubble-wrapper.other .message-bubble {
+        background: #ffffff;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px 18px 18px 4px;
+        @(isRtl ? "border-radius: 18px 18px 4px 18px;" : "")
+    }
+
+    .message-text {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    .message-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        font-size: 0.75rem;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+
+    .bubble-wrapper.mine .message-footer {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .bubble-wrapper.other .message-footer {
+        color: var(--text-muted, #64748b);
+    }
+
+    /* Empty Chat State */
+    .empty-chat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-muted, #64748b);
+        text-align: center;
+    }
+
+    .empty-chat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px dashed #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+
+    /* Chat Footer */
+    .chat-footer {
+        padding: 16px 24px;
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .chat-input-field {
+        border-radius: 30px;
+        border: 1px solid #cbd5e1;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        transition: all 0.25s;
+    }
+
+    .chat-input-field:focus {
+        background: #ffffff;
+        border-color: var(--secondary-color, #3b82f6);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .send-btn-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--secondary-color, #3b82f6);
+        color: #ffffff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .send-btn-circle:hover {
+        background: #2563eb;
+        transform: scale(1.05) rotate(5deg);
+    }
+
+    .send-btn-circle:active {
+        transform: scale(0.95);
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .message-bubble.image-only {
+        padding: 6px;
+    }
+
+    .message-bubble.image-only img {
+        margin-bottom: 0 !important;
+    }
+</style>
+
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h4 mb-0">Chat</h2>
-        <span class="text-muted">Booking #@Model.BookingId</span>
-    </div>
-
-    <div class="border rounded p-3 mb-3" style="height: 420px; overflow-y: auto; background: #f8f9fa;">
-        @if (!Model.Messages.Any())
-        {
-            <div class="text-muted text-center mt-5">
-                No messages yet.
-            </div>
-        }
-        else
-        {
-            foreach (var item in Model.Messages)
-            {
-                var isMine = item.SenderId == currentUserId;
-
-                <div class="d-flex mb-2 @(isMine ? "justify-content-end" : "justify-content-start")">
-                    <div class="p-2 rounded @(isMine ? "bg-primary text-white" : "bg-white border")"
-                         style="max-width: 70%;">
-                        <div>@item.Message</div>
-                        <small class="@(isMine ? "text-white-50" : "text-muted")">
-                            @item.SentAt.ToLocalTime().ToString("g")
-                        </small>
+    <div class="chat-wrapper">
+        <div class="chat-window">
+            
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <a href="javascript:history.back()" class="back-btn-circle" title="@Localizer["Back"]">
+                        <i class="bi @(isRtl ? "bi-chevron-right" : "bi-chevron-left")"></i>
+                    </a>
+                    
+                    <div class="chat-avatar">
+                        @receiverInitial
+                    </div>
+                    
+                    <div class="chat-user-details">
+                        <h3>@receiverName</h3>
+                        <span>
+                            <span class="online-indicator-dot"></span>
+                            @Localizer["Online"]
+                        </span>
                     </div>
                 </div>
+                
+                <div>
+                    @if (Model.BookingId > 0)
+                    {
+                        <span class="booking-badge shadow-sm">
+                            @Localizer["Booking"] #@Model.BookingId
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-20 shadow-sm px-3 py-2 rounded-pill fw-bold">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> @noBookingLabel
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <!-- Chat Messages Body -->
+            <div class="chat-body" id="chatBody">
+                @if (Model.BookingId <= 0)
+                {
+                    <div class="empty-chat py-5">
+                        <div class="empty-chat-icon shadow-sm" style="width: 80px; height: 80px; font-size: 2.2rem; background: #fffbeb; color: #d97706; border: 1px dashed #f59e0b; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-calendar-plus text-warning"></i>
+                        </div>
+                        <h4 class="fw-bold mt-2" style="color: var(--primary-color);">@bookingReqTitle</h4>
+                        <p class="text-muted px-4" style="max-width: 480px; font-size: 0.95rem; line-height: 1.6; margin: 8px auto 20px auto;">
+                            @bookingReqDesc
+                        </p>
+                        @if (workerProfileId > 0)
+                        {
+                            <a href="/Customer/BookingSystem/CreateBooking?workerId=@workerProfileId" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
+                                @bookBtnLabel <i class="bi bi-calendar-check ms-1"></i>
+                            </a>
+                        }
+                    </div>
+                }
+                else if (!Model.Messages.Any())
+                {
+                    <div class="empty-chat">
+                        <div class="empty-chat-icon shadow-sm">
+                            <i class="bi bi-chat-dots text-primary"></i>
+                        </div>
+                        <h5>@Localizer["NoMessagesYet"]</h5>
+                        <p class="small mb-0">@Localizer["SayHelloTo"] @receiverName</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in Model.Messages)
+                    {
+                        var isMine = item.SenderId == currentUserId;
+
+                        <div class="bubble-wrapper @(isMine ? "mine" : "other")">
+                            <div class="message-bubble shadow-sm @(string.IsNullOrEmpty(item.Message) ? "image-only" : "")">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="/@item.ImageUrl" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/@item.ImageUrl')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />
+                                }
+                                @if (!string.IsNullOrEmpty(item.Message))
+                                {
+                                    <div class="message-text">@item.Message</div>
+                                }
+                                <div class="message-footer">
+                                    <span>@item.SentAt.ToLocalTime().ToString("t")</span>
+                                    @if (isMine)
+                                    {
+                                        if (item.IsRead)
+                                        {
+                                            <i class="bi bi-check2-all text-info" title="Read" style="font-size: 1.05rem;"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-check2" title="Sent" style="font-size: 1.05rem;"></i>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Chat Footer Input -->
+            @if (Model.BookingId > 0)
+            {
+                <div class="chat-footer">
+                    <!-- Image Preview Area -->
+                    <div id="imagePreviewContainer" style="display: none; align-items: center; gap: 8px; padding: 8px 12px; background: #f8fafc; border-radius: 12px; margin-bottom: 8px; border: 1px solid #e2e8f0;">
+                        <img id="imagePreview" src="" style="max-height: 50px; border-radius: 8px;" />
+                        <span id="imageFileName" class="small text-muted text-truncate" style="max-width: 150px;"></span>
+                        <button type="button" id="clearImageBtn" class="btn-close ms-auto" aria-label="Close" style="font-size: 0.8rem;"></button>
+                    </div>
+
+                    <form asp-area="Customer" asp-controller="Chat" asp-action="Send" method="post" id="chatForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="bookingId" value="@Model.BookingId" />
+                        <input type="hidden" name="receiverId" value="@Model.ReceiverId" />
+                        
+                        <div class="chat-input-wrapper">
+                            <label for="imageUpload" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 42px; height: 42px; border: 1px solid #cbd5e1; color: #64748b; cursor: pointer; transition: all 0.2s;" title="إرسال صورة">
+                                <i class="bi bi-image" style="font-size: 1.2rem;"></i>
+                            </label>
+                            <input type="file" name="image" id="imageUpload" accept="image/*" style="display: none;" />
+
+                            <input type="text"
+                                   name="message"
+                                   id="messageInput"
+                                   class="form-control chat-input-field"
+                                   placeholder="@Localizer["WriteMessage"]"
+                                   autocomplete="off" />
+                                   
+                            <button type="submit" class="send-btn-circle" id="sendBtn">
+                                <i class="bi bi-send-fill @(isRtl ? "rotate-180" : "")"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             }
-        }
-    </div>
 
-    <form asp-area="Customer" asp-controller="Chat" asp-action="Send" method="post">
-        @Html.AntiForgeryToken()
-
-        <input type="hidden" name="bookingId" value="@Model.BookingId" />
-        <input type="hidden" name="receiverId" value="@Model.ReceiverId" />
-
-        <div class="input-group">
-            <input name="message"
-                   class="form-control"
-                   placeholder="Write your message..."
-                   autocomplete="off" />
-
-            <button type="submit" class="btn btn-primary">
-                Send
-            </button>
         </div>
-    </form>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatBody = document.getElementById("chatBody");
+            if (chatBody) {
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            const chatForm = document.getElementById("chatForm");
+            const messageInput = document.getElementById("messageInput");
+            const imageUpload = document.getElementById("imageUpload");
+            const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+            const imagePreview = document.getElementById("imagePreview");
+            const imageFileName = document.getElementById("imageFileName");
+            const clearImageBtn = document.getElementById("clearImageBtn");
+
+            // Handle image selection preview
+            if (imageUpload) {
+                imageUpload.addEventListener("change", function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            imagePreview.src = e.target.result;
+                            imageFileName.textContent = file.name;
+                            imagePreviewContainer.style.display = "flex";
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Handle clearing selected image
+            if (clearImageBtn) {
+                clearImageBtn.addEventListener("click", function () {
+                    imageUpload.value = "";
+                    imagePreview.src = "";
+                    imageFileName.textContent = "";
+                    imagePreviewContainer.style.display = "none";
+                });
+            }
+
+            // 1. Send message via AJAX (no refresh)
+            if (chatForm) {
+                chatForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    const msgText = messageInput.value.trim();
+                    const hasImage = imageUpload && imageUpload.files.length > 0;
+                    if (!msgText && !hasImage) return;
+
+                    const formData = new FormData(chatForm);
+
+                    fetch(chatForm.action, {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            messageInput.value = "";
+                            if (imageUpload) {
+                                imageUpload.value = "";
+                                imagePreviewContainer.style.display = "none";
+                                imagePreview.src = "";
+                                imageFileName.textContent = "";
+                            }
+                        } else {
+                            response.json().then(data => {
+                                if (typeof toastr !== "undefined") {
+                                    toastr.error(data.message || "Failed to send message.");
+                                } else {
+                                    alert(data.message || "Failed to send message.");
+                                }
+                            }).catch(() => {
+                                if (typeof toastr !== "undefined") {
+                                    toastr.error("Failed to send message.");
+                                } else {
+                                    alert("Failed to send message.");
+                                }
+                            });
+                        }
+                    }).catch(err => console.error(err));
+                });
+            }
+
+            // 2. Connect to SignalR
+            @if (ViewBag.ConversationKey != null)
+            {
+                <text>
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/chatHub")
+                    .build();
+
+                connection.on("ReceiveMessage", function (message) {
+                    // Check if message belongs to this booking
+                    if (message.bookingId !== @Model.BookingId) return;
+
+                    const emptyChat = document.querySelector(".empty-chat");
+                    if (emptyChat) emptyChat.remove();
+
+                    const isMine = message.senderId === "@currentUserId";
+                    const bubbleWrapper = document.createElement("div");
+                    bubbleWrapper.className = `bubble-wrapper ${isMine ? 'mine' : 'other'}`;
+
+                    const sentTime = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    let checkmarksHtml = "";
+                    if (isMine) {
+                        checkmarksHtml = message.isRead 
+                            ? '<i class="bi bi-check2-all text-info" title="Read" style="font-size: 1.05rem;"></i>' 
+                            : '<i class="bi bi-check2" title="Sent" style="font-size: 1.05rem;"></i>';
+                    }
+
+                    let imgHtml = "";
+                    if (message.imageUrl) {
+                        imgHtml = `<img src="/${message.imageUrl}" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/${message.imageUrl}')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`;
+                    }
+
+                    let msgTextHtml = "";
+                    if (message.message) {
+                        msgTextHtml = `<div class="message-text">${escapeHtml(message.message)}</div>`;
+                    }
+
+                    bubbleWrapper.innerHTML = `
+                        <div class="message-bubble shadow-sm ${!message.message ? 'image-only' : ''}">
+                            ${imgHtml}
+                            ${msgTextHtml}
+                            <div class="message-footer">
+                                <span>${sentTime}</span>
+                                ${checkmarksHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    chatBody.appendChild(bubbleWrapper);
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    // Mark as read in real-time if received from the other party
+                    if (!isMine) {
+                        connection.invoke("MarkAsRead", message.id).catch(err => console.error(err.toString()));
+                    }
+                });
+
+                connection.on("MessageRead", function (data) {
+                    const checks = document.querySelectorAll(".bi-check2");
+                    checks.forEach(check => {
+                        check.className = "bi bi-check2-all text-info";
+                        check.title = "Read";
+                    });
+                });
+
+                connection.start().then(function () {
+                    connection.invoke("JoinConversation", "@ViewBag.ConversationKey")
+                        .catch(err => console.error(err.toString()));
+                }).catch(err => console.error(err.toString()));
+                </text>
+            }
+
+            function escapeHtml(text) {
+                return text
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+        });
+    </script>
+}

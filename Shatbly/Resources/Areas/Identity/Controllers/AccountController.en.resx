@@ -51,4 +51,5 @@
   <data name="EmailClaimNotReceived" xml:space="preserve"><value>Email claim not received from provider.</value></data>
   <data name="ConfirmEmailLink" xml:space="preserve"><value>Please confirm your account by clicking this link: &lt;a href='{0}'&gt;Click here to confirm your account&lt;/a&gt;</value></data>
   <data name="OtpEmailBody" xml:space="preserve"><value>&lt;h1&gt;Your OTP for password reset is: {0}. Don't share it&lt;/h1&gt;</value></data>
+  <data name="PhoneAlreadyExists" xml:space="preserve"><value>This phone number is already registered.</value></data>
 </root>

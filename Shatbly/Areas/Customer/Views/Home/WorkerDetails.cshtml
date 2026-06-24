@@ -20,6 +20,27 @@
     var categoryName = isRtl ? (Model.WorkerServices?.Category?.NameAr ?? Localizer["NotSpecified"].Value) : (Model.WorkerServices?.Category?.Name ?? Localizer["NotSpecified"].Value);
     var firstLetter = Model.User?.FName?.Substring(0, Math.Min(3, Model.User.FName.Length)) ?? "م";
     var avatarName = $"{Model.User?.FName}+{Model.User?.LName}";
+    var profilePictureUrl = "";
+    if (!string.IsNullOrEmpty(Model.ProfilePicturePath))
+    {
+        var cleanedPath = Model.ProfilePicturePath.Trim().Replace("\\", "/");
+        if (cleanedPath.StartsWith("~/"))
+        {
+            profilePictureUrl = Url.Content(cleanedPath);
+        }
+        else if (cleanedPath.StartsWith("/"))
+        {
+            profilePictureUrl = Url.Content("~" + cleanedPath);
+        }
+        else
+        {
+            profilePictureUrl = Url.Content("~/" + cleanedPath);
+        }
+    }
+    else
+    {
+        profilePictureUrl = $"https://ui-avatars.com/api/?name={avatarName}&background=0D8ABC&color=fff&size=200";
+    }
 }
 
 <style>
@@ -197,6 +218,10 @@
         font-weight: 600;
         margin-top: 6px;
     }
+    .review-thumb:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
     /* Empty state */
     .wp-empty {
@@ -235,7 +260,7 @@
                 <i class="bi @(isRtl ? "bi-arrow-right" : "bi-arrow-left")"></i>
             </a>
 
-            <img src="https://ui-avatars.com/api/?name=@avatarName&background=0D8ABC&color=fff&size=200"
+            <img src="@profilePictureUrl"
                  class="rounded-circle profile-avatar" alt="Avatar">
 
             <h2 class="fw-bold mt-3 mb-2">
@@ -297,6 +322,12 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" data-bs-toggle="pill" data-bs-target="#services">@Localizer["ServicesAndPrices"]</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#portfolio">@(isRtl ? "سابقة الأعمال" : "Portfolio")</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#reviews">@Localizer["ReviewsTitle"]</button>
+                </li>
             </ul>
 
             <div class="tab-content pb-5" id="pills-tabContent">
@@ -354,41 +385,6 @@
                             @Localizer["NoWorkingHours"]
                         </div>
                     }
-
-                    <!-- Reviews Section -->
-                    @if (Model.WorkerReviews?.Any() == true)
-                    {
-                        <hr class="my-4 text-muted opacity-25">
-                        <h5 class="fw-bold text-primary mb-3">
-                            <i class="bi bi-chat-square-heart-fill me-2"></i> @Localizer["ReviewsTitle"]
-                            <span class="badge bg-light text-primary border ms-2">@Model.WorkerReviews.Count()</span>
-                        </h5>
-                        @foreach (var review in Model.WorkerReviews.OrderByDescending(r => r.CreatedAt).Take(5))
-                        {
-                            <div class="wp-review-card">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="wp-review-stars">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            if (i <= review.Rating)
-                                            {
-                                                <i class="bi bi-star-fill"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="bi bi-star"></i>
-                                            }
-                                        }
-                                    </div>
-                                    <span class="wp-review-date">@review.CreatedAt.ToString("dd MMM yyyy")</span>
-                                </div>
-                                @if (!string.IsNullOrEmpty(review.Comment))
-                                {
-                                    <p class="wp-review-comment">@review.Comment</p>
-                                }
-                            </div>
-                        }
-                    }
                 </div>
 
                 <!-- Tab: Services & Prices -->
@@ -412,7 +408,7 @@
                             <div style="background: #f8fafc; border-radius: 14px; padding: 18px;">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <span class="text-muted fw-semibold">@Localizer["ServiceStatus"]</span>
-                                    @if (Model.WorkerServices.IsActive)
+                                    @if (Model.IsAvailable)
                                     {
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
                                             <i class="bi bi-check-circle-fill me-1"></i> @Localizer["Active"]
@@ -459,6 +455,121 @@
                     }
                 </div>
 
+                <!-- Tab: Portfolio -->
+                <div class="tab-pane fade content-card" id="portfolio">
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-images me-2"></i> @(isRtl ? "سابقة الأعمال" : "Portfolio")
+                        @if (Model.PortfolioMediaItems?.Any() == true)
+                        {
+                            <span class="badge bg-light text-primary border ms-2">@Model.PortfolioMediaItems.Count()</span>
+                        }
+                    </h5>
+
+                    @if (Model.PortfolioMediaItems?.Any() == true)
+                    {
+                        <div class="row g-3">
+                            @foreach (var media in Model.PortfolioMediaItems)
+                            {
+                                <div class="col-6 col-md-4">
+                                    <div class="card h-100 shadow-sm border-0 overflow-hidden" style="border-radius:12px;">
+                                        @if (media.MediaType == MediaType.Image)
+                                        {
+                                            <a href="@media.MediaUrl" target="_blank">
+                                                <img src="@media.MediaUrl" class="card-img-top object-fit-cover" style="height: 200px; width: 100%; transition: transform 0.3s;" 
+                                                     alt="@media.Caption" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';" />
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <video src="@media.MediaUrl" class="card-img-top object-fit-cover" style="height: 200px; width: 100%;" controls></video>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(media.Caption))
+                                        {
+                                            <div class="card-body p-2 text-center" style="background:#f8fafc;">
+                                                <p class="card-text text-muted small text-truncate mb-0 fw-semibold">@media.Caption</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="wp-empty">
+                            <i class="bi bi-images"></i>
+                            @(isRtl ? "لا توجد أعمال مرفوعة بعد" : "No portfolio items uploaded yet")
+                        </div>
+                    }
+                </div>
+
+                <!-- Tab: Reviews -->
+                <div class="tab-pane fade content-card" id="reviews">
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-chat-square-heart-fill me-2"></i> @Localizer["ReviewsTitle"]
+                        <span class="badge bg-light text-primary border ms-2">@(Model.WorkerReviews?.Count(r => r.IsApproved) ?? 0)</span>
+                    </h5>
+
+                    @if (Model.WorkerReviews?.Any(r => r.IsApproved) == true)
+                    {
+                        @foreach (var review in Model.WorkerReviews.Where(r => r.IsApproved).OrderByDescending(r => r.CreatedAt))
+                        {
+                            <div class="wp-review-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="wp-review-stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <span class="wp-review-date">@review.CreatedAt.ToString("dd MMM yyyy")</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(review.Comment))
+                                {
+                                    <p class="wp-review-comment">@review.Comment</p>
+                                }
+                                @if (!string.IsNullOrEmpty(review.BeforeImageUrl) || !string.IsNullOrEmpty(review.AfterImageUrl))
+                                {
+                                    <div class="d-flex gap-3 mt-3">
+                                        @if (!string.IsNullOrEmpty(review.BeforeImageUrl))
+                                        {
+                                            <div class="text-center">
+                                                <div class="text-muted small mb-1" style="font-size:0.75rem;">@(isRtl ? "قبل البدء" : "Before")</div>
+                                                <img src="/@review.BeforeImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                                     style="width: 80px; height: 80px; object-fit: cover; transition: transform 0.2s;" 
+                                                     onclick="openReviewImageModal('/@review.BeforeImageUrl', '@(isRtl ? "قبل البدء" : "Before")')" />
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(review.AfterImageUrl))
+                                        {
+                                            <div class="text-center">
+                                                <div class="text-muted small mb-1" style="font-size:0.75rem;">@(isRtl ? "بعد الانتهاء" : "After")</div>
+                                                <img src="/@review.AfterImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                                     style="width: 80px; height: 80px; object-fit: cover; transition: transform 0.2s;" 
+                                                     onclick="openReviewImageModal('/@review.AfterImageUrl', '@(isRtl ? "بعد الانتهاء" : "After")')" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="wp-empty">
+                            <i class="bi bi-chat-left-text"></i>
+                            @(isRtl ? "لا توجد تقييمات معتمدة بعد" : "No approved reviews yet")
+                        </div>
+                    }
+                </div>
+
             </div>
         </div>
     </div>
@@ -487,9 +598,35 @@
             </a>
         </div>
 
-        <a href="/Customer/BookingSystem/CreateBooking?workerId=@Model.Id"
+        <a href="/Customer/BookingSystem/CreateBooking?workerId=@Model.UserId"
            class="btn btn-primary fw-bold fs-4 py-3 px-5 shadow-sm rounded-pill" style="min-width: 300px; text-decoration: none;">
             @Localizer["BookAppointmentNow"] <i class="bi bi-calendar-check ms-2"></i>
         </a>
     </div>
 </div>
+
+<!-- Modal for viewing review images -->
+<div class="modal fade" id="reviewImageModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="reviewImageTitle">@(isRtl ? "معاينة الصورة" : "Image Preview")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center bg-light">
+                <img id="reviewImagePreview" src="" class="img-fluid" style="max-height: 75vh; width: auto; object-fit: contain;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openReviewImageModal(imageUrl, title) {
+            document.getElementById('reviewImagePreview').src = imageUrl;
+            document.getElementById('reviewImageTitle').innerText = title;
+            var modal = new bootstrap.Modal(document.getElementById('reviewImageModal'));
+            modal.show();
+        }
+    </script>
+}

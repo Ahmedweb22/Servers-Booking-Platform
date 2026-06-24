@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@Localizer["PageTitle"]</title>
+    <title>@(ViewData["Title"] ?? Localizer["PageTitle"])</title>
     <link rel="stylesheet" href="~/css/identity.css">
     @if (isRtl)
     {
@@ -285,8 +285,8 @@
         </div>
         <div class="container">
             <div class="hero-content">
-                <h1 class="display-4 fw-bold mb-3">@Localizer["HeroTitle"]</h1>
-                <p class="lead fs-4 mb-0 opacity-75">@Localizer["HeroSubtitle"]</p>
+                <h1 class="display-4 fw-bold mb-3">@(ViewData["HeroTitle"] ?? Localizer["HeroTitle"])</h1>
+                <p class="lead fs-4 mb-0 opacity-75">@(ViewData["HeroSubtitle"] ?? Localizer["HeroSubtitle"])</p>
             </div>
         </div>
     </header>
@@ -310,9 +310,9 @@
                 <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
                     <h5 class="fw-bold mb-4 text-white">@Localizer["QuickLinks"]</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-3"><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>@Localizer["PrivacyPolicy"]</a></li>
-                        <li class="mb-3"><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>@Localizer["TermsAndConditions"]</a></li>
-                        <li><a href="#" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi bi-chevron-left ms-2 small"></i>@Localizer["ContactUs"]</a></li>
+                        <li class="mb-3"><a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi @(isRtl ? "bi-chevron-left" : "bi-chevron-right") me-2 small"></i>@Localizer["PrivacyPolicy"]</a></li>
+                        <li class="mb-3"><a asp-area="Customer" asp-controller="Home" asp-action="Terms" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi @(isRtl ? "bi-chevron-left" : "bi-chevron-right") me-2 small"></i>@Localizer["TermsAndConditions"]</a></li>
+                        <li><a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="text-white text-decoration-none opacity-75 hover-link"><i class="bi @(isRtl ? "bi-chevron-left" : "bi-chevron-right") me-2 small"></i>@Localizer["ContactUs"]</a></li>
                     </ul>
                 </div>
 

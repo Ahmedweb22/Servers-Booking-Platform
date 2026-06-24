@@ -9,5 +9,6 @@ public interface IBookingSystemService
     Task<BookingActionResult> CancelAsync(int id, string? cancellationReason);
     Task<bool> MarkAsPaidAsync(int bookingId);
     Task<bool> AddReviewAsync(Review review);
-    Task<bool> RaiseDisputeAsync(int bookingId, string reason);
+    Task<bool> RaiseDisputeAsync(int bookingId, string reason, string raisedById);
+    Task<List<Order>> GetCustomerOrdersAsync(string userId);
 }

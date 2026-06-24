@@ -66,11 +66,6 @@ namespace Shatbly.Areas.Worker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(WithdrawalRequestVM model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
             var workerId = await _currentWorkerService.GetCurrentWorkerIdAsync(User);
 
             if (workerId is null)
@@ -78,13 +73,15 @@ namespace Shatbly.Areas.Worker.Controllers
                 return NotFound(_sharedLocalizer["WorkerProfileNotFoundShort"].Value);
             }
 
+            if (!ModelState.IsValid)
+            {
+                var dashboard = await _earningsService.GetDashboardAsync(workerId.Value);
+                model.AvailableBalance = dashboard.PendingBalance;
+                return View(model);
+            }
+
             var result = await _withdrawalService.CreateRequestAsync(workerId.Value, model.Amount);
 
-            //if (!result.Succeeded)
-            //{
-            //    ModelState.AddModelError(string.Empty, result.ErrorMessage!);
-            //    return View(model);
-            //}
             if (!result.Succeeded)
             {
                 var dashboard = await _earningsService.GetDashboardAsync(workerId.Value);

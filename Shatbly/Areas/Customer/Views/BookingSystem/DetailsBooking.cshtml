@@ -151,6 +151,14 @@
             grid-template-columns: 1fr;
         }
     }
+    .review-thumb {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .review-thumb:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 </style>
 
 <div class="details-shell">
@@ -246,7 +254,62 @@
                         <i class="bi bi-stars text-warning me-1"></i> @Localizer["RateServiceTitle"]
                     </h3>
                     
-                    @if (Model.HasReview)
+                    @if (Model.HasReview && Model.Review != null)
+                    {
+                        <div class="py-2 text-start @(isRtl ? "text-end" : "text-start")">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <span class="badge bg-success rounded-pill px-3 py-2 fs-6 fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> @Localizer["RatedSuccessfully"]
+                                </span>
+                            </div>
+                            
+                            <div class="mt-3 p-3 rounded text-start @(isRtl ? "text-end" : "text-start")" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(16,185,129,0.2);">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="star-rating" style="color: #f59e0b; font-size: 1.1rem;">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= Model.Review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star text-muted opacity-30"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <small class="text-muted">@Model.Review.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                                </div>
+                                
+                                <p class="mb-0 text-dark" style="font-size: 0.95rem; font-style: italic;">"@Model.Review.Comment"</p>
+                                
+                                @if (!string.IsNullOrEmpty(Model.Review.BeforeImageUrl) || !string.IsNullOrEmpty(Model.Review.AfterImageUrl))
+                                {
+                                    <div class="d-flex justify-content-center gap-3 mt-3">
+                                        @if (!string.IsNullOrEmpty(Model.Review.BeforeImageUrl))
+                                        {
+                                            <div class="text-center">
+                                                <img src="/@Model.Review.BeforeImageUrl" class="rounded border review-thumb" 
+                                                     style="width: 70px; height: 70px; object-fit: cover;" 
+                                                     onclick="openReviewImageModal('/@Model.Review.BeforeImageUrl', '@(isRtl ? "قبل البدء" : "Before")')" />
+                                                <small class="d-block text-muted mt-1" style="font-size: 0.75rem;">@(isRtl ? "قبل" : "Before")</small>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(Model.Review.AfterImageUrl))
+                                        {
+                                            <div class="text-center">
+                                                <img src="/@Model.Review.AfterImageUrl" class="rounded border review-thumb" 
+                                                     style="width: 70px; height: 70px; object-fit: cover;" 
+                                                     onclick="openReviewImageModal('/@Model.Review.AfterImageUrl', '@(isRtl ? "بعد الانتهاء" : "After")')" />
+                                                <small class="d-block text-muted mt-1" style="font-size: 0.75rem;">@(isRtl ? "بعد" : "After")</small>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (Model.HasReview)
                     {
                         <div class="py-2">
                             <span class="badge bg-success rounded-pill px-3 py-2 fs-6 fw-bold">
@@ -367,11 +430,34 @@
         </section>
     </div>
 </div>
+
+<!-- Modal for viewing review images -->
+<div class="modal fade" id="reviewImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="reviewImageTitle">@(isRtl ? "معاينة الصورة" : "Image Preview")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center bg-light">
+                <img id="reviewImagePreview" src="" class="img-fluid" style="max-height: 75vh; width: auto; object-fit: contain;" />
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        function openReviewImageModal(imageUrl, title) {
+            document.getElementById('reviewImagePreview').src = imageUrl;
+            document.getElementById('reviewImageTitle').innerText = title;
+            var modal = new bootstrap.Modal(document.getElementById('reviewImageModal'));
+            modal.show();
+        }
+
         // جلب رقم الحجز الحالي من الموديل
         const currentBookingId = document.getElementById("bookingIdStore").value;
 

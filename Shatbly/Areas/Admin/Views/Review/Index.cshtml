@@ -1,0 +1,307 @@
+@model Shatbly.ViewModels.AdminReviewsIndexVM
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewBag.Title = isRtl ? "إدارة التقييمات والآراء" : "Reviews & Feedback Management";
+}
+
+<style>
+    .review-table-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f0f0f0;
+        padding: 24px;
+    }
+    .star-rating {
+        color: #f59e0b; /* Amber yellow color */
+        font-size: 1.1rem;
+    }
+    .star-empty {
+        color: #e2e8f0;
+    }
+    .search-input-group {
+        max-width: 400px;
+    }
+    .review-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+</style>
+
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 @(isRtl ? "text-end flex-row-reverse" : "text-start")">
+    <div>
+        <h2 class="fw-bold mb-1">@(isRtl ? "تقييمات العملاء" : "Client Reviews")</h2>
+        <p class="text-muted mb-0">@(isRtl ? "إدارة وتعديل وحذف التقييمات والتعليقات المتروكة للفنيين" : "Manage, edit, or delete feedback and ratings left by clients for workers")</p>
+    </div>
+    <div>
+        <a asp-area="Admin" asp-controller="Review" asp-action="Create" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> @(isRtl ? "إضافة تقييم جديد" : "Create New Review")
+        </a>
+    </div>
+</div>
+
+<div class="review-table-card">
+    <!-- Search / Filter form -->
+    <form method="get" asp-action="Index" class="mb-4">
+        <div class="input-group search-input-group @(isRtl ? "ms-auto" : "")">
+            <span class="input-group-text bg-light border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" name="search" value="@Model.Search" class="form-control border-start-0 bg-light" 
+                   placeholder="@(isRtl ? "البحث عن تعليق، عميل، فني..." : "Search comment, reviewer, worker...")" />
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <a href="@Url.Action("Index", "Review")" class="btn btn-outline-secondary d-flex align-items-center">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+            <button class="btn btn-primary" type="submit">@(isRtl ? "بحث" : "Search")</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-secondary">
+                <tr class="@(isRtl ? "text-end" : "text-start")">
+                    <th scope="col">#</th>
+                    <th scope="col">@(isRtl ? "العميل (المرسِل)" : "Client (Reviewer)")</th>
+                    <th scope="col">@(isRtl ? "الفني (المستقبِل)" : "Worker (Reviewee)")</th>
+                    <th scope="col">@(isRtl ? "التخصص" : "Category")</th>
+                    <th scope="col">@(isRtl ? "التقييم" : "Rating")</th>
+                    <th scope="col">@(isRtl ? "التعليق" : "Comment")</th>
+                    <th scope="col">@(isRtl ? "تاريخ الإنشاء" : "Created At")</th>
+                    <th scope="col">@(isRtl ? "الحالة" : "Status")</th>
+                    <th scope="col" class="text-center">@(isRtl ? "العمليات" : "Actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Reviews == null || !Model.Reviews.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-chat-left-text fs-1 d-block mb-3 opacity-50"></i>
+                            @(isRtl ? "لا توجد تقييمات مطابقة لبحثك." : "No reviews matching your search were found.")
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model.Reviews)
+                    {
+                        var reviewerName = item.Reviewer != null ? $"{item.Reviewer.FName} {item.Reviewer.LName}".Trim() : "Client User";
+                        if (string.IsNullOrWhiteSpace(reviewerName)) reviewerName = item.Reviewer?.UserName ?? "Client";
+
+                        var revieweeName = item.Reviewee != null ? $"{item.Reviewee.FName} {item.Reviewee.LName}".Trim() : "Worker User";
+                        if (string.IsNullOrWhiteSpace(revieweeName)) revieweeName = item.Reviewee?.UserName ?? "Worker";
+
+                        var catName = isRtl ? item.Category?.NameAr : item.Category?.NameEn;
+                        if (string.IsNullOrWhiteSpace(catName)) catName = item.Category?.NameEn ?? "-";
+
+                        <tr class="@(isRtl ? "text-end" : "text-start")">
+                            <td class="fw-bold text-dark">@item.Id</td>
+                            <td>
+                                <div class="fw-semibold text-dark">@reviewerName</div>
+                                <small class="text-muted d-block" style="font-size:0.75rem;">@item.Reviewer?.Email</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@revieweeName</div>
+                                <small class="text-muted d-block" style="font-size:0.75rem;">@item.Reviewee?.Email</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border px-2 py-1">@catName</span>
+                            </td>
+                            <td>
+                                <div class="star-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= item.Rating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star star-empty"></i>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-wrap" style="max-width: 250px;" title="@item.Comment">
+                                    @item.Comment
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.BeforeImageUrl) || !string.IsNullOrEmpty(item.AfterImageUrl))
+                                {
+                                    <div class="d-flex gap-2 mt-2">
+                                        @if (!string.IsNullOrEmpty(item.BeforeImageUrl))
+                                        {
+                                            <div class="position-relative text-center">
+                                                <img src="/@item.BeforeImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                                     style="width: 50px; height: 50px; object-fit: cover; transition: transform 0.2s;" 
+                                                     onclick="openReviewImageModal('/@item.BeforeImageUrl', '@(isRtl ? "قبل البدء" : "Before")')" />
+                                                <small class="d-block text-muted" style="font-size: 0.65rem;">@(isRtl ? "قبل" : "Before")</small>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.AfterImageUrl))
+                                        {
+                                            <div class="position-relative text-center">
+                                                <img src="/@item.AfterImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                                     style="width: 50px; height: 50px; object-fit: cover; transition: transform 0.2s;" 
+                                                     onclick="openReviewImageModal('/@item.AfterImageUrl', '@(isRtl ? "بعد الانتهاء" : "After")')" />
+                                                <small class="d-block text-muted" style="font-size: 0.65rem;">@(isRtl ? "بعد" : "After")</small>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                            <td class="text-secondary small">
+                                @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                            </td>
+                            <td>
+                                @if (item.IsApproved)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
+                                        @(isRtl ? "مقبول" : "Approved")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1">
+                                        @(isRtl ? "قيد الانتظار" : "Pending")
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    @if (!item.IsApproved)
+                                    {
+                                        <form asp-area="Admin" asp-controller="Review" asp-action="Approve" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold">
+                                                <i class="bi bi-check-circle-fill me-1"></i> @(isRtl ? "قبول" : "Approve")
+                                            </button>
+                                        </form>
+                                    }
+                                    <a asp-area="Admin" asp-controller="Review" asp-action="Edit" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold">
+                                        <i class="bi bi-pencil-square me-1"></i> @(isRtl ? "تعديل" : "Edit")
+                                    </a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold js-delete-review" 
+                                            data-id="@item.Id" data-name="Review #@item.Id">
+                                        <i class="bi bi-trash-fill me-1"></i> @(isRtl ? "حذف" : "Delete")
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center gap-1">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;" 
+                       href="@Url.Action("Index", new { search = Model.Search, page = Model.CurrentPage - 1 })" aria-label="Previous">
+                        <i class="bi bi-chevron-@(isRtl ? "right" : "left")"></i>
+                    </a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                           href="@Url.Action("Index", new { search = Model.Search, page = i })">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                       href="@Url.Action("Index", new { search = Model.Search, page = Model.CurrentPage + 1 })" aria-label="Next">
+                        <i class="bi bi-chevron-@(isRtl ? "left" : "right")"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Modal for viewing review images -->
+<div class="modal fade" id="reviewImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="reviewImageTitle">@(isRtl ? "معاينة الصورة" : "Image Preview")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center bg-light">
+                <img id="reviewImagePreview" src="" class="img-fluid" style="max-height: 75vh; width: auto; object-fit: contain;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openReviewImageModal(imageUrl, title) {
+            document.getElementById('reviewImagePreview').src = imageUrl;
+            document.getElementById('reviewImageTitle').innerText = title;
+            var modal = new bootstrap.Modal(document.getElementById('reviewImageModal'));
+            modal.show();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const isRtl = document.documentElement.dir === 'rtl';
+
+            document.querySelectorAll(".js-delete-review").forEach(button => {
+                button.addEventListener("click", function () {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name;
+
+                    Swal.fire({
+                        title: isRtl ? "هل أنت متأكد؟" : "Are you sure?",
+                        text: isRtl ? `هل ترغب في حذف التقييم "${name}"؟ لا يمكن التراجع عن هذا الإجراء.` : `Do you want to delete "${name}"? This action cannot be undone.`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc3545",
+                        cancelButtonColor: "#6c757d",
+                        confirmButtonText: isRtl ? "نعم، احذفه!" : "Yes, delete it!",
+                        cancelButtonText: isRtl ? "إلغاء" : "Cancel"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/Admin/Review/Delete/${id}`, {
+                                method: "DELETE",
+                                headers: {
+                                    // Include request verification token if necessary, but standard delete actions in this system seem to use basic REST DELETE endpoints
+                                }
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    Swal.fire({
+                                        title: isRtl ? "تم الحذف!" : "Deleted!",
+                                        text: isRtl ? "تم حذف التقييم بنجاح." : "The review has been deleted successfully.",
+                                        icon: "success",
+                                        confirmButtonText: isRtl ? "موافق" : "OK"
+                                    }).then(() => {
+                                        button.closest("tr").remove();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: isRtl ? "خطأ!" : "Error!",
+                                        text: isRtl ? "فشلت عملية حذف التقييم." : "Failed to delete the review.",
+                                        icon: "error",
+                                        confirmButtonText: isRtl ? "موافق" : "OK"
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

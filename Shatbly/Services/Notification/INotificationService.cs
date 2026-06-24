@@ -24,5 +24,11 @@ namespace Shatbly.Services.Notification
         Task DeleteAsync(
             int notificationId,
             CancellationToken cancellationToken = default);
+
+        Task SendMessageToAdminAsync(
+            string senderId,
+            string title,
+            string message,
+            CancellationToken cancellationToken = default);
     }
 }

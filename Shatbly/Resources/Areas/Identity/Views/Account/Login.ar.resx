@@ -31,4 +31,6 @@
   <data name="EmailOrUsernamePlaceholder" xml:space="preserve"><value>example@mail.com أو username123</value></data>
   <data name="PasswordPlaceholder" xml:space="preserve"><value>أدخل كلمة المرور</value></data>
   <data name="TogglePasswordVisibility" xml:space="preserve"><value>إظهار/إخفاء كلمة المرور</value></data>
+  <data name="WorkerPortalPrompt" xml:space="preserve"><value>هل أنت مزود خدمة أو فني؟</value></data>
+  <data name="WorkerPortalLink" xml:space="preserve"><value>تسجيل دخول الفنيين من هنا</value></data>
 </root>

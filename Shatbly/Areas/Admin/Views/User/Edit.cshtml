@@ -1,8 +1,8 @@
-﻿@model EditUserVM
+@model EditUserVM
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
-            <h3 class="display-6">Edit Actor</h3>
+            <h3 class="display-6">Edit User</h3>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
                 </div>
                 <div class="mb-3">
                     <label asp-for="Phone" class="form-label">Phone</label>
-                    <input asp-for="Phone" type="tel" class="form-label" id="phone" name="phone"
+                    <input asp-for="Phone" type="tel" class="form-control"
                            placeholder="01xxxxxxxxx" required pattern="^(01)[0-9]{9}$" autocomplete="tel">
                     <span asp-validation-for="Phone" class="text-danger"></span>
                 </div>
@@ -40,8 +40,13 @@
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Password" class="form-label">Password</label>
-                    <input class="form-control" placeholder="Enter Password" asp-for="Password">
+                    <label asp-for="Password" class="form-label">Password (leave blank to keep current)</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" placeholder="Enter New Password (Optional)" asp-for="Password" id="passwordField" value="@Model.Password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
@@ -56,21 +61,55 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary">Submit</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Back to Users Dashboard</a>
             </form>
         </div>
     </div>
 </div>
 <script>
     function previewImage(event) {
-    const input = event.target;
-    const preview = document.getElementById('preview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
+        const input = event.target;
+        const preview = document.getElementById('preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        reader.readAsDataURL(input.files[0]);
     }
+
+    const passwordField = document.getElementById('passwordField');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+    const toggleBtn = document.getElementById('togglePassword');
+
+    // Restore value
+    const savedPasswordValue = @Html.Raw(Json.Serialize(Model?.Password));
+    if (savedPasswordValue) {
+        passwordField.value = savedPasswordValue;
+    }
+
+    // Restore state from sessionStorage
+    const isPasswordVisible = sessionStorage.getItem('passwordVisible') === 'true';
+    if (isPasswordVisible) {
+        passwordField.type = 'text';
+        toggleIcon.classList.remove('bi-eye');
+        toggleIcon.classList.add('bi-eye-slash');
+    }
+
+    toggleBtn.addEventListener('click', function () {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+            sessionStorage.setItem('passwordVisible', 'true');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+            sessionStorage.setItem('passwordVisible', 'false');
+        }
+    });
 </script>
 @section Scripts {
     <partial name="~/Views/Shared/_NotificationPartial.cshtml" />

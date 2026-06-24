@@ -16,7 +16,7 @@
 
     <nav class="sidebar-nav mt-4">
         <a asp-area="Admin" asp-controller="Home" asp-action="Index"
-           class="nav-item @(currentController == "Dashboard" ? "active" : "")">
+           class="nav-item @(currentController == "Home" ? "active" : "")">
             <i class="fa-solid fa-house"></i>
             <span>@Localizer["Dashboard"]</span>
         </a>
@@ -74,6 +74,12 @@
             <i class="fa-solid fa-briefcase"></i>
             <span>@Localizer["WorkerProfile"]</span>
         </a>
+
+        <a asp-area="Admin" asp-controller="Messages" asp-action="Index"
+               class="nav-item @(currentController == "Messages" ? "active" : "")">
+            <i class="fa-solid fa-envelope"></i>
+            <span>@Localizer["Messages"]</span>
+        </a>
         @* Spam to Customer Area *@
         @* <a asp-area="Admin" asp-controller="BookingSystem" asp-action="Create"
            class="nav-item @(currentController == "BookingSystem" ? "active" : "")">
@@ -87,10 +93,33 @@
             <span>@Localizer["Reports"]</span>
         </a>
 
+        <a asp-area="Admin" asp-controller="Withdrawal" asp-action="Index"
+           class="nav-item @(currentController == "Withdrawal" ? "active" : "")">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+            <span>@Localizer["Withdrawals"]</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="Review" asp-action="Index"
+           class="nav-item @(currentController == "Review" ? "active" : "")">
+            <i class="fa-solid fa-star"></i>
+            <span>@Localizer["Reviews"]</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="Dispute" asp-action="Index"
+           class="nav-item @(currentController == "Dispute" ? "active" : "")">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>@Localizer["Disputes"]</span>
+        </a>
+
         <a asp-area="Admin" asp-controller="Setting" asp-action="Index"
            class="nav-item @(currentController == "Setting" ? "active" : "")">
             <i class="fa-solid fa-gear"></i>
             <span>@Localizer["Settings"]</span>
+        </a>
+
+        <a href="/Identity/Account/Logout" class="nav-item text-danger">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>@Localizer["Logout"]</span>
         </a>
     </nav>
 </aside>

@@ -87,9 +87,15 @@
                         <span class="text-muted small">@Localizer["NoAccount"]</span>
                         <a asp-action="Register" class="small text-primary fw-bold text-decoration-none">@Localizer["RegisterNow"]</a>
                     </div>
-                    <div class="text-center">
+                    <div class="text-center mb-3">
                         <span class="text-muted small">@Localizer["ResendConfirmation"]</span>
                         <a asp-action="ResendEmailConfirmation" class="small text-primary fw-bold text-decoration-none">@Localizer["ClickHere"]</a>
+                    </div>
+                    <div class="text-center pt-3 border-top mt-3">
+                        <span class="text-muted small">@Localizer["WorkerPortalPrompt"]</span>
+                        <a asp-action="WorkerLogin" class="small text-primary fw-bold text-decoration-none ms-1">
+                            @Localizer["WorkerPortalLink"]
+                        </a>
                     </div>
                 </form>
                 <partial name="_ExternalAuthentication" />

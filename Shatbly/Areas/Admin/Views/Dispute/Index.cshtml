@@ -1,0 +1,195 @@
+@model IEnumerable<Shatbly.Models.Dipuste>
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewBag.Title = isRtl ? "إدارة الشكاوى والنزاعات" : "Disputes & Complaints Management";
+}
+
+<style>
+    .dispute-table-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f0f0f0;
+        padding: 24px;
+    }
+</style>
+
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 @(isRtl ? "text-end flex-row-reverse" : "text-start")">
+    <div>
+        <h2 class="fw-bold mb-1">@(isRtl ? "الشكاوى والنزاعات" : "Disputes & Complaints")</h2>
+        <p class="text-muted mb-0">@(isRtl ? "إدارة ومتابعة الشكاوى والنزاعات المرفوعة" : "Manage and track disputes and complaints")</p>
+    </div>
+</div>
+
+<div class="dispute-table-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-secondary">
+                <tr class="@(isRtl ? "text-end" : "text-start")">
+                    <th scope="col">#</th>
+                    <th scope="col">@(isRtl ? "الحجز" : "Booking")</th>
+                    <th scope="col">@(isRtl ? "المرسِل" : "Raised By")</th>
+                    <th scope="col">@(isRtl ? "المشتكى عليه" : "Against")</th>
+                    <th scope="col">@(isRtl ? "سبب النزاع" : "Reason")</th>
+                    <th scope="col">@(isRtl ? "التفاصيل" : "Description")</th>
+                    <th scope="col">@(isRtl ? "تاريخ الشكوى" : "Created At")</th>
+                    <th scope="col">@(isRtl ? "الحالة" : "Status")</th>
+                    <th scope="col">@(isRtl ? "القرار / الحل" : "Resolution")</th>
+                    <th scope="col" class="text-center">@(isRtl ? "العمليات" : "Actions")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <i class="bi bi-exclamation-octagon fs-1 d-block mb-3 opacity-50 text-danger"></i>
+                            @(isRtl ? "لا توجد شكاوى أو نزاعات حالياً." : "No disputes or complaints found.")
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        var raiserName = item.RaisedBy != null ? $"{item.RaisedBy.FName} {item.RaisedBy.LName}".Trim() : "Client";
+                        if (string.IsNullOrWhiteSpace(raiserName)) raiserName = item.RaisedBy?.UserName ?? "Client";
+
+                        var againstName = item.Against != null ? $"{item.Against.FName} {item.Against.LName}".Trim() : "Worker";
+                        if (string.IsNullOrWhiteSpace(againstName)) againstName = item.Against?.UserName ?? "Worker";
+
+                        <tr class="@(isRtl ? "text-end" : "text-start")">
+                            <td class="fw-bold text-dark">@item.Id</td>
+                            <td>
+                                <a href="/Admin/Booking/Details/@item.BookingId" class="fw-semibold">#@item.BookingId</a>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@raiserName</div>
+                                <small class="text-muted d-block" style="font-size:0.75rem;">@item.RaisedBy?.Email</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">@againstName</div>
+                                <small class="text-muted d-block" style="font-size:0.75rem;">@item.Against?.Email</small>
+                            </td>
+                            <td class="fw-semibold text-danger">@item.Reason</td>
+                            <td>
+                                <div class="text-wrap" style="max-width: 250px;" title="@item.Description">
+                                    @item.Description
+                                </div>
+                            </td>
+                            <td class="text-secondary small">
+                                @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                            </td>
+                            <td>
+                                @if (item.Status == Shatbly.Models.DisputeStatus.Resolved || item.Status == Shatbly.Models.DisputeStatus.Closed)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
+                                        @item.Status
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1">
+                                        @item.Status
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="text-muted small text-truncate" style="max-width: 150px;" title="@item.Resolution">
+                                    @(string.IsNullOrWhiteSpace(item.Resolution) ? "-" : item.Resolution)
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (item.Status != Shatbly.Models.DisputeStatus.Resolved && item.Status != Shatbly.Models.DisputeStatus.Closed)
+                                {
+                                    <button type="button" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold js-resolve-dispute" 
+                                            data-id="@item.Id">
+                                        <i class="bi bi-check-circle-fill me-1"></i> @(isRtl ? "حل النزاع" : "Resolve")
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">@(isRtl ? "محلول" : "Resolved")</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center gap-1">
+                <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;" 
+                       href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })" aria-label="Previous">
+                        <i class="bi bi-chevron-@(isRtl ? "right" : "left")"></i>
+                    </a>
+                </li>
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                           href="@Url.Action("Index", new { page = i })">@i</a>
+                    </li>
+                }
+                <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                       href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })" aria-label="Next">
+                        <i class="bi bi-chevron-@(isRtl ? "left" : "right")"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Modal for resolution explanation -->
+<div class="modal fade" id="resolveModal" tabindex="-1" aria-labelledby="resolveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="resolveForm" method="post" asp-action="Resolve">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="disputeIdInput" />
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resolveModalLabel">@(isRtl ? "تقديم حل النزاع" : "Provide Dispute Resolution")</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <div class="mb-3">
+                        <label for="resolutionText" class="form-label fw-semibold text-secondary">@(isRtl ? "تفاصيل الحل أو الإجراء المتخذ" : "Details of resolution or action taken")</label>
+                        <textarea class="form-control" name="resolution" id="resolutionText" rows="4" required placeholder="@(isRtl ? "أدخل تفاصيل القرار..." : "Enter resolution details...")"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@(isRtl ? "إلغاء" : "Cancel")</button>
+                    <button type="submit" class="btn btn-success">@(isRtl ? "تأكيد الحل" : "Confirm Resolve")</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const resolveButtons = document.querySelectorAll(".js-resolve-dispute");
+            const resolveModal = new bootstrap.Modal(document.getElementById('resolveModal'));
+            const disputeIdInput = document.getElementById('disputeIdInput');
+
+            resolveButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    disputeIdInput.value = this.dataset.id;
+                    resolveModal.show();
+                });
+            });
+        });
+    </script>
+}

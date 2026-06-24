@@ -1,0 +1,175 @@
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = isRtl ? "سياسة الخصوصية - شطبلي" : "Privacy Policy - Shatbly";
+    ViewData["HeroTitle"] = isRtl ? "سياسة الخصوصية" : "Privacy Policy";
+    ViewData["HeroSubtitle"] = isRtl 
+        ? "كيف نقوم بجمع واستخدام وحماية بياناتك الشخصية" 
+        : "How we collect, use, and protect your personal information";
+}
+
+<style>
+    .legal-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        border: 1px solid rgba(10, 38, 71, 0.05);
+        transition: transform 0.3s ease;
+    }
+    .section-icon {
+        color: var(--primary-color);
+        background: rgba(10, 38, 71, 0.05);
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    .legal-title {
+        color: var(--primary-color);
+        font-weight: 800;
+    }
+</style>
+
+<section class="container" style="margin-top: -60px; margin-bottom: 80px; position: relative; z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card legal-card p-4 p-md-5">
+                @if (isRtl)
+                {
+                    <div class="text-end">
+                        <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                            <div class="section-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                            <div>
+                                <h3 class="mb-0 legal-title">التزامنا بخصوصيتك</h3>
+                                <p class="text-muted mb-0 small">تاريخ التحديث: يونيو 2026</p>
+                            </div>
+                        </div>
+
+                        <p class="lead text-secondary mb-5">
+                            في منصة شطبلي، نضع خصوصية وأمان مستخدمينا في مقدمة أولوياتنا. نوضح في هذه الصفحة كيفية جمعنا للبيانات الشخصية واستخدامها ومشاركتها عند استخدامك لخدماتنا.
+                        </p>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-folder-symlink-fill text-warning"></i> ١. البيانات التي نقوم بجمعها
+                                </h5>
+                                <p class="text-muted">
+                                    نقوم بجمع المعلومات اللازمة لتقديم أفضل خدمات صيانة وتشطيب ممكنة لك. تشمل هذه البيانات:
+                                </p>
+                                <ul class="text-muted pe-4">
+                                    <li class="mb-2"><strong>بيانات الملف الشخصي:</strong> الاسم، البريد الإلكتروني، رقم الهاتف، والرمز السري.</li>
+                                    <li class="mb-2"><strong>بيانات العنوان والموقع:</strong> المدينة، المنطقة، وإحداثيات الموقع لتسهيل وصول الفنيين.</li>
+                                    <li class="mb-2"><strong>بيانات الفنيين:</strong> التخصص، السيرة الذاتية، وسجل الأعمال والتقييمات.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-gear-fill text-warning"></i> ٢. كيف نستخدم بياناتك
+                                </h5>
+                                <p class="text-muted">
+                                    نستخدم البيانات التي نجمعها للأغراض التالية:
+                                </p>
+                                <ul class="text-muted pe-4">
+                                    <li class="mb-2">تسهيل وتأكيد عمليات حجز الخدمات وتحديد المواعيد بين العملاء والفنيين.</li>
+                                    <li class="mb-2">تحسين جودة المنصة وتطوير خدمات جديدة تلبي تطلعات مستخدمينا.</li>
+                                    <li class="mb-2">التواصل معك بخصوص التحديثات الهامة، العروض الترويجية، أو استبيانات الرأي.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-shield-fill-check text-warning"></i> ٣. حماية بياناتك
+                                </h5>
+                                <p class="text-muted">
+                                    نحن نطبق مجموعة متنوعة من الإجراءات الأمنية للحفاظ على سلامة معلوماتك الشخصية. نستخدم تشفيراً متقدماً لنقل البيانات الحساسة ونخزنها في قواعد بيانات آمنة ومحمية بجدران حماية قوية.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-chat-left-text-fill text-warning"></i> ٤. للتواصل معنا
+                                </h5>
+                                <p class="text-muted">
+                                    إذا كانت لديك أي أسئلة أو استفسارات حول سياسة الخصوصية الخاصة بنا، يمكنك التواصل معنا مباشرة من خلال <a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="text-decoration-none text-primary fw-bold">صفحة اتصل بنا</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-start">
+                        <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                            <div class="section-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                            <div>
+                                <h3 class="mb-0 legal-title">Our Commitment to Your Privacy</h3>
+                                <p class="text-muted mb-0 small">Last Updated: June 2026</p>
+                            </div>
+                        </div>
+
+                        <p class="lead text-secondary mb-5">
+                            At Shatbly, your privacy and data security are our top priorities. This Privacy Policy details how we collect, use, and protect your personal information when you use our platform and services.
+                        </p>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-folder-symlink-fill text-warning"></i> 1. Information We Collect
+                                </h5>
+                                <p class="text-muted">
+                                    We collect information necessary to provide you with the best maintenance and finishing services. This includes:
+                                </p>
+                                <ul class="text-muted ps-4">
+                                    <li class="mb-2"><strong>Profile Information:</strong> Name, email address, phone number, and password.</li>
+                                    <li class="mb-2"><strong>Location Data:</strong> City, district, and coordinates to enable technician dispatch.</li>
+                                    <li class="mb-2"><strong>Technician Data:</strong> Specialization, CV/Resume, work history, and ratings.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-gear-fill text-warning"></i> 2. How We Use Your Information
+                                </h5>
+                                <p class="text-muted">
+                                    We use the collected data for the following purposes:
+                                </p>
+                                <ul class="text-muted ps-4">
+                                    <li class="mb-2">Facilitating and confirming bookings and schedules between clients and technicians.</li>
+                                    <li class="mb-2">Improving our platform features and developing new user-centric services.</li>
+                                    <li class="mb-2">Communicating important updates, promotional offers, and satisfaction surveys.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-shield-fill-check text-warning"></i> 3. Data Security
+                                </h5>
+                                <p class="text-muted">
+                                    We implement a variety of security measures to maintain the safety of your personal information. We utilize modern encryption protocols for data transmission and store your info behind secured networks.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-chat-left-text-fill text-warning"></i> 4. Contact Us
+                                </h5>
+                                <p class="text-muted">
+                                    If you have any questions or suggestions regarding our Privacy Policy, please feel free to reach out via our <a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="text-decoration-none text-primary fw-bold">Contact Us page</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

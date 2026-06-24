@@ -2,6 +2,12 @@
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
 }
+<style>
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+    }
+</style>
 <div class="container my-4">
 	<h2 class="mb-4">@Localizer["FavoritesTitle"]</h2>
     @if (!Model.Any())
@@ -18,11 +24,32 @@
         <!-- Normal Worker Card 1 -->
         @foreach (var worker in Model)
         {
+            var profilePictureUrl = "";
+            if (!string.IsNullOrEmpty(worker.ProfilePicturePath))
+            {
+                var cleanedPath = worker.ProfilePicturePath.Trim().Replace("\\", "/");
+                if (cleanedPath.StartsWith("~/"))
+                {
+                    profilePictureUrl = Url.Content(cleanedPath);
+                }
+                else if (cleanedPath.StartsWith("/"))
+                {
+                    profilePictureUrl = Url.Content("~" + cleanedPath);
+                }
+                else
+                {
+                    profilePictureUrl = Url.Content("~/" + cleanedPath);
+                }
+            }
+            else
+            {
+                profilePictureUrl = "https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop";
+            }
             <div class="worker-card">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <div class="d-flex gap-3">
                         <div class="avatar-container">
-                            <img src="https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop" class="worker-avatar" alt="Worker">
+                            <img src="@profilePictureUrl" class="worker-avatar" alt="Worker">
                             <span class="online-dot" style="background-color: #f59e0b;"></span> <!-- Busy but available soon -->
                         </div>
                         <div>
@@ -46,7 +73,10 @@
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center">
-                    <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span></div>
+                    <div class="price-tag">
+                        @(worker.WorkerServices != null ? worker.WorkerServices.HourlyRate.ToString("N0") : "0")
+                        <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span>
+                    </div>
                     <a href="/Customer/Home/WorkerDetails/@worker.Id" class="btn-book bg-light text-dark border" style="text-decoration: none;">@Localizer["DetailsButton"]</a>
                 </div>
 

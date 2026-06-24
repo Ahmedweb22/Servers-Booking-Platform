@@ -52,7 +52,21 @@
                     <div class="col-md-6">
                         <label asp-for="CVFile" class="form-label"></label>
                         <input asp-for="CVFile" type="file" class="form-control" accept=".pdf,.doc,.docx" />
-                        <span class="text-muted small">Current CV: @(string.IsNullOrEmpty(Model.ExistingCVPath) ? "None" : Model.ExistingCVPath)</span>
+                        <div class="mt-1">
+                            <span class="text-muted small">Current CV: </span>
+                            @if (!string.IsNullOrEmpty(Model.ExistingCVPath))
+                            {
+                                var isPath = Model.ExistingCVPath.Contains('/') || Model.ExistingCVPath.Contains('\\');
+                                var cvUrl = isPath ? Url.Content("~/" + Model.ExistingCVPath.Replace("\\", "/")) : Url.Content("~/img/worker/worker_cv/" + Model.ExistingCVPath);
+                                <a href="@cvUrl" target="_blank" class="btn btn-xs btn-outline-info py-0 px-2" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-file-arrow-down"></i> View CV
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small font-italic">None</span>
+                            }
+                        </div>
                         <span asp-validation-for="CVFile" class="text-danger"></span>
                     </div>
 

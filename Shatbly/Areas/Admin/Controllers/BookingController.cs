@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -87,7 +87,8 @@ namespace Shatbly.Areas.Admin.Controllers
             b => b.Worker,
             b => b.Coupon,
             b => b.PromoCode,
-            b => b.BookingItems
+            b => b.BookingItems,
+            b => b.Disputes
                 },
                 tracking: false);
 
@@ -158,6 +159,10 @@ namespace Shatbly.Areas.Admin.Controllers
             existingBooking.CouponId = booking.CouponId;
             existingBooking.PromoCodeId = booking.PromoCodeId;
             existingBooking.Status = booking.Status;
+            existingBooking.ScheduledAt = booking.ScheduledAt;
+            existingBooking.DurationHours = booking.DurationHours;
+            existingBooking.TotalPrice = booking.TotalPrice;
+            existingBooking.DiscountAmt = booking.DiscountAmt;
 
             _bookingRepo.Update(existingBooking);
             await _bookingRepo.CommitAsync();

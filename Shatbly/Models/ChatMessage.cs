@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shatbly.Models
@@ -8,8 +8,9 @@ namespace Shatbly.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        public string Message { get; set; }
+        public string? Message { get; set; }
+
+        public string? ImageUrl { get; set; }
 
         public bool IsRead { get; set; } = false;
 

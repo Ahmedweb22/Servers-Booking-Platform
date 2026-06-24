@@ -1,0 +1,163 @@
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = isRtl ? "الشروط والأحكام - شطبلي" : "Terms & Conditions - Shatbly";
+    ViewData["HeroTitle"] = isRtl ? "الشروط والأحكام" : "Terms & Conditions";
+    ViewData["HeroSubtitle"] = isRtl 
+        ? "اتفاقية الاستخدام والضوابط المنظمة للمنصة" 
+        : "User agreement and guidelines governing the platform";
+}
+
+<style>
+    .legal-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        border: 1px solid rgba(10, 38, 71, 0.05);
+        transition: transform 0.3s ease;
+    }
+    .section-icon {
+        color: var(--primary-color);
+        background: rgba(10, 38, 71, 0.05);
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    .legal-title {
+        color: var(--primary-color);
+        font-weight: 800;
+    }
+</style>
+
+<section class="container" style="margin-top: -60px; margin-bottom: 80px; position: relative; z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card legal-card p-4 p-md-5">
+                @if (isRtl)
+                {
+                    <div class="text-end">
+                        <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                            <div class="section-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+                            <div>
+                                <h3 class="mb-0 legal-title">شروط استخدام منصة شطبلي</h3>
+                                <p class="text-muted mb-0 small">تاريخ التحديث: يونيو 2026</p>
+                            </div>
+                        </div>
+
+                        <p class="lead text-secondary mb-5">
+                            مرحباً بك في شطبلي. يرجى قراءة هذه الشروط والأحكام بعناية قبل استخدام المنصة. يشكل استخدامك للمنصة موافقة كاملة على الالتزام بهذه الشروط.
+                        </p>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-person-fill-check text-warning"></i> ١. حساب المستخدم ومسؤولياته
+                                </h5>
+                                <p class="text-muted">
+                                    عند إنشاء حساب على شطبلي، يجب عليك توفير معلومات دقيقة وكاملة. أنت مسؤول بشكل كامل عن الحفاظ على سرية كلمة المرور الخاصة بك وعن جميع الأنشطة التي تحدث تحت حسابك.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-calendar2-check-fill text-warning"></i> ٢. طبيعة الخدمات والحجوزات
+                                </h5>
+                                <p class="text-muted">
+                                    شطبلي هي منصة تقنية تربط بين العملاء الذين يبحثون عن خدمات صيانة وتشطيب، وبين الفنيين المستقلين.
+                                </p>
+                                <ul class="text-muted pe-4">
+                                    <li class="mb-2">تعتبر الاتفاقات والمواعيد ملزمة بمجرد تأكيد الحجز من خلال المنصة.</li>
+                                    <li class="mb-2">يتحمل الفني المسؤولية الكاملة عن جودة تنفيذ الأعمال المقدمة للعميل.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-credit-card-fill text-warning"></i> ٣. الرسوم والمدفوعات
+                                </h5>
+                                <p class="text-muted">
+                                    تخضع الأسعار المقدمة للفحص والاتفاق بين الطرفين بناءً على التخصص ونطاق العمل المطلق. يجب دفع المبالغ المتفق عليها فور إتمام الخدمة بنجاح، وتخضع بعض الحجوزات لرسوم إلغاء في حال الإلغاء المتأخر.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning"></i> ٤. حدود المسؤولية
+                                </h5>
+                                <p class="text-muted">
+                                    تبذل منصة شطبلي أقصى جهدها للتحقق من هوية ومهارات الفنيين المسجلين، ولكننا لا نضمن جودة العمل بشكل مباشر ولا نتحمل المسؤولية عن أي أضرار ناجمة عن الاتفاقات الخارجية التي تتم خارج إطار المنصة الرسمي.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-start">
+                        <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                            <div class="section-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
+                            <div>
+                                <h3 class="mb-0 legal-title">Terms of Service</h3>
+                                <p class="text-muted mb-0 small">Last Updated: June 2026</p>
+                            </div>
+                        </div>
+
+                        <p class="lead text-secondary mb-5">
+                            Welcome to Shatbly. Please read these Terms & Conditions carefully before using our platform. By accessing or using our services, you agree to be bound by these terms.
+                        </p>
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-person-fill-check text-warning"></i> 1. User Accounts & Responsibilities
+                                </h5>
+                                <p class="text-muted">
+                                    When creating an account on Shatbly, you must provide accurate and complete information. You are solely responsible for safeguarding your credentials and for all activities that occur under your account.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-calendar2-check-fill text-warning"></i> 2. Nature of Bookings & Services
+                                </h5>
+                                <p class="text-muted">
+                                    Shatbly is a technology platform that connects customers looking for maintenance and finishing services with independent professional technicians.
+                                </p>
+                                <ul class="text-muted ps-4">
+                                    <li class="mb-2">Bookings and schedules are considered binding once confirmed via the platform.</li>
+                                    <li class="mb-2">The technician is fully responsible for the standard and quality of the executed work.</li>
+                                </ul>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-credit-card-fill text-warning"></i> 3. Fees and Payments
+                                </h5>
+                                <p class="text-muted">
+                                    Service prices are agreed upon based on the scope and details of the request. Payment is due immediately upon successful completion of the service. Late cancellations may incur cancelation fees.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2" style="color: var(--primary-color);">
+                                    <i class="bi bi-exclamation-triangle-fill text-warning"></i> 4. Limitation of Liability
+                                </h5>
+                                <p class="text-muted">
+                                    Shatbly makes every effort to verify the credentials and skill level of registered technicians. However, we do not directly guarantee the final work quality and are not liable for private agreements made outside the platform.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,7 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Localization;
+using Shatbly.Models;
+using Shatbly.ViewModels;
+using Shatbly.Repositories.IRepositories;
 using Shatbly.Services.File_Service;
+using Shatbly.UnitOfWork;
+using Shatbly.Utilities;
 using System.Security.Claims;
+
 namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
@@ -12,14 +20,19 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IFileService _fileService;
         private readonly IStringLocalizer<WorkerProfileController> _localizer;
         private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+        private readonly IRepository<WorkerService> _workerServiceRepo;
+        private readonly IRepository<ServiceCategory> _categoryRepo;
 
         public WorkerProfileController(IUnitOfWork unitOfWork, IFileService fileService,
-            IStringLocalizer<WorkerProfileController> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
+            IStringLocalizer<WorkerProfileController> localizer, IStringLocalizer<SharedResource> sharedLocalizer,
+            IRepository<WorkerService> workerServiceRepo, IRepository<ServiceCategory> categoryRepo)
         {
             _unitOfWork = unitOfWork;
             _fileService = fileService;
             _localizer = localizer;
             _sharedLocalizer = sharedLocalizer;
+            _workerServiceRepo = workerServiceRepo;
+            _categoryRepo = categoryRepo;
         }
 
         [HttpGet]
@@ -45,7 +58,18 @@ namespace Shatbly.Areas.Worker.Controllers
                 return NotFound(_sharedLocalizer["WorkerProfileNotFound"].Value);
             }
 
-            return View(MapToEditVm(profile));
+            var vm = MapToEditVm(profile);
+
+            var categories = await _categoryRepo.GetAsync(c => c.IsActive, tracking: false);
+            var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+            vm.Categories = categories.Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = isRtl ? c.NameAr : c.NameEn,
+                Selected = c.Id == vm.CategoryId
+            }).ToList();
+
+            return View(vm);
         }
 
         [HttpPost]
@@ -66,6 +90,14 @@ namespace Shatbly.Areas.Worker.Controllers
 
             if (!ModelState.IsValid)
             {
+                var categories = await _categoryRepo.GetAsync(c => c.IsActive, tracking: false);
+                var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                model.Categories = categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = isRtl ? c.NameAr : c.NameEn,
+                    Selected = c.Id == model.CategoryId
+                }).ToList();
                 return View(model);
             }
 
@@ -73,7 +105,25 @@ namespace Shatbly.Areas.Worker.Controllers
             profile.IsAvailable = model.IsAvailable;
             profile.AcceptsOnline = model.AcceptsOnline;
 
-            _unitOfWork.WorkerProfiles.Update(profile);
+            // Update or Create WorkerService
+            if (profile.WorkerServices == null)
+            {
+                var newService = new WorkerService
+                {
+                    WorkerId = profile.Id,
+                    CategoryId = model.CategoryId,
+                    HourlyRate = model.HourlyRate,
+                    IsActive = model.IsAvailable
+                };
+                await _workerServiceRepo.CreateAsync(newService);
+            }
+            else
+            {
+                profile.WorkerServices.CategoryId = model.CategoryId;
+                profile.WorkerServices.HourlyRate = model.HourlyRate;
+                profile.WorkerServices.IsActive = model.IsAvailable;
+            }
+
             await _unitOfWork.CommitAsync();
 
             TempData["Success"] = _localizer["ProfileUpdatedSuccess"].Value;
@@ -93,7 +143,11 @@ namespace Shatbly.Areas.Worker.Controllers
 
             profile.IsAvailable = !profile.IsAvailable;
 
-            _unitOfWork.WorkerProfiles.Update(profile);
+            if (profile.WorkerServices != null)
+            {
+                profile.WorkerServices.IsActive = profile.IsAvailable;
+            }
+
             await _unitOfWork.CommitAsync();
 
             TempData["Success"] = profile.IsAvailable
@@ -146,6 +200,49 @@ namespace Shatbly.Areas.Worker.Controllers
             return RedirectToAction(nameof(Details));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadProfilePicture(EditWorkerProfileVM model)
+        {
+            var profile = await GetCurrentWorkerProfileAsync();
+
+            if (profile is null)
+            {
+                return NotFound(_sharedLocalizer["WorkerProfileNotFound"].Value);
+            }
+
+            if (model.Id != profile.Id)
+            {
+                return Forbid();
+            }
+
+            if (model.ProfilePictureFile is null)
+            {
+                TempData["Error"] = _localizer["ChoosePhotoFile"].ResourceNotFound ? "Please choose an image file." : _localizer["ChoosePhotoFile"].Value;
+                return RedirectToAction(nameof(Details));
+            }
+
+            var result = await _fileService.UploadFileAsync(
+                model.ProfilePictureFile,
+                "uploads/avatars",
+                maxSizeInBytes: 10 * 1024 * 1024,
+                allowedExtensions: new[] { ".jpg", ".jpeg", ".png" });
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = result.ErrorMessage;
+                return RedirectToAction(nameof(Details));
+            }
+
+            profile.ProfilePicturePath = result.FilePath;
+
+            _unitOfWork.WorkerProfiles.Update(profile);
+            await _unitOfWork.CommitAsync();
+
+            TempData["Success"] = _localizer["ProfilePictureUploadedSuccess"].ResourceNotFound ? "Profile photo updated successfully!" : _localizer["ProfilePictureUploadedSuccess"].Value;
+            return RedirectToAction(nameof(Details));
+        }
+
         private async Task<WorkerProfile?> GetCurrentWorkerProfileAsync(bool tracking = true)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -159,13 +256,17 @@ namespace Shatbly.Areas.Worker.Controllers
                 expression: p => p.UserId == userId,
                 includes:
                 [
-                    p => p.User
+                    p => p.User,
+                    p => p.Availabilities,
+                    p => p.WorkerServices,
+                    p => p.WorkerServices.Category
                 ],
                 tracking: tracking);
         }
 
         private static WorkerProfileVM MapToDetailsVm(WorkerProfile profile)
         {
+            var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
             return new WorkerProfileVM
             {
                 Id = profile.Id,
@@ -176,8 +277,12 @@ namespace Shatbly.Areas.Worker.Controllers
                 IsAvailable = profile.IsAvailable,
                 AcceptsOnline = profile.AcceptsOnline,
                 CVPath = profile.CVPath,
+                ProfilePicturePath = profile.ProfilePicturePath,
                 CreatedAt = profile.CreatedAt,
-                WorkerName = profile.User?.UserName ?? profile.User?.Email ?? "Worker"
+                WorkerName = profile.User?.UserName ?? profile.User?.Email ?? "Worker",
+                Availabilities = profile.Availabilities,
+                CategoryName = profile.WorkerServices != null ? (isRtl ? profile.WorkerServices.Category?.NameAr : profile.WorkerServices.Category?.NameEn) : null,
+                HourlyRate = profile.WorkerServices?.HourlyRate ?? 0
             };
         }
 
@@ -189,9 +294,11 @@ namespace Shatbly.Areas.Worker.Controllers
                 Bio = profile.Bio,
                 IsAvailable = profile.IsAvailable,
                 AcceptsOnline = profile.AcceptsOnline,
-                ExistingCVPath = profile.CVPath
+                ExistingCVPath = profile.CVPath,
+                ExistingProfilePicturePath = profile.ProfilePicturePath,
+                HourlyRate = profile.WorkerServices?.HourlyRate ?? 0,
+                CategoryId = profile.WorkerServices?.CategoryId ?? 0
             };
         }
     }
-
 }

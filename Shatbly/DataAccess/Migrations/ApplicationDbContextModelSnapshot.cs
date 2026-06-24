@@ -376,11 +376,13 @@ namespace Shatbly.DataAccess.Migrations
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ReadAt")
@@ -1074,6 +1076,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -1122,9 +1127,6 @@ namespace Shatbly.DataAccess.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NameAr")
                         .IsRequired()
@@ -1422,6 +1424,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Property<string>("HRNotes")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdCardPhotoPath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("InterviewDate")
                         .HasColumnType("datetime2");
 
@@ -1433,6 +1438,9 @@ namespace Shatbly.DataAccess.Migrations
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePicturePath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("RatingAvg")
                         .HasColumnType("decimal(3,2)");
@@ -1914,7 +1922,7 @@ namespace Shatbly.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.WorkerProfile", null)
+                    b.HasOne("Shatbly.Models.WorkerProfile", "WorkerProfile")
                         .WithMany("WorkerReviews")
                         .HasForeignKey("WorkerProfileId");
 
@@ -1927,6 +1935,8 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Reviewee");
 
                     b.Navigation("Reviewer");
+
+                    b.Navigation("WorkerProfile");
                 });
 
             modelBuilder.Entity("Shatbly.Models.SupportTicket", b =>

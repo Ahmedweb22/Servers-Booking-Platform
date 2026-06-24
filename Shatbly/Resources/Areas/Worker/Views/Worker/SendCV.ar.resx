@@ -34,4 +34,7 @@
   <data name="CvLabel" xml:space="preserve"><value>السيرة الذاتية (CV)</value></data>
   <data name="CvInvalid" xml:space="preserve"><value>ارسل السيره الذاتيه</value></data>
   <data name="SubmitBtn" xml:space="preserve"><value>تقديم الطلب</value></data>
+  <data name="CvUploadTitle" xml:space="preserve"><value>رفع السيرة الذاتية (CV)</value></data>
+  <data name="CvUploadSubtitle" xml:space="preserve"><value>اسحب الملف هنا أو اضغط للاختيار (PDF, DOCX)</value></data>
+  <data name="ChangeFile" xml:space="preserve"><value>تغيير الملف</value></data>
 </root>

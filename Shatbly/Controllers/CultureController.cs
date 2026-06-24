@@ -6,6 +6,7 @@ namespace Shatbly.Controllers
     [Route("[controller]/[action]")]
     public class CultureController : Controller
     {
+        [HttpGet]
         [HttpPost]
         [IgnoreAntiforgeryToken]
         public IActionResult SetCulture(string culture, string returnUrl)
@@ -15,6 +16,7 @@ namespace Shatbly.Controllers
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
                 new CookieOptions
                 {
+                    Path = "/",
                     Expires = DateTimeOffset.UtcNow.AddYears(1),
                     IsEssential = true,
                     SameSite = SameSiteMode.Lax
