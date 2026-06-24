@@ -22,4 +22,9 @@
   <data name="Profile" xml:space="preserve"><value>الملف الشخصي</value></data>
   <data name="Settings" xml:space="preserve"><value>الإعدادات</value></data>
   <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="Notifications" xml:space="preserve"><value>الإشعارات</value></data>
+  <data name="ViewAll" xml:space="preserve"><value>عرض الكل</value></data>
+  <data name="LoadingNotifications" xml:space="preserve"><value>جاري تحميل الإشعارات...</value></data>
+  <data name="NoNotifications" xml:space="preserve"><value>لا توجد إشعارات حالياً</value></data>
+  <data name="ErrorLoadingNotifications" xml:space="preserve"><value>حدث خطأ أثناء تحميل الإشعارات.</value></data>
 </root>

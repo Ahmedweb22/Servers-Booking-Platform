@@ -11,14 +11,10 @@
     var targetFlag = isArabic ? "🇬🇧" : "🇪🇬";
 }
 
-<form action="/Culture/SetCulture" method="post" class="d-inline-block">
-    <input type="hidden" name="culture" value="@targetCulture" />
-    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
-    <button type="submit" class="lang-switch-btn" title="@targetFull" id="langSwitchBtn">
-        <span class="lang-flag">@targetFlag</span>
-        <span class="lang-label">@targetLabel</span>
-    </button>
-</form>
+<a href="/Culture/SetCulture?culture=@targetCulture&returnUrl=@System.Net.WebUtility.UrlEncode(Context.Request.Path + Context.Request.QueryString)" class="lang-switch-btn text-decoration-none" title="@targetFull" id="langSwitchBtn">
+    <span class="lang-flag">@targetFlag</span>
+    <span class="lang-label">@targetLabel</span>
+</a>
 
 <style>
     .lang-switch-btn {

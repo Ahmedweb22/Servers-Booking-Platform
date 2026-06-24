@@ -1,25 +1,33 @@
-﻿using global::Shatbly.Services.Notification;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using System.Security.Claims;
+using global::Shatbly.Services.Notification;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Shatbly.Services.File_Service;
+using Shatbly.Services.Chat;
 
 namespace Shatbly.Areas.Worker.Controllers
+{
+    [Area(SD.WORKER_AREA)]
+    [Authorize(Roles = $"{SD.ROLE_WORKER},{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
+    public class ChatController : Controller
     {
-        [Area(SD.WORKER_AREA)]
-        [Authorize(Roles = $"{SD.ROLE_WORKER},{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
-        public class ChatController : Controller
-        {
-            private readonly ApplicationDbContext _context;
-            private readonly INotificationService _notificationService;
+        private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
+        private readonly IChatService _chatService;
+        private readonly IFileService _fileService;
 
-            public ChatController(
-                ApplicationDbContext context,
-                INotificationService notificationService)
-            {
-                _context = context;
-                _notificationService = notificationService;
-            }
+        public ChatController(
+            ApplicationDbContext context,
+            INotificationService notificationService,
+            IChatService chatService,
+            IFileService fileService)
+        {
+            _context = context;
+            _notificationService = notificationService;
+            _chatService = chatService;
+            _fileService = fileService;
+        }
 
             private string? CurrentUserId =>
                 User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -74,6 +82,9 @@ namespace Shatbly.Areas.Worker.Controllers
 
                 await _context.SaveChangesAsync(cancellationToken);
 
+                var users = new[] { CurrentUserId, booking.ClientId }.OrderBy(x => x).ToArray();
+                ViewBag.ConversationKey = $"booking-{booking.Id}-chat-{users[0]}-{users[1]}";
+
                 var vm = new ChatWorkerViewModel
                 {
                     BookingId = booking.Id,
@@ -89,13 +100,14 @@ namespace Shatbly.Areas.Worker.Controllers
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> Send(
                 int bookingId,
-                string message,
+                string? message,
+                IFormFile? image,
                 CancellationToken cancellationToken)
             {
                 if (string.IsNullOrWhiteSpace(CurrentUserId))
                     return Unauthorized();
 
-                if (string.IsNullOrWhiteSpace(message))
+                if (string.IsNullOrWhiteSpace(message) && (image == null || image.Length == 0))
                     return RedirectToAction(
                         nameof(Conversation),
                         new { bookingId });
@@ -120,26 +132,42 @@ namespace Shatbly.Areas.Worker.Controllers
                 if (booking.WorkerId != workerProfile.Id)
                     return Forbid();
 
-                var chatMessage = new ChatMessage
+                string? imageUrl = null;
+                if (image != null && image.Length > 0)
                 {
-                    BookingId = bookingId,
-                    SenderId = CurrentUserId,
-                    ReceiverId = booking.ClientId,
-                    Message = message,
-                    SentAt = DateTime.UtcNow
-                };
+                    var uploadResult = await _fileService.UploadFileAsync(
+                        image,
+                        "uploads/chat",
+                        5 * 1024 * 1024,
+                        new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" });
 
-                _context.ChatMessages.Add(chatMessage);
+                    if (uploadResult.Succeeded)
+                    {
+                        imageUrl = uploadResult.FilePath;
+                    }
+                    else
+                    {
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return BadRequest(new { success = false, message = uploadResult.ErrorMessage ?? "فشل تحميل الصورة." });
+                        }
+                        ModelState.AddModelError("image", uploadResult.ErrorMessage ?? "فشل تحميل الصورة.");
+                        return RedirectToAction(nameof(Conversation), new { bookingId });
+                    }
+                }
 
-                await _notificationService.CreateNotificationAsync(
+                await _chatService.SendMessageAsync(
+                    CurrentUserId,
                     booking.ClientId,
-                    "New Message",
-                    message,
-                    NotificationType.Message,
                     bookingId,
+                    message,
+                    imageUrl,
                     cancellationToken);
 
-                await _context.SaveChangesAsync(cancellationToken);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true, imageUrl });
+                }
 
                 return RedirectToAction(
                     nameof(Conversation),

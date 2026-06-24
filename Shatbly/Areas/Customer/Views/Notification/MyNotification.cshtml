@@ -1,211 +1,592 @@
-﻿@model IReadOnlyList<Notification>
+@model IReadOnlyList<Notification>
 
 @{
-    ViewData["Title"] = "Notification";
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewData["Title"] = Localizer["Notification"];
 }
-<p>UserId: @ViewBag.CurrentUserId</p>
-@* <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Notifications</h1>
-</div> *@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0">Notifications</h1>
 
-    <form asp-area="Customer" asp-controller="Notification" asp-action="Test" method="post">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-primary btn-sm">
-            Test Notification
-        </button>
-    </form>
+<style>
+    .notifications-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+
+    .inbox-header {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        margin-bottom: 25px;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .inbox-title {
+        font-weight: 800;
+        color: var(--primary-color, #0f172a);
+        font-size: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .inbox-subtitle {
+        color: var(--text-muted, #64748b);
+        font-size: 0.95rem;
+        margin-top: 4px;
+    }
+
+    /* Filter Pills */
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .filter-btn {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: var(--text-muted, #64748b);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-btn:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: var(--primary-color, #0f172a);
+    }
+
+    .filter-btn.active {
+        background: var(--secondary-color, #3b82f6);
+        border-color: var(--secondary-color, #3b82f6);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .filter-count {
+        background: rgba(0, 0, 0, 0.08);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .filter-btn.active .filter-count {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Notification Cards */
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .notification-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+        border: 1px solid #f1f5f9;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .notification-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: transparent;
+        transition: background 0.3s;
+        @(isRtl ? "right: 0;" : "left: 0;")
+    }
+
+    .notification-card.unread {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .notification-card.unread::before {
+        background: var(--secondary-color, #3b82f6);
+    }
+
+    .notification-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        border-color: #cbd5e1;
+    }
+
+    /* Icon Wrappers */
+    .icon-wrapper {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.25rem;
+    }
+
+    /* Types Styling */
+    .type-message { background: #eff6ff; color: #3b82f6; }
+    .type-booking { background: #ecfdf5; color: #10b981; }
+    .type-payment { background: #fef3c7; color: #d97706; }
+    .type-promotion { background: #faf5ff; color: #8b5cf6; }
+    .type-system { background: #fff5f5; color: #ef4444; }
+
+    /* Content Area */
+    .card-main-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .card-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .card-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--primary-color, #0f172a);
+        margin: 0;
+    }
+
+    .card-message-text {
+        font-size: 0.95rem;
+        color: #475569;
+        line-height: 1.5;
+        margin: 0 0 10px 0;
+        word-wrap: break-word;
+    }
+
+    .card-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 0.8rem;
+        color: var(--text-muted, #64748b);
+        font-weight: 600;
+    }
+
+    .card-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Pulsing Blue Dot for Unread */
+    .unread-indicator {
+        width: 8px;
+        height: 8px;
+        background-color: var(--secondary-color, #3b82f6);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+        animation: pulseDot 2s infinite;
+    }
+
+    @@keyframes pulseDot {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    /* Actions Panel */
+    .card-actions {
+        display: flex;
+        gap: 8px;
+        align-self: center;
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        color: var(--text-muted, #64748b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: #f8fafc;
+        color: var(--primary-color, #0f172a);
+        border-color: #cbd5e1;
+        transform: scale(1.05);
+    }
+
+    .action-btn.btn-chat {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #059669;
+        width: auto;
+        padding: 0 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+
+    .action-btn.btn-chat:hover {
+        background: #d1fae5;
+        color: #047857;
+        border-color: #34d399;
+    }
+
+    .action-btn.btn-read {
+        color: #3b82f6;
+        border-color: #bfdbfe;
+        background: #eff6ff;
+    }
+
+    .action-btn.btn-read:hover {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .action-btn.btn-delete {
+        color: #ef4444;
+        border-color: #fecaca;
+        background: #fff5f5;
+    }
+
+    .action-btn.btn-delete:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    /* Empty State */
+    .empty-state-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+        border: 1px solid #f1f5f9;
+        margin-top: 10px;
+    }
+
+    .empty-icon-circle {
+        width: 80px;
+        height: 80px;
+        background: #f1f5f9;
+        color: #94a3b8;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        margin: 0 auto 20px auto;
+    }
+
+    .empty-title {
+        font-weight: 800;
+        font-size: 1.3rem;
+        color: var(--primary-color, #0f172a);
+        margin-bottom: 8px;
+    }
+
+    .empty-desc {
+        color: var(--text-muted, #64748b);
+        max-width: 400px;
+        margin: 0 auto 24px auto;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .empty-btn {
+        border-radius: 30px;
+        padding: 10px 24px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="notifications-container">
+        
+        <!-- Header Card -->
+        <div class="inbox-header">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="inbox-title">
+                        <i class="bi bi-chat-left-heart text-primary"></i>
+                        @Localizer["Messages"]
+                    </h1>
+                    <p class="inbox-subtitle">@Localizer["ManageNotificationsAndChats"]</p>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#contactAdminModal">
+                        <i class="bi bi-chat-left-dots-fill me-1"></i> @(isRtl ? "تواصل مع الإدارة" : "Contact Admin")
+                    </button>
+
+                    <form asp-area="Customer" asp-controller="Notification" asp-action="Test" method="post" style="margin:0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold">
+                            <i class="bi bi-plus-circle me-1"></i> @Localizer["TestNotification"]
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="filter-tabs">
+                <button class="filter-btn active" onclick="filterNotifications('all', this)">
+                    @Localizer["All"] 
+                    <span class="filter-count">@Model.Count</span>
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('Message', this)">
+                    <i class="bi bi-chat-left-text"></i>
+                    @Localizer["Chats"] 
+                    <span class="filter-count">@Model.Count(n => n.Type == NotificationType.Message)</span>
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('BookingUpdate', this)">
+                    <i class="bi bi-calendar-check"></i>
+                    @Localizer["Bookings"] 
+                    <span class="filter-count">@Model.Count(n => n.Type == NotificationType.BookingUpdate)</span>
+                </button>
+                <button class="filter-btn" onclick="filterNotifications('System', this)">
+                    <i class="bi bi-shield-exclamation"></i>
+                    @Localizer["System"] 
+                    <span class="filter-count">@Model.Count(n => n.Type == NotificationType.System || n.Type == NotificationType.PaymentUpdate || n.Type == NotificationType.Promotion)</span>
+                </button>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <!-- Elegant Empty State -->
+            <div class="empty-state-card">
+                <div class="empty-icon-circle">
+                    <i class="bi bi-bell-slash"></i>
+                </div>
+                <h3 class="empty-title">@Localizer["NoNotificationsTitle"]</h3>
+                <p class="empty-desc">@Localizer["NoNotificationsDesc"]</p>
+                <a href="/Customer/Home/Index" class="btn btn-primary empty-btn px-4 py-2">
+                    @Localizer["ExploreWorkers"] <i class="bi @(isRtl ? "bi-arrow-left" : "bi-arrow-right") ms-1"></i>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="notification-list" id="notificationsList">
+                @foreach (var notification in Model)
+                {
+                    var isUnread = !notification.IsRead;
+                    var typeClass = "";
+                    var iconClass = "";
+                    var filterGroup = "System";
+
+                    switch (notification.Type)
+                    {
+                        case NotificationType.Message:
+                            typeClass = "type-message";
+                            iconClass = "bi-chat-left-text-fill";
+                            filterGroup = "Message";
+                            break;
+                        case NotificationType.BookingUpdate:
+                            typeClass = "type-booking";
+                            iconClass = "bi-calendar-event-fill";
+                            filterGroup = "BookingUpdate";
+                            break;
+                        case NotificationType.PaymentUpdate:
+                            typeClass = "type-payment";
+                            iconClass = "bi-credit-card-2-back-fill";
+                            filterGroup = "System";
+                            break;
+                        case NotificationType.Promotion:
+                            typeClass = "type-promotion";
+                            iconClass = "bi-gift-fill";
+                            filterGroup = "System";
+                            break;
+                        case NotificationType.System:
+                            typeClass = "type-system";
+                            iconClass = "bi-shield-exclamation-fill";
+                            filterGroup = "System";
+                            break;
+                    }
+
+                    <div class="notification-card @(isUnread ? "unread" : "")" 
+                         data-type="@notification.Type" 
+                         data-group="@filterGroup">
+                        
+                        <!-- Notification Icon -->
+                        <div class="icon-wrapper @typeClass">
+                            <i class="bi @iconClass"></i>
+                        </div>
+
+                        <!-- Main Content -->
+                        <div class="card-main-content">
+                            <div class="card-header-row">
+                                <h4 class="card-title">@notification.Title</h4>
+                                @if (isUnread)
+                                {
+                                    <span class="unread-indicator" title="Unread"></span>
+                                }
+                            </div>
+                            
+                            <p class="card-message-text">@notification.Message</p>
+                            
+                            <div class="card-meta-row">
+                                <span class="card-meta-item">
+                                    <i class="bi bi-clock"></i>
+                                    @notification.CreatedAt.ToLocalTime().ToString("g")
+                                </span>
+                                <span class="card-meta-item">
+                                    <i class="bi bi-bookmark-fill"></i>
+                                    @Localizer[notification.Type.ToString()]
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Card Action Panel -->
+                        <div class="card-actions">
+                            @if (notification.Type == NotificationType.Message && notification.BookingId.HasValue)
+                            {
+                                <a asp-area="Customer"
+                                   asp-controller="Chats"
+                                   asp-action="Conversation"
+                                   asp-route-bookingId="@notification.BookingId"
+                                   class="action-btn btn-chat shadow-sm">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                    <span>@Localizer["OpenChat"]</span>
+                                </a>
+                            }
+
+                            @if (isUnread)
+                            {
+                                <form asp-action="MarkAsRead" method="post" style="margin:0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@notification.Id" />
+                                    <button type="submit" class="action-btn btn-read shadow-sm" title="@Localizer["MarkRead"]">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                </form>
+                            }
+
+                            <form asp-action="Delete" method="post" style="margin:0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@notification.Id" />
+                                <button type="submit" class="action-btn btn-delete shadow-sm" title="@Localizer["Delete"]">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <!-- JavaScript filtering -->
+            <script>
+                function filterNotifications(group, btn) {
+                    // Update active tab button styling
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    // Filter the cards
+                    const cards = document.querySelectorAll('.notification-card');
+                    let visibleCount = 0;
+                    
+                    cards.forEach(card => {
+                        if (group === 'all' || card.getAttribute('data-group') === group) {
+                            card.style.display = 'flex';
+                            visibleCount++;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    // Manage empty filter view
+                    let emptyMsg = document.getElementById('filterEmptyMsg');
+                    if (visibleCount === 0) {
+                        if (!emptyMsg) {
+                            emptyMsg = document.createElement('div');
+                            emptyMsg.id = 'filterEmptyMsg';
+                            emptyMsg.className = 'empty-state-card';
+                            emptyMsg.innerHTML = `
+                                <div class="empty-icon-circle"><i class="bi bi-chat-left-dots"></i></div>
+                                <h3 class="empty-title">@Localizer["NoItemsFound"]</h3>
+                                <p class="empty-desc">@Localizer["NoItemsForCategory"]</p>
+                            `;
+                            document.getElementById('notificationsList').after(emptyMsg);
+                        } else {
+                            emptyMsg.style.display = 'block';
+                        }
+                    } else {
+                        if (emptyMsg) {
+                            emptyMsg.style.display = 'none';
+                        }
+                    }
+                 }
+            </script>
+        }
+    </div>
 </div>
-@* send *@
-@* <form asp-area="Customer"
-      asp-controller="Chats"
-      asp-action="Send"
-      method="post">
 
-    @Html.AntiForgeryToken()
-
-    <input name="bookingId"
-           type="number"
-           placeholder="Booking Id" />
-
-    <input name="message"
-           placeholder="Message" />
-
-    <button type="submit">
-        Send Test Message
-    </button>
-</form> *@
-
-@if (!Model.Any())
-{
-    <div class="alert alert-info">No notifications yet.</div>
-}
-else
-{
-    <div class="list-group">
-
-        @foreach (var notification in Model)
-        {
-            <div class="list-group-item d-flex justify-content-between align-items-start">
-
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-
-                        <strong>@notification.Title</strong>
-
-                        @if (!notification.IsRead)
-                        {
-                            <span class="badge bg-primary">
-                                New
-                            </span>
-                        }
-
-                    </div>
-
-                    <p class="mb-1">
-                        @notification.Message
-                    </p>
-
-                    <small class="text-muted">
-                        @notification.Type -
-                        @notification.CreatedAt.ToLocalTime().ToString("g")
-                    </small>
-                </div>
-
-                <div class="d-flex gap-2">
-
-                    @if (notification.Type == NotificationType.Message
-                                && notification.BookingId.HasValue)
-                    {
-                        <a asp-area="Customer"
-                           asp-controller="Chats"
-                           asp-action="Conversation"
-                           asp-route-bookingId="@notification.BookingId"
-                           class="btn btn-sm btn-success">
-                            Open Chat
-                        </a>
-                    }
-
-                    @if (!notification.IsRead)
-                    {
-                        <form asp-action="MarkAsRead" method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <input type="hidden"
-                                   name="id"
-                                   value="@notification.Id" />
-
-                            <button type="submit"
-                                    class="btn btn-sm btn-outline-primary">
-                                Mark Read
-                            </button>
-
-                        </form>
-                    }
-
-                    <form asp-action="Delete" method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <input type="hidden"
-                               name="id"
-                               value="@notification.Id" />
-
-                        <button type="submit"
-                                class="btn btn-sm btn-outline-danger">
-                            Delete
-                        </button>
-
-                    </form>
-
-                </div>
-
+<!-- Modal: Contact Admin -->
+<div class="modal fade" id="contactAdminModal" tabindex="-1" aria-labelledby="contactAdminModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="contactAdminModalLabel">
+                    <i class="bi bi-chat-left-text text-primary me-2"></i>
+                    @(isRtl ? "تواصل مع الإدارة" : "Contact Admin")
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        }
-
-    </div>
-}
-@*         @foreach (var notification in Model)
-        {
-            <div class="list-group-item d-flex justify-content-between align-items-start">
-
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-
-                        <strong>@notification.Title</strong>
-
-                        @if (!notification.IsRead)
-                        {
-                            <span class="badge bg-primary">
-                                New
-                            </span>
-                        }
-
-                    </div>
-
-                    <p class="mb-1">
-                        @notification.Message
+            <form asp-area="Customer" asp-controller="Notification" asp-action="SendMessageToAdmin" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body py-3">
+                    <p class="mb-3 text-muted small">
+                        @(isRtl ? "أرسل رسالة أو استفسار أو بلاغ مباشرة إلى إدارة المنصة وسنقوم بالرد عليك في أقرب وقت." : "Send a message, inquiry, or report directly to the platform admin. We will reply as soon as possible.")
                     </p>
-
-                    <small class="text-muted">
-                        @notification.Type -
-                        @notification.CreatedAt.ToLocalTime().ToString("g")
-                    </small>
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">@(isRtl ? "عنوان الرسالة" : "Message Title")</label>
+                        <input name="title" type="text" class="form-control rounded-3 border" placeholder="@(isRtl ? "أدخل عنوان رسالتك" : "Enter message title")" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label fw-semibold">@(isRtl ? "محتوى الرسالة" : "Message Content")</label>
+                        <textarea name="message" class="form-control rounded-3 border" rows="4" placeholder="@(isRtl ? "اكتب تفاصيل رسالتك هنا..." : "Type your message details here...")" required></textarea>
+                    </div>
                 </div>
-
-                <div class="d-flex gap-2">
-
-                    @if (notification.Type == NotificationType.Message
-                                && notification.BookingId.HasValue)
-                    {
-                        <a asp-area="Customer"
-                           asp-controller="Chats"
-                           asp-action="Conversation"
-                           asp-route-bookingId="@notification.BookingId"
-                           class="btn btn-sm btn-success">
-                            Open Chat
-                        </a>
-                    }
-
-                    @if (!notification.IsRead)
-                    {
-                        <form asp-action="MarkAsRead" method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <input type="hidden"
-                                   name="id"
-                                   value="@notification.Id" />
-
-                            <button type="submit"
-                                    class="btn btn-sm btn-outline-primary">
-                                Mark Read
-                            </button>
-
-                        </form>
-                    }
-
-                    <form asp-action="Delete" method="post">
-
-                        @Html.AntiForgeryToken()
-
-                        <input type="hidden"
-                               name="id"
-                               value="@notification.Id" />
-
-                        <button type="submit"
-                                class="btn btn-sm btn-outline-danger">
-                            Delete
-                        </button>
-
-                    </form>
-
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">@(isRtl ? "إلغاء" : "Cancel")</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-send-fill me-1"></i> @(isRtl ? "إرسال الرسالة" : "Send Message")
+                    </button>
                 </div>
-
-            </div>
-        }
-
+            </form>
+        </div>
     </div>
-} *@
+</div>

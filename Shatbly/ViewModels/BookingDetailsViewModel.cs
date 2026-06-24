@@ -7,5 +7,6 @@ namespace Shatbly.ViewModels
         public bool CanReschedule { get; set; }
         public bool CanCancel { get; set; }
         public bool HasReview { get; set; }
+        public Models.Review? Review { get; set; }
     }
 }

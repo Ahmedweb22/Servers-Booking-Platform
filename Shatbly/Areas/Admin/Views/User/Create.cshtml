@@ -1,4 +1,4 @@
-﻿@model CreateUserVM
+@model CreateUserVM
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -33,13 +33,18 @@
                 </div>
                 <div class="mb-3">
                     <label asp-for="Phone" class="form-label">Phone</label>
-                    <input asp-for="Phone" type="tel" class="form-label" id="phone" name="phone"
+                    <input asp-for="Phone" type="tel" class="form-control"
                            placeholder="01xxxxxxxxx" required pattern="^(01)[0-9]{9}$" autocomplete="tel">
                     <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
+                </div>
                 <div class="mb-3">
                     <label for="Password" class="form-label">Password</label>
-                    <input class="form-control" placeholder="Enter password" asp-for="Password">
+                    <div class="input-group">
+                        <input type="password" class="form-control" placeholder="Enter password" asp-for="Password" id="passwordField">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
@@ -53,6 +58,7 @@
                 </div>
               
                 <button type="submit" class="btn btn-primary">Submit</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Back to Users Dashboard</a>
             </form>
         </div>
     </div>
@@ -61,4 +67,37 @@
 @section Scripts {
     <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
     <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script>
+        const passwordField = document.getElementById('passwordField');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+        const toggleBtn = document.getElementById('togglePassword');
+
+        // Restore value
+        const savedPasswordValue = @Html.Raw(Json.Serialize(Model?.Password));
+        if (savedPasswordValue) {
+            passwordField.value = savedPasswordValue;
+        }
+
+        // Restore state from sessionStorage
+        const isPasswordVisible = sessionStorage.getItem('passwordVisible') === 'true';
+        if (isPasswordVisible) {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        }
+
+        toggleBtn.addEventListener('click', function () {
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+                sessionStorage.setItem('passwordVisible', 'true');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+                sessionStorage.setItem('passwordVisible', 'false');
+            }
+        });
+    </script>
 }

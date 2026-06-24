@@ -1,4 +1,4 @@
-﻿@model Shatbly.ViewModels.BookingWizardViewModel
+@model Shatbly.ViewModels.BookingWizardViewModel
 @using Shatbly.Models
 @using Stripe
 
@@ -7,6 +7,11 @@
 }
 
 <style>
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+    }
+
     :root {
         --page-bg: #f5efe6;
         --panel: #fffdf9;
@@ -369,8 +374,10 @@
     </div>
 
     <div class="wizard-grid">
-        <form asp-controller="BookingSystem" asp-action="Create" method="post" class="panel" id="bookingForm">
+        <form asp-controller="BookingSystem" asp-action="CreateBooking" method="post" class="panel" id="bookingForm">
             @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PromoCodeId" id="promoCodeIdHidden" />
+            <input type="hidden" asp-for="PromoCodeText" id="promoCodeTextHidden" />
             <div asp-validation-summary="ModelOnly" class="banner error"></div>
 
             <div class="steps">
@@ -388,13 +395,29 @@
                 <div class="field-grid">
                     <div class="field">
                         <label asp-for="ServiceId"></label>
-                        <select asp-for="ServiceId" asp-items="Model.ServiceOptions" id="serviceSelect"></select>
+                        @if (ViewBag.IsWorkerLocked == true)
+                        {
+                            <select asp-for="ServiceId" asp-items="Model.ServiceOptions" id="serviceSelect" disabled style="background-color: #f3f4f6; color: #374151; cursor: not-allowed; opacity: 0.85;"></select>
+                            <input type="hidden" asp-for="ServiceId" />
+                        }
+                        else
+                        {
+                            <select asp-for="ServiceId" asp-items="Model.ServiceOptions" id="serviceSelect"></select>
+                        }
                         <span asp-validation-for="ServiceId" class="validation"></span>
                     </div>
 
                     <div class="field">
                         <label asp-for="WorkerId"></label>
-                        <select asp-for="WorkerId" asp-items="Model.WorkerOptions" id="workerSelect"></select>
+                        @if (ViewBag.IsWorkerLocked == true)
+                        {
+                            <select asp-for="WorkerId" asp-items="Model.WorkerOptions" id="workerSelect" disabled style="background-color: #f3f4f6; color: #374151; cursor: not-allowed; opacity: 0.85;"></select>
+                            <input type="hidden" asp-for="WorkerId" />
+                        }
+                        else
+                        {
+                            <select asp-for="WorkerId" asp-items="Model.WorkerOptions" id="workerSelect"></select>
+                        }
                         <span asp-validation-for="WorkerId" class="validation"></span>
                     </div>
                 </div>
@@ -587,6 +610,21 @@
                 <span>Recurring discount</span>
                 <strong>- EGP <span id="discountAmount">@Model.DiscountAmount.ToString("0.00")</span></strong>
             </div>
+            <div class="summary-line" id="promoDiscountLine" style="display: none; color: var(--success);">
+                <span>Promo Discount (<span id="appliedPromoCodeText"></span>)</span>
+                <strong>- EGP <span id="promoDiscountAmount">0.00</span></strong>
+            </div>
+            
+            <!-- Promo Code Input Group -->
+            <div style="margin-top: 16px; margin-bottom: 12px; padding: 12px; background: #faf6f0; border: 1px solid var(--line); border-radius: 16px;">
+                <label for="promoCodeInput" style="font-size: 0.85rem; font-weight: 600; color: var(--ink); display: block; margin-bottom: 6px;">Have a Promo Code?</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="promoCodeInput" placeholder="Enter code" value="@Model.PromoCodeText" style="padding: 8px 12px; border-radius: 12px; border: 1px solid #d9c5b2; flex: 1; text-transform: uppercase; font-size: 0.9rem;" />
+                    <button type="button" id="applyPromoBtn" class="btn btn-primary" style="padding: 8px 16px; border-radius: 12px; font-size: 0.9rem; margin-top: 0;">Apply</button>
+                </div>
+                <div id="promoMsg" style="font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;"></div>
+            </div>
+
             <div class="summary-total">
                 <span>Total</span>
                 <span>EGP <span id="totalPrice">@Model.TotalPrice.ToString("0.00")</span></span>
@@ -602,6 +640,8 @@
 <script>
     (() => {
         const modelAvailability = @Html.Raw(Model.AvailabilityJson);
+        const workerDetails = JSON.parse('@Html.Raw(Model.WorkerDetailsJson)');
+        const serviceDetails = JSON.parse('@Html.Raw(Model.ServiceDetailsJson)');
         const steps = Array.from(document.querySelectorAll("[data-step]"));
         const stepChips = Array.from(document.querySelectorAll("[data-step-chip]"));
         const nextButtons = Array.from(document.querySelectorAll("[data-next-step]"));
@@ -614,12 +654,34 @@
         const addressLineInput = document.getElementById("addressLineInput");
         const recurrenceSelect = document.getElementById("RecurrencePattern");
         const bookingTypeInputs = Array.from(document.querySelectorAll("input[name='BookingType']"));
+        
+        // Save the original worker options from the select on page load
+        const allWorkers = Array.from(workerSelect.options).map(option => ({
+            value: option.value,
+            text: option.text
+        }));
+
         const serviceOptions = Array.from(serviceSelect.options).map(option => {
-            const [name, pricePart] = option.text.split(" - EGP ");
-            return { id: option.value, name, price: Number(pricePart || "0") };
+            const id = option.value;
+            const name = option.text;
+            const price = Number(serviceDetails[id] || "0");
+            return { id, name, price };
         });
 
+        // Promo Code elements
+        const promoCodeIdHidden = document.getElementById("promoCodeIdHidden");
+        const promoCodeTextHidden = document.getElementById("promoCodeTextHidden");
+        const promoCodeInput = document.getElementById("promoCodeInput");
+        const applyPromoBtn = document.getElementById("applyPromoBtn");
+        const promoMsg = document.getElementById("promoMsg");
+        const promoDiscountLine = document.getElementById("promoDiscountLine");
+        const promoDiscountAmount = document.getElementById("promoDiscountAmount");
+        const appliedPromoCodeText = document.getElementById("appliedPromoCodeText");
+
         let currentStep = 1;
+        let promoDiscountValue = 0;
+        let appliedPromoId = null;
+        let appliedPromoCode = "";
 
         function getBookingType() {
             const selected = bookingTypeInputs.find(input => input.checked);
@@ -655,18 +717,33 @@
             const workerId = workerSelect.value;
             const datesForWorker = modelAvailability[workerId] || {};
             const dateItems = Object.keys(datesForWorker).map(date => ({ value: date, label: date }));
+
+            // Save currently selected date & time
+            const previousDate = dateSelect.value;
+            const previousTime = timeSelect.value;
+
             fillSelect(dateSelect, dateItems, "No available dates");
 
-            if (getBookingType() === "Instant" && dateItems.length) {
-                dateSelect.value = dateItems[0].value;
-            } else if ("@Model.SelectedDate") {
-                dateSelect.value = "@Model.SelectedDate";
-            }
+            // Check if previous selection is valid for the new worker
+            const hasPreviousDate = previousDate && datesForWorker[previousDate];
+            const hasPreviousTime = hasPreviousDate && datesForWorker[previousDate].includes(previousTime);
 
-            syncTimes();
+            if (hasPreviousDate && hasPreviousTime) {
+                dateSelect.value = previousDate;
+                syncTimes(previousTime);
+            } else {
+                if (getBookingType() === "Instant" && dateItems.length) {
+                    dateSelect.value = dateItems[0].value;
+                } else if (datesForWorker["@Model.SelectedDate"]) {
+                    dateSelect.value = "@Model.SelectedDate";
+                } else if (dateItems.length) {
+                    dateSelect.value = dateItems[0].value;
+                }
+                syncTimes();
+            }
         }
 
-        function syncTimes() {
+        function syncTimes(preselectedTime) {
             const workerId = workerSelect.value;
             const selectedDate = dateSelect.value;
             const times = ((modelAvailability[workerId] || {})[selectedDate] || []).map(time => ({
@@ -677,30 +754,56 @@
             fillSelect(timeSelect, times, "No slots");
 
             if (times.length) {
-                timeSelect.value = getBookingType() === "Instant" ? times[0].value : ("@Model.SelectedTime" || times[0].value);
+                if (preselectedTime && times.some(t => t.value === preselectedTime)) {
+                    timeSelect.value = preselectedTime;
+                } else if (getBookingType() === "Instant") {
+                    timeSelect.value = times[0].value;
+                } else if (selectedDate === "@Model.SelectedDate" && "@Model.SelectedTime" && times.some(t => t.value === "@Model.SelectedTime")) {
+                    timeSelect.value = "@Model.SelectedTime";
+                } else {
+                    timeSelect.value = times[0].value;
+                }
             }
 
             updateSummary();
         }
 
         function updatePricing() {
+            const workerId = workerSelect.value;
+            const detail = workerDetails[workerId];
+            
+            // Get base price from selected worker's hourly rate, fallback to selected service price
             const selectedService = serviceOptions.find(option => option.id === serviceSelect.value) || { name: "Choose a service", price: 0 };
+            const basePrice = detail ? detail.hourlyRate : selectedService.price;
+            
             const bookingType = getBookingType();
             const recurrence = recurrenceSelect.value || "None";
             const convenience = bookingType === "Instant" ? 45 : 25;
             let discount = 0;
 
             if (recurrence === "Weekly") {
-                discount = selectedService.price * 0.05;
+                discount = Math.round(basePrice * 0.05 * 100) / 100;
             }
 
             if (recurrence === "Monthly") {
-                discount = selectedService.price * 0.10;
+                discount = Math.round(basePrice * 0.10 * 100) / 100;
             }
 
-            const total = selectedService.price + convenience - discount;
+            // Calculate total before promo code
+            let total = basePrice + convenience - discount;
+
+            // Apply promo code discount if we have a validated one
+            if (promoDiscountValue > 0) {
+                promoDiscountLine.style.display = "flex";
+                appliedPromoCodeText.textContent = appliedPromoCode;
+                promoDiscountAmount.textContent = promoDiscountValue.toFixed(2);
+                total = Math.max(0, total - promoDiscountValue);
+            } else {
+                promoDiscountLine.style.display = "none";
+            }
+
             document.getElementById("summaryService").textContent = selectedService.name;
-            document.getElementById("servicePrice").textContent = selectedService.price.toFixed(2);
+            document.getElementById("servicePrice").textContent = basePrice.toFixed(2);
             document.getElementById("convenienceFee").textContent = convenience.toFixed(2);
             document.getElementById("discountAmount").textContent = discount.toFixed(2);
             document.getElementById("totalPrice").textContent = total.toFixed(2);
@@ -716,6 +819,125 @@
             updatePricing();
         }
 
+        // Prevent enter key on promo input from submitting form
+        promoCodeInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                applyPromoBtn.click();
+            }
+        });
+
+        async function validateAndApplyPromo() {
+            const code = promoCodeInput.value.trim().toUpperCase();
+            if (!code) {
+                clearPromo();
+                return;
+            }
+
+            const workerId = workerSelect.value;
+            const detail = workerDetails[workerId];
+            const originalPrice = detail ? detail.hourlyRate : (serviceOptions.find(option => option.id === serviceSelect.value)?.price || 0);
+            const serviceId = serviceSelect.value;
+
+            try {
+                applyPromoBtn.disabled = true;
+                applyPromoBtn.textContent = "Checking...";
+                promoMsg.style.display = "none";
+
+                const response = await fetch('/Customer/BookingSystem/ValidatePromoCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `code=${encodeURIComponent(code)}&serviceId=${encodeURIComponent(serviceId)}&originalPrice=${encodeURIComponent(originalPrice)}`
+                });
+
+                const data = await response.json();
+                if (data.succeeded) {
+                    promoMsg.textContent = data.message;
+                    promoMsg.style.color = "var(--success)";
+                    promoMsg.style.display = "block";
+
+                    promoDiscountValue = Number(data.discountAmount);
+                    appliedPromoId = data.promoCodeId;
+                    appliedPromoCode = code;
+
+                    promoCodeIdHidden.value = appliedPromoId;
+                    promoCodeTextHidden.value = appliedPromoCode;
+
+                    updatePricing();
+                } else {
+                    promoMsg.textContent = data.message;
+                    promoMsg.style.color = "#b42318";
+                    promoMsg.style.display = "block";
+                    clearPromo();
+                }
+            } catch (err) {
+                console.error(err);
+                promoMsg.textContent = "Error validating promo code.";
+                promoMsg.style.color = "#b42318";
+                promoMsg.style.display = "block";
+                clearPromo();
+            } finally {
+                applyPromoBtn.disabled = false;
+                applyPromoBtn.textContent = "Apply";
+            }
+        }
+
+        function clearPromo() {
+            promoDiscountValue = 0;
+            appliedPromoId = null;
+            appliedPromoCode = "";
+            promoCodeIdHidden.value = "";
+            promoCodeTextHidden.value = "";
+            updatePricing();
+        }
+
+        function handleServiceChange() {
+            const serviceId = Number(serviceSelect.value);
+            const filtered = allWorkers.filter(w => {
+                const detail = workerDetails[w.value];
+                return detail && detail.categoryId === serviceId;
+            });
+
+            const currentWorkerId = workerSelect.value;
+            const isStillValid = filtered.some(w => w.value === currentWorkerId);
+
+            workerSelect.innerHTML = "";
+            filtered.forEach(w => {
+                const opt = document.createElement("option");
+                opt.value = w.value;
+                opt.textContent = w.text;
+                workerSelect.appendChild(opt);
+            });
+
+            if (isStillValid) {
+                workerSelect.value = currentWorkerId;
+            } else if (filtered.length > 0) {
+                workerSelect.value = filtered[0].value;
+            }
+
+            syncAvailability();
+
+            if (appliedPromoCode) {
+                validateAndApplyPromo();
+            }
+        }
+
+        function handleWorkerChange() {
+            const workerId = workerSelect.value;
+            const detail = workerDetails[workerId];
+            if (detail) {
+                serviceSelect.value = detail.categoryId;
+            }
+            syncAvailability();
+
+            if (appliedPromoCode) {
+                validateAndApplyPromo();
+            }
+        }
+
         nextButtons.forEach(button => {
             button.addEventListener("click", () => updateSteps(Math.min(currentStep + 1, steps.length)));
         });
@@ -724,8 +946,9 @@
             button.addEventListener("click", () => updateSteps(Math.max(currentStep - 1, 1)));
         });
 
-        workerSelect.addEventListener("change", syncAvailability);
-        serviceSelect.addEventListener("change", updateSummary);
+        applyPromoBtn.addEventListener("click", validateAndApplyPromo);
+        workerSelect.addEventListener("change", handleWorkerChange);
+        serviceSelect.addEventListener("change", handleServiceChange);
         dateSelect.addEventListener("change", syncTimes);
         timeSelect.addEventListener("change", updateSummary);
         recurrenceSelect.addEventListener("change", updatePricing);
@@ -741,8 +964,36 @@
         });
         addressLineInput.addEventListener("input", updateSummary);
 
+        // Perform initial service-based filtering on load
+        const initialServiceId = Number(serviceSelect.value);
+        if (initialServiceId) {
+            const filtered = allWorkers.filter(w => {
+                const detail = workerDetails[w.value];
+                return detail && detail.categoryId === initialServiceId;
+            });
+            const currentWorkerId = workerSelect.value;
+            workerSelect.innerHTML = "";
+            filtered.forEach(w => {
+                const opt = document.createElement("option");
+                opt.value = w.value;
+                opt.textContent = w.text;
+                if (w.value === currentWorkerId) {
+                    opt.selected = true;
+                }
+                workerSelect.appendChild(opt);
+            });
+        }
+
         syncAvailability();
         updateSteps(1);
         updateSummary();
+
+        // If promo code exists from backend (e.g. page validation reload), auto-apply it
+        if (promoCodeIdHidden.value && promoCodeTextHidden.value) {
+            promoCodeInput.value = promoCodeTextHidden.value;
+            appliedPromoId = Number(promoCodeIdHidden.value);
+            appliedPromoCode = promoCodeTextHidden.value;
+            validateAndApplyPromo();
+        }
     })();
 </script>

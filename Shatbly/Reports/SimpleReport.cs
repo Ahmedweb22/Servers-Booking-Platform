@@ -1,4 +1,4 @@
-﻿using ICSharpCode.Decompiler.CSharp.Syntax;
+using ICSharpCode.Decompiler.CSharp.Syntax;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -8,15 +8,17 @@ namespace Shatbly.Reports;
 public class SimpleReport : IDocument
 {
     private readonly IReadOnlyList<User> _users;
+    private readonly IReadOnlyDictionary<string, string> _userRoles;
     private readonly DateTime _generatedAt;
 
-    public SimpleReport(IEnumerable<User> users)
+    public SimpleReport(IEnumerable<User> users, IDictionary<string, string> userRoles)
     {
         _users = users
             .OrderByDescending(user => user.Id)
             .ThenBy(user => user.Name)
             .ToList();
 
+        _userRoles = new Dictionary<string, string>(userRoles);
         _generatedAt = DateTime.Now;
     }
 
@@ -103,7 +105,7 @@ public class SimpleReport : IDocument
         var admins = CountRole(SD.ROLE_ADMIN);
         var workers = CountRole(SD.ROLE_WORKER);
         var SuperAdmins = CountRole(SD.ROLE_SUPER_ADMIN);
-        var totalOrders = _users.Sum(user => SafeCount(user.ClientBookings) + SafeCount(user.ClientBookings));
+        var totalOrders = _users.Sum(user => SafeCount(user.ClientBookings) + SafeCount(user.Orders));
 
         container.Row(row =>
         {
@@ -165,7 +167,7 @@ public class SimpleReport : IDocument
     private void ComposeRoleDistribution(IContainer container)
     {
         var roleGroups = _users
-            .GroupBy(user => string.IsNullOrWhiteSpace(user.NormalizedUserName) ? "Unknown" : user.NormalizedUserName)
+            .GroupBy(user => _userRoles.TryGetValue(user.Id, out var r) ? r : "Customer")
             .Select(group => new ChartPoint(group.Key, group.Count()))
             .OrderByDescending(point => point.Value)
             .ThenBy(point => point.Label)
@@ -283,7 +285,7 @@ public class SimpleReport : IDocument
                     BodyCell(table, background).Text(Coalesce(user.Name));
                     BodyCell(table, background).Text(Coalesce(user.Email));
                     BodyCell(table, background).Text(Coalesce(user.Phone));
-                    BodyCell(table, background).Text(Coalesce(user.NormalizedUserName));
+                    BodyCell(table, background).Text(Coalesce(_userRoles.TryGetValue(user.Id, out var r) ? r : "Customer"));
                     BodyCell(table, background).Text(user.CreatedAt.ToString("dd MMM yyyy"));
                     BodyCell(table, background).AlignRight().Text($"{SafeCount(user.Orders):N0}");
                     BodyCell(table, background).AlignRight().Text($"{SafeCount(user.ClientBookings):N0}");
@@ -441,7 +443,7 @@ public class SimpleReport : IDocument
 
     private int CountRole(string role)
     {
-        return _users.Count(user => string.Equals(user.NormalizedUserName, role, StringComparison.OrdinalIgnoreCase));
+        return _users.Count(user => string.Equals(_userRoles.TryGetValue(user.Id, out var r) ? r : "Customer", role, StringComparison.OrdinalIgnoreCase));
     }
 
     private static bool IsSameMonth(DateTime value, DateTime comparison)

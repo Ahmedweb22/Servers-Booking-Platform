@@ -30,4 +30,5 @@
   <data name="SaveChanges" xml:space="preserve"><value>حفظ التغييرات</value></data>
   <data name="PersonalInformation" xml:space="preserve"><value>المعلومات الشخصية</value></data>
   <data name="EmailCannotBeChanged" xml:space="preserve"><value>لا يمكن تغيير البريد الإلكتروني.</value></data>
+  <data name="PhoneAlreadyExists" xml:space="preserve"><value>رقم الهاتف هذا مسجل بالفعل لمستخدم آخر.</value></data>
 </root>

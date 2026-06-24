@@ -1,0 +1,465 @@
+@using Shatbly.ViewModels
+@using Shatbly.Models
+@using Microsoft.AspNetCore.Localization
+@model AdminMessagesVM
+
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "الرسائل والطلبات" : "Messages & Applications";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold">@(isRtl ? "مركز الرسائل وطلبات التسجيل" : "Messages & Registration Center")</h2>
+            <p class="text-muted mb-0">@(isRtl ? "إدارة طلبات انضمام الفنيين وتوجيه الرسائل المباشرة للمستخدمين." : "Manage worker applications and send direct messages/notifications to users.")</p>
+        </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-4 shadow-sm border" id="adminMessagesTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="applications-tab" data-bs-toggle="tab" data-bs-target="#applications-panel" type="button" role="tab" aria-controls="applications-panel" aria-selected="true">
+                <i class="fa-solid fa-user-clock"></i>
+                <span>@(isRtl ? "طلبات التسجيل المعلقة" : "Pending Applications")</span>
+                @if (Model.PendingWorkers.Any())
+                {
+                    <span class="badge bg-danger rounded-pill">@Model.PendingWorkers.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="send-tab" data-bs-toggle="tab" data-bs-target="#send-panel" type="button" role="tab" aria-controls="send-panel" aria-selected="false">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>@(isRtl ? "إرسال رسالة مباشرة" : "Send Direct Message")</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-panel" type="button" role="tab" aria-controls="history-panel" aria-selected="false">
+                <i class="fa-solid fa-history"></i>
+                <span>@(isRtl ? "سجل الرسائل المرسلة" : "Sent Messages History")</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="inbox-tab" data-bs-toggle="tab" data-bs-target="#inbox-panel" type="button" role="tab" aria-controls="inbox-panel" aria-selected="false">
+                <i class="fa-solid fa-inbox"></i>
+                <span>@(isRtl ? "صندوق الوارد" : "Inbox")</span>
+                @if (Model.IncomingMessages.Any())
+                {
+                    <span class="badge bg-primary rounded-pill">@Model.IncomingMessages.Count</span>
+                }
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="adminMessagesTabsContent">
+        
+        <!-- Tab 1: Pending Applications -->
+        <div class="tab-pane fade show active" id="applications-panel" role="tabpanel" aria-labelledby="applications-tab">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@(isRtl ? "الاسم" : "Name")</th>
+                                    <th>@(isRtl ? "البريد الإلكتروني" : "Email")</th>
+                                    <th>@(isRtl ? "الهاتف" : "Phone")</th>
+                                    <th>@(isRtl ? "تاريخ التقديم" : "Applied Date")</th>
+                                    <th>@(isRtl ? "السيرة الذاتية" : "CV")</th>
+                                    <th>@(isRtl ? "صورة الهوية" : "ID Photo")</th>
+                                    <th class="text-center">@(isRtl ? "الإجراءات" : "Actions")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.PendingWorkers.Any())
+                                {
+                                    foreach (var worker in Model.PendingWorkers)
+                                    {
+                                        var fullName = worker.User != null ? $"{worker.User.FName} {worker.User.LName}" : "N/A";
+                                        var email = worker.User?.Email ?? "N/A";
+                                        var phone = worker.User?.Phone ?? "N/A";
+                                        <tr>
+                                            <td class="fw-semibold">@fullName</td>
+                                            <td>@email</td>
+                                            <td>@phone</td>
+                                            <td>@worker.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(worker.CVPath))
+                                                {
+                                                    var isPath = worker.CVPath.Contains('/') || worker.CVPath.Contains('\\');
+                                                    var cvUrl = isPath ? Url.Content("~/" + worker.CVPath.Replace("\\", "/")) : Url.Content("~/img/worker/worker_cv/" + worker.CVPath);
+                                                    <a href="@cvUrl" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                        <i class="fa-solid fa-file-pdf me-1"></i> @(isRtl ? "عرض السيرة الذاتية" : "View CV")
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">@(isRtl ? "لا توجد" : "No CV file")</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(worker.IdCardPhotoPath))
+                                                {
+                                                    var idCardUrl = Url.Content("~/img/worker/worker_id/" + worker.IdCardPhotoPath);
+                                                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="openIdModal('@idCardUrl', '@fullName')">
+                                                        <i class="fa-solid fa-id-card me-1"></i> @(isRtl ? "عرض الهوية" : "View ID")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">@(isRtl ? "لا توجد" : "No ID photo")</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <!-- Approve Form -->
+                                                    <form asp-action="ApproveWorker" method="post" class="d-inline">
+                                                        <input type="hidden" name="profileId" value="@worker.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                                                            <i class="fa-solid fa-check me-1"></i> @(isRtl ? "قبول" : "Approve")
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- Reject Button Trigger -->
+                                                    <button type="button" class="btn btn-sm btn-danger rounded-pill px-3" 
+                                                            onclick="openRejectModal('@worker.Id', '@fullName')">
+                                                        <i class="fa-solid fa-xmark me-1"></i> @(isRtl ? "رفض" : "Reject")
+                                                    </button>
+
+                                                    <!-- Message Button Trigger -->
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" 
+                                                            onclick="openMessageModal('@worker.UserId', '@fullName')">
+                                                        <i class="fa-solid fa-comment-dots me-1"></i> @(isRtl ? "رسالة" : "Message")
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-circle-info fa-2x mb-3 text-secondary"></i>
+                                            <p class="mb-0">@(isRtl ? "لا توجد طلبات تسجيل معلقة حالياً." : "No pending worker applications at the moment.")</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Send Direct Message -->
+        <div class="tab-pane fade" id="send-panel" role="tabpanel" aria-labelledby="send-tab">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="card shadow-sm border-0 rounded-4 p-4 bg-white">
+                        <h4 class="fw-bold mb-4 text-dark border-bottom pb-2">
+                            <i class="fa-solid fa-envelope-open-text text-primary me-2"></i>
+                            @(isRtl ? "إرسال رسالة/تنبيه لمستخدم" : "Send Direct Message/Notification")
+                        </h4>
+                        
+                        <form asp-action="SendMessage" method="post">
+                            <div class="mb-3">
+                                <label for="TargetUserId" class="form-label fw-semibold">@(isRtl ? "المستلم" : "Recipient User")</label>
+                                <select asp-for="TargetUserId" class="form-select rounded-3 p-2 border" id="selectRecipient" required>
+                                    <option value="" disabled selected>@(isRtl ? "-- اختر مستلم --" : "-- Select a recipient --")</option>
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        var displayName = $"{user.FName} {user.LName} ({user.Email})";
+                                        <option value="@user.Id">@displayName</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="MessageTitle" class="form-label fw-semibold">@(isRtl ? "عنوان الرسالة" : "Message Title")</label>
+                                <input asp-for="MessageTitle" type="text" class="form-control rounded-3 p-2 border" placeholder="@(isRtl ? "أدخل عنوان الرسالة" : "Enter message title")" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="MessageBody" class="form-label fw-semibold">@(isRtl ? "محتوى الرسالة" : "Message Content")</label>
+                                <textarea asp-for="MessageBody" rows="4" class="form-control rounded-3 p-2 border" placeholder="@(isRtl ? "أكتب محتوى رسالتك هنا..." : "Type your message content here...")" required></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="MessageType" class="form-label fw-semibold">@(isRtl ? "نوع الإشعار" : "Notification Type")</label>
+                                <select asp-for="MessageType" class="form-select rounded-3 p-2 border" required>
+                                    <option value="@NotificationType.Message">@(isRtl ? "محادثة / رسالة" : "Message")</option>
+                                    <option value="@NotificationType.System">@(isRtl ? "تنبيه نظام" : "System Notification")</option>
+                                    <option value="@NotificationType.Promotion">@(isRtl ? "عرض ترويجي" : "Promotion")</option>
+                                </select>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> @(isRtl ? "إرسال الرسالة" : "Send Message")
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Sent Messages History -->
+        <div class="tab-pane fade" id="history-panel" role="tabpanel" aria-labelledby="history-tab">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@(isRtl ? "المستلم" : "Recipient")</th>
+                                    <th>@(isRtl ? "العنوان" : "Title")</th>
+                                    <th>@(isRtl ? "الرسالة" : "Message")</th>
+                                    <th>@(isRtl ? "النوع" : "Type")</th>
+                                    <th>@(isRtl ? "التاريخ" : "Sent Date")</th>
+                                    <th>@(isRtl ? "حالة القراءة" : "Status")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.SentNotifications.Any())
+                                {
+                                    foreach (var notif in Model.SentNotifications)
+                                    {
+                                        var recipientName = notif.User != null ? $"{notif.User.FName} {notif.User.LName}" : "N/A";
+                                        <tr>
+                                            <td class="fw-semibold">@recipientName <br /><small class="text-muted">@notif.User?.Email</small></td>
+                                            <td>@notif.Title</td>
+                                            <td style="max-width: 250px;" class="text-truncate" title="@notif.Message">@notif.Message</td>
+                                            <td>
+                                                <span class="badge @(notif.Type == NotificationType.System ? "bg-warning text-dark" : notif.Type == NotificationType.Promotion ? "bg-info" : "bg-primary")">
+                                                    @notif.Type
+                                                </span>
+                                            </td>
+                                            <td>@notif.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td>
+                                                @if (notif.IsRead)
+                                                {
+                                                    <span class="badge bg-success rounded-pill px-2">@(isRtl ? "مقروءة" : "Read")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary rounded-pill px-2">@(isRtl ? "غير مقروءة" : "Unread")</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-history fa-2x mb-3 text-secondary"></i>
+                                            <p class="mb-0">@(isRtl ? "لا توجد رسائل مرسلة سابقاً." : "No notification history found.")</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Inbox (Incoming Messages from Users & Workers) -->
+        <div class="tab-pane fade" id="inbox-panel" role="tabpanel" aria-labelledby="inbox-tab">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@(isRtl ? "المرسل" : "Sender")</th>
+                                    <th>@(isRtl ? "العنوان" : "Title")</th>
+                                    <th>@(isRtl ? "الرسالة" : "Message")</th>
+                                    <th>@(isRtl ? "تاريخ الاستلام" : "Received Date")</th>
+                                    <th class="text-center">@(isRtl ? "الإجراءات" : "Actions")</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.IncomingMessages.Any())
+                                {
+                                    foreach (var notif in Model.IncomingMessages)
+                                    {
+                                        var senderName = notif.User != null ? $"{notif.User.FName} {notif.User.LName}" : (isRtl ? "مستخدم غير معروف" : "Unknown User");
+                                        var senderEmail = notif.User?.Email ?? "N/A";
+                                        var senderId = notif.User?.Id ?? "";
+                                        <tr>
+                                            <td class="fw-semibold">
+                                                @senderName
+                                                <br />
+                                                <small class="text-muted">@senderEmail</small>
+                                            </td>
+                                            <td>@notif.Title</td>
+                                            <td style="max-width: 300px;" class="text-wrap">@notif.Message</td>
+                                            <td>@notif.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrEmpty(senderId))
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" 
+                                                            onclick="openReplyModal('@senderId', '@senderName')">
+                                                        <i class="fa-solid fa-reply me-1"></i> @(isRtl ? "رد" : "Reply")
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-inbox fa-2x mb-3 text-secondary"></i>
+                                            <p class="mb-0">@(isRtl ? "لا توجد رسائل واردة حالياً." : "No incoming messages from users or workers at the moment.")</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: Rejection Reason -->
+<div class="modal fade" id="rejectWorkerModal" tabindex="-1" aria-labelledby="rejectWorkerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="rejectWorkerModalLabel">@(isRtl ? "رفض طلب انضمام فني" : "Reject Worker Application")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="RejectWorker" method="post">
+                <div class="modal-body py-3">
+                    <input type="hidden" name="profileId" id="rejectProfileId" />
+                    <p class="mb-3 text-muted">
+                        @(isRtl ? "أنت على وشك رفض طلب الفني " : "You are about to reject the worker application for ")
+                        <strong id="rejectWorkerName"></strong>. 
+                        @(isRtl ? "يمكنك توضيح السبب ليصله إشعار بذلك." : "You can state the reason below, which will be sent to them as a notification.")
+                    </p>
+                    <div class="mb-3">
+                        <label for="rejectionReason" class="form-label fw-semibold">@(isRtl ? "سبب الرفض (اختياري)" : "Rejection Reason (Optional)")</label>
+                        <textarea class="form-control rounded-3 border" name="rejectionReason" rows="3" placeholder="@(isRtl ? "أكتب سبب الرفض هنا..." : "Type rejection details...")"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">@(isRtl ? "إلغاء" : "Cancel")</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">
+                        <i class="fa-solid fa-xmark me-1"></i> @(isRtl ? "تأكيد الرفض" : "Confirm Rejection")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Quick Message -->
+<div class="modal fade" id="quickMessageModal" tabindex="-1" aria-labelledby="quickMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="quickMessageModalLabel">@(isRtl ? "إرسال رسالة للفني" : "Send Message to Worker")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="SendMessage" method="post">
+                <div class="modal-body py-3">
+                    <input type="hidden" asp-for="TargetUserId" id="messageUserId" />
+                    <p class="mb-3 text-muted">
+                        @(isRtl ? "إرسال رسالة مباشرة للفني: " : "Send a message directly to: ")
+                        <strong id="messageWorkerName"></strong>.
+                    </p>
+                    <div class="mb-3">
+                        <label for="MessageTitle" class="form-label fw-semibold">@(isRtl ? "عنوان الرسالة" : "Message Title")</label>
+                        <input asp-for="MessageTitle" type="text" class="form-control rounded-3 border" placeholder="@(isRtl ? "مثال: تحديث حول طلب انضمامك" : "e.g. Update regarding your application")" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="MessageBody" class="form-label fw-semibold">@(isRtl ? "نص الرسالة" : "Message Content")</label>
+                        <textarea asp-for="MessageBody" class="form-control rounded-3 border" rows="4" placeholder="@(isRtl ? "أكتب محتوى رسالتك هنا..." : "Type your message content here...")" required></textarea>
+                    </div>
+                    <input type="hidden" asp-for="MessageType" value="@NotificationType.System" />
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">@(isRtl ? "إلغاء" : "Cancel")</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i class="fa-solid fa-paper-plane me-1"></i> @(isRtl ? "إرسال الرسالة" : "Send Message")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: ID Card View -->
+<div class="modal fade" id="viewIdCardModal" tabindex="-1" aria-labelledby="viewIdCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="viewIdCardModalLabel">@(isRtl ? "عرض الهوية الشخصية للفني: " : "Worker ID Card: ") <span id="idModalWorkerName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <img id="idCardImagePreview" src="" class="img-fluid rounded-3 border shadow-sm" style="max-height: 500px; object-fit: contain; width: 100%;" alt="ID Card Photo" />
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">@(isRtl ? "إغلاق" : "Close")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openRejectModal(profileId, workerName) {
+            document.getElementById('rejectProfileId').value = profileId;
+            document.getElementById('rejectWorkerName').innerText = workerName;
+            
+            var rejectModal = new bootstrap.Modal(document.getElementById('rejectWorkerModal'));
+            rejectModal.show();
+        }
+
+        function openMessageModal(userId, workerName) {
+            document.getElementById('messageUserId').value = userId;
+            document.getElementById('messageWorkerName').innerText = workerName;
+            
+            var quickMsgModal = new bootstrap.Modal(document.getElementById('quickMessageModal'));
+            quickMsgModal.show();
+        }
+
+        function openIdModal(imageUrl, workerName) {
+            document.getElementById('idCardImagePreview').src = imageUrl;
+            document.getElementById('idModalWorkerName').innerText = workerName;
+            
+            var idModal = new bootstrap.Modal(document.getElementById('viewIdCardModal'));
+            idModal.show();
+        }
+
+        function openReplyModal(userId, senderName) {
+            var selectElement = document.getElementById('selectRecipient');
+            if (selectElement) {
+                selectElement.value = userId;
+            }
+            
+            var sendTab = document.getElementById('send-tab');
+            if (sendTab) {
+                var triggerEl = bootstrap.Tab.getInstance(sendTab) || new bootstrap.Tab(sendTab);
+                triggerEl.show();
+            }
+        }
+    </script>
+}

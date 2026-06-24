@@ -1,22 +1,13 @@
-﻿@model DashboardStatsCardCountVM
+@model DashboardStatsCardCountVM
 @{
     ViewBag.Title = "Dashboard";
 
     var stats = new[]
     {
-        new { Title = "Total Users", Value = Model.UsersCount.ToString("N0"), Icon = "fa-solid fa-users", IconBgClass = "bg-soft-primary", Trend = "+8.2%", TrendClass = "text-success" },
-        new { Title = "Total Services", Value = Model.ServicesCategoriesCount.ToString("N0"), Icon = "fa-solid fa-briefcase", IconBgClass = "bg-soft-warning", Trend = "+3.4%", TrendClass = "text-success" },
-        new { Title = "Total Orders", Value = Model.OrdersCount.ToString("N0"), Icon = "fa-solid fa-cart-shopping", IconBgClass = "bg-soft-success", Trend = "+11.6%", TrendClass = "text-success" },
-        new { Title = "Revenue", Value = "$" + (Model.OrdersCount * 25).ToString("N0"), Icon = "fa-solid fa-dollar-sign", IconBgClass = "bg-soft-danger", Trend = "-1.2%", TrendClass = "text-danger" }
-    };
-
-    var recentOrders = new[]
-    {
-        new { OrderId = "#ORD-1001", User = "Omar Khaled", Service = "Website Design", Status = "Completed", Date = "21 Apr 2026" },
-        new { OrderId = "#ORD-1002", User = "Sara Adel", Service = "SEO Package", Status = "Pending", Date = "20 Apr 2026" },
-        new { OrderId = "#ORD-1003", User = "Ahmed Nabil", Service = "Hosting Plan", Status = "Processing", Date = "20 Apr 2026" },
-        new { OrderId = "#ORD-1004", User = "Lina Samir", Service = "Mobile App UI", Status = "Completed", Date = "19 Apr 2026" },
-        new { OrderId = "#ORD-1005", User = "Youssef Ali", Service = "Maintenance", Status = "Cancelled", Date = "18 Apr 2026" }
+        new { Title = "Total Users", Value = Model.UsersCount.ToString("N0"), Icon = "fa-solid fa-users", IconBgClass = "bg-soft-primary", Trend = "Active", TrendClass = "text-success" },
+        new { Title = "Total Services", Value = Model.ServicesCategoriesCount.ToString("N0"), Icon = "fa-solid fa-briefcase", IconBgClass = "bg-soft-warning", Trend = "Active", TrendClass = "text-success" },
+        new { Title = "Total Orders", Value = Model.OrdersCount.ToString("N0"), Icon = "fa-solid fa-cart-shopping", IconBgClass = "bg-soft-success", Trend = "Total Bookings", TrendClass = "text-success" },
+        new { Title = "Revenue", Value = "EGP " + Model.TotalRevenue.ToString("N2"), Icon = "fa-solid fa-dollar-sign", IconBgClass = "bg-soft-danger", Trend = "Completed & Confirmed", TrendClass = "text-success" }
     };
 }
 
@@ -26,12 +17,12 @@
         <p class="page-subtitle mb-0">Welcome back, here is what’s happening across your platform today.</p>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-light btn-soft">
-            <i class="fa-solid fa-download me-2"></i>Export
+        <button class="btn btn-light btn-soft" onclick="window.print()">
+            <i class="fa-solid fa-download me-2"></i>Export PDF
         </button>
-        <button class="btn btn-primary btn-soft">
-            <i class="fa-solid fa-plus me-2"></i>Create Report
-        </button>
+        <a href="/Admin/Booking" class="btn btn-primary btn-soft">
+            <i class="fa-solid fa-eye me-2"></i>Manage Bookings
+        </a>
     </div>
 </div>
 
@@ -61,7 +52,7 @@
             <div class="section-head">
                 <div>
                     <h5 class="mb-1">User Distribution</h5>
-                    <p class="text-muted mb-0">Users by plan type</p>
+                    <p class="text-muted mb-0">Registered users by role</p>
                 </div>
             </div>
             <div class="chart-wrap chart-md">
@@ -75,7 +66,7 @@
             <div class="section-head">
                 <div>
                     <h5 class="mb-1">Services Usage</h5>
-                    <p class="text-muted mb-0">Most requested services this week</p>
+                    <p class="text-muted mb-0">Most requested service categories</p>
                 </div>
             </div>
             <div class="chart-wrap chart-md">
@@ -91,7 +82,7 @@
             <h5 class="mb-1">Recent Orders</h5>
             <p class="text-muted mb-0">Latest transactions and service requests</p>
         </div>
-        <button class="btn btn-light btn-soft">View All</button>
+        <a href="/Admin/Booking" class="btn btn-light btn-soft">View All</a>
     </div>
 
     <div class="table-responsive">
@@ -106,22 +97,32 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var order in recentOrders)
+                @if (Model.RecentOrders != null && Model.RecentOrders.Any())
                 {
-                    var badgeClass = "bg-secondary-subtle text-secondary";
-                    if (order.Status == "Completed") { badgeClass = "bg-success-subtle text-success"; }
-                    if (order.Status == "Pending") { badgeClass = "bg-warning-subtle text-warning"; }
-                    if (order.Status == "Processing") { badgeClass = "bg-info-subtle text-info"; }
-                    if (order.Status == "Cancelled") { badgeClass = "bg-danger-subtle text-danger"; }
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        var badgeClass = "bg-secondary-subtle text-secondary";
+                        if (order.Status == OrderStatuses.Completed) { badgeClass = "bg-success-subtle text-success"; }
+                        else if (order.Status == OrderStatuses.Pending) { badgeClass = "bg-warning-subtle text-warning"; }
+                        else if (order.Status == OrderStatuses.Confirmed) { badgeClass = "bg-primary-subtle text-primary"; }
+                        else if (order.Status == OrderStatuses.Rescheduled) { badgeClass = "bg-info-subtle text-info"; }
+                        else if (order.Status == OrderStatuses.Cancelled || order.Status == OrderStatuses.Rejected) { badgeClass = "bg-danger-subtle text-danger"; }
 
+                        <tr>
+                            <td class="fw-semibold">#ORD-@order.Id</td>
+                            <td>@(order.User?.Name ?? order.User?.Email ?? "Customer")</td>
+                            <td>@(order.Service?.Name ?? "General Service")</td>
+                            <td>
+                                <span class="badge rounded-pill custom-badge @badgeClass">@order.Status</span>
+                            </td>
+                            <td class="text-muted">@order.CreatedAt.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td class="fw-semibold">@order.OrderId</td>
-                        <td>@order.User</td>
-                        <td>@order.Service</td>
-                        <td>
-                            <span class="badge rounded-pill custom-badge @badgeClass">@order.Status</span>
-                        </td>
-                        <td class="text-muted">@order.Date</td>
+                        <td colspan="5" class="text-center text-muted py-4">No recent orders found.</td>
                     </tr>
                 }
             </tbody>
@@ -137,10 +138,10 @@
         new Chart(document.getElementById('ordersLineChart'), {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                labels: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyOrderLabels)),
                 datasets: [{
                     label: 'Orders',
-                    data: [120, 190, 170, 220, 260, 240, 310],
+                    data: @Html.Raw(JsonSerializer.Serialize(Model.MonthlyOrderCounts)),
                     borderColor: '#2563eb',
                     backgroundColor: 'rgba(37, 99, 235, 0.12)',
                     fill: true,
@@ -174,10 +175,10 @@
         new Chart(document.getElementById('servicesBarChart'), {
             type: 'bar',
             data: {
-                labels: ['Design', 'SEO', 'Hosting', 'Marketing', 'Support', 'Consulting'],
+                labels: @Html.Raw(JsonSerializer.Serialize(Model.ServicesUsageLabels)),
                 datasets: [{
                     label: 'Usage',
-                    data: [65, 48, 82, 56, 44, 38],
+                    data: @Html.Raw(JsonSerializer.Serialize(Model.ServicesUsageCounts)),
                     backgroundColor: ['#0f172a', '#2563eb', '#14b8a6', '#f59e0b', '#8b5cf6', '#ef4444'],
                     borderRadius: 10,
                     borderSkipped: false
@@ -206,10 +207,10 @@
         new Chart(document.getElementById('usersPieChart'), {
             type: 'pie',
             data: {
-                labels: ['Free', 'Basic', 'Premium'],
+                labels: @Html.Raw(JsonSerializer.Serialize(Model.UserDistributionLabels)),
                 datasets: [{
-                    data: [42, 33, 25],
-                    backgroundColor: ['#cbd5e1', '#2563eb', '#0f172a'],
+                    data: @Html.Raw(JsonSerializer.Serialize(Model.UserDistributionCounts)),
+                    backgroundColor: ['#cbd5e1', '#2563eb', '#0f172a', '#8b5cf6', '#ef4444'],
                     borderWidth: 0
                 }]
             },

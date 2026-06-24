@@ -19,5 +19,8 @@ namespace Shatbly.ViewModels
         [Required]
         public IFormFile cv { get; set; }
 
+        [Required]
+        [System.ComponentModel.DataAnnotations.Display(Name = "ID Card Photo")]
+        public IFormFile IdCardPhoto { get; set; }
     }
 }

@@ -86,6 +86,14 @@
                                         }
                                     </td>
                                     <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.CVPath))
+                                        {
+                                            var isPath = item.CVPath.Contains('/') || item.CVPath.Contains('\\');
+                                            var cvUrl = isPath ? Url.Content("~/" + item.CVPath.Replace("\\", "/")) : Url.Content("~/img/worker/worker_cv/" + item.CVPath);
+                                            <a href="@cvUrl" target="_blank" class="btn btn-sm btn-info text-white me-1" title="View CV">
+                                                <i class="fa-solid fa-file-pdf"></i> CV
+                                            </a>
+                                        }
                                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning text-white">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>

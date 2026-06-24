@@ -51,4 +51,5 @@
   <data name="EmailClaimNotReceived" xml:space="preserve"><value>لم يتم استلام بيانات البريد الإلكتروني من المزود.</value></data>
   <data name="ConfirmEmailLink" xml:space="preserve"><value>يرجى تأكيد حسابك بالضغط على هذا الرابط: &lt;a href='{0}'&gt;اضغط هنا لتأكيد حسابك&lt;/a&gt;</value></data>
   <data name="OtpEmailBody" xml:space="preserve"><value>&lt;h1&gt;رمز التحقق لإعادة تعيين كلمة المرور هو: {0}. لا تشاركه مع أحد&lt;/h1&gt;</value></data>
+  <data name="PhoneAlreadyExists" xml:space="preserve"><value>رقم الهاتف هذا مسجل بالفعل.</value></data>
 </root>

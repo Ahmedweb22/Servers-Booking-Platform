@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shatbly.Services.Chat;
 using Shatbly.Services.Notification;
+using Shatbly.Services.File_Service;
 using System.Security.Claims;
 
 namespace Shatbly.Areas.Customer.Controllers
@@ -14,14 +15,18 @@ namespace Shatbly.Areas.Customer.Controllers
         private readonly ApplicationDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IChatService _chatService;
+        private readonly IFileService _fileService;
 
         public ChatsController(
             ApplicationDbContext context,
-            INotificationService notificationService , IChatService chatService)
+            INotificationService notificationService,
+            IChatService chatService,
+            IFileService fileService)
         {
             _context = context;
             _notificationService = notificationService;
             _chatService = chatService;
+            _fileService = fileService;
         }
 
         private string? CurrentUserId =>
@@ -71,6 +76,9 @@ namespace Shatbly.Areas.Customer.Controllers
 
             await _context.SaveChangesAsync(cancellationToken);
 
+            var users = new[] { CurrentUserId, booking.Worker.UserId }.OrderBy(x => x).ToArray();
+            ViewBag.ConversationKey = $"booking-{booking.Id}-chat-{users[0]}-{users[1]}";
+
             var vm = new ChatCustomerViewModel
             {
                 BookingId = booking.Id,
@@ -85,9 +93,10 @@ namespace Shatbly.Areas.Customer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Send(
-      int bookingId,
-      string message,
-      CancellationToken cancellationToken)
+            int bookingId,
+            string? message,
+            IFormFile? image,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(CurrentUserId))
                 return Unauthorized();
@@ -105,12 +114,42 @@ namespace Shatbly.Areas.Customer.Controllers
             if (booking.ClientId != CurrentUserId)
                 return Forbid();
 
+            string? imageUrl = null;
+            if (image != null && image.Length > 0)
+            {
+                var uploadResult = await _fileService.UploadFileAsync(
+                    image,
+                    "uploads/chat",
+                    5 * 1024 * 1024,
+                    new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" });
+
+                if (uploadResult.Succeeded)
+                {
+                    imageUrl = uploadResult.FilePath;
+                }
+                else
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return BadRequest(new { success = false, message = uploadResult.ErrorMessage ?? "فشل تحميل الصورة." });
+                    }
+                    ModelState.AddModelError("image", uploadResult.ErrorMessage ?? "فشل تحميل الصورة.");
+                    return RedirectToAction(nameof(Conversation), new { bookingId });
+                }
+            }
+
             await _chatService.SendMessageAsync(
                 CurrentUserId,
                 booking.Worker.UserId,
                 bookingId,
                 message,
+                imageUrl,
                 cancellationToken);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, imageUrl });
+            }
 
             return RedirectToAction(
                 nameof(Conversation),

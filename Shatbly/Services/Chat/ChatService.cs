@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Shatbly.Hubs;
 using Shatbly.Models;
 using Shatbly.Services.Notification;
@@ -15,19 +15,25 @@ namespace Shatbly.Services.Chat
             string senderId,
             string receiverId,
             int bookingId,
-            string message,
+            string? message,
+            string? imageUrl = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(senderId);
             ArgumentException.ThrowIfNullOrWhiteSpace(receiverId);
-            ArgumentException.ThrowIfNullOrWhiteSpace(message);
+
+            if (string.IsNullOrWhiteSpace(message) && string.IsNullOrWhiteSpace(imageUrl))
+            {
+                throw new ArgumentException("Cannot send an empty message without an image.");
+            }
 
             var chatMessage = new ChatMessage
             {
                 SenderId = senderId,
                 ReceiverId = receiverId,
                 BookingId = bookingId,
-                Message = message.Trim(),
+                Message = message?.Trim(),
+                ImageUrl = imageUrl,
                 IsRead = false,
                 SentAt = DateTime.UtcNow
             };
@@ -46,6 +52,7 @@ namespace Shatbly.Services.Chat
                     chatMessage.ReceiverId,
                     chatMessage.BookingId,
                     chatMessage.Message,
+                    chatMessage.ImageUrl,
                     chatMessage.IsRead,
                     chatMessage.SentAt
                 },
@@ -58,20 +65,24 @@ namespace Shatbly.Services.Chat
             //    NotificationType.Message,
             //    bookingId,
             //    cancellationToken);
+            var notificationContent = string.IsNullOrWhiteSpace(message)
+                ? "أرسل صورة / Sent an image"
+                : message;
+
             await notificationService.CreateNotificationAsync(
-    receiverId,
-    "New message",
-    message,
-    NotificationType.Message,
-    bookingId,
-    cancellationToken);
-    //        await notificationService.CreateNotificationAsync(
-    //receiverId,
-    //"New message",
-    //"Click to open conversation",
-    //NotificationType.Message,
-    //bookingId,
-    //cancellationToken);
+                receiverId,
+                "New message",
+                notificationContent,
+                NotificationType.Message,
+                bookingId,
+                cancellationToken);
+            //        await notificationService.CreateNotificationAsync(
+            //receiverId,
+            //"New message",
+            //"Click to open conversation",
+            //NotificationType.Message,
+            //bookingId,
+            //cancellationToken);
             return chatMessage;
         }
 

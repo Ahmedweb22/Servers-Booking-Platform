@@ -1,4 +1,4 @@
-﻿@model ServiceCategory
+@model ServiceCategory
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -35,15 +35,25 @@
                 <!-- Image Preview Area -->
                 <div class="mb-3" id="imagePreviewContainer">
                     <label class="form-label">Icon Preview</label>
-                    <div class="border rounded p-2 text-center" style="max-width: 300px;">
+                    <div class="border rounded p-2 text-center d-flex align-items-center justify-content-center" style="max-width: 300px; min-height: 100px;">
                         @if (!string.IsNullOrEmpty(Model.Icon))
                         {
-                            <img id="imagePreview" src="~/img/service_categories/@Model.Icon" alt="Icon Preview" style="max-width: 100%; max-height: 250px;" />
+                            if (Model.Icon.Contains(" ") || Model.Icon.StartsWith("fa-") || Model.Icon.StartsWith("bi-"))
+                            {
+                                <div id="iconPreviewWrapper" style="font-size: 3rem;">
+                                    <i class="@Model.Icon text-primary" id="iconPreviewIcon"></i>
+                                </div>
+                                <img id="imagePreview" src="#" alt="Icon Preview" style="max-width: 100%; max-height: 250px; display: none;" />
+                            }
+                            else
+                            {
+                                <img id="imagePreview" src="~/img/service_categories/@Model.Icon" alt="Icon Preview" style="max-width: 100%; max-height: 250px;" />
+                            }
                         }
                         else
                         {
                             <img id="imagePreview" src="#" alt="Icon Preview" style="max-width: 100%; max-height: 250px; display: none;" />
-                            <p id="noImageText" class="text-muted">No icon uploaded yet</p>
+                            <p id="noImageText" class="text-muted mb-0">No icon uploaded yet</p>
                         }
                     </div>
                 </div>
@@ -71,14 +81,25 @@
 </div>
 <script>
     function previewImage(event) {
-    const input = event.target;
-    const preview = document.getElementById('preview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
+        const input = event.target;
+        const preview = document.getElementById('imagePreview');
+        const iconWrapper = document.getElementById('iconPreviewWrapper');
+        const noImageText = document.getElementById('noImageText');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (iconWrapper) {
+                    iconWrapper.style.display = 'none';
+                }
+                if (noImageText) {
+                    noImageText.style.display = 'none';
+                }
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        reader.readAsDataURL(input.files[0]);
     }
 </script>
 @section Scripts {

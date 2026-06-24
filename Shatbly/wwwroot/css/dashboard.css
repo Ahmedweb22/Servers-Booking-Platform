@@ -1,4 +1,4 @@
-﻿:root {
+:root {
     --bg-color: #f8fafc;
     --panel-color: #ffffff;
     --sidebar-color: #0f172a;
@@ -40,6 +40,22 @@ body.dashboard-body {
     height: 100vh;
     z-index: 1030;
     box-shadow: 8px 0 30px rgba(15, 23, 42, 0.18);
+    overflow-y: auto;
+}
+
+/* Premium Sidebar Scrollbar Styling */
+.sidebar-panel::-webkit-scrollbar {
+    width: 5px;
+}
+.sidebar-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+}
+.sidebar-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
 }
 
 .sidebar-brand {

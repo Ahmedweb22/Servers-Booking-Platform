@@ -1,0 +1,304 @@
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    Layout = "_IdentityLayout";
+    ViewData["Title"] = isRtl ? "اتصل بنا - شطبلي" : "Contact Us - Shatbly";
+    ViewData["HeroTitle"] = isRtl ? "تواصل معنا" : "Contact Us";
+    ViewData["HeroSubtitle"] = isRtl 
+        ? "يسعدنا دائماً الإجابة على استفساراتك وتلقي مقترحاتك" 
+        : "We are always happy to answer your inquiries and receive your feedback";
+}
+
+<style>
+    .contact-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        border: 1px solid rgba(10, 38, 71, 0.05);
+        overflow: hidden;
+    }
+    .info-column {
+        background: linear-gradient(135deg, #0A2647 0%, #144272 100%);
+        color: white;
+        padding: 40px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .form-column {
+        padding: 40px;
+    }
+    .form-control-custom {
+        border-radius: 12px;
+        padding: 12px 16px;
+        border: 1.5px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    .form-control-custom:focus {
+        border-color: #144272;
+        box-shadow: 0 0 0 4px rgba(20, 66, 114, 0.1);
+        outline: none;
+    }
+    .contact-icon-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #F2C94C;
+        flex-shrink: 0;
+    }
+    .btn-send {
+        background: linear-gradient(135deg, #0A2647 0%, #144272 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 28px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+    .btn-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(10, 38, 71, 0.2);
+        color: white;
+    }
+    .social-link-item {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .social-link-item:hover {
+        background: #F2C94C;
+        color: #0A2647;
+        transform: translateY(-2px);
+    }
+</style>
+
+<section class="container" style="margin-top: -60px; margin-bottom: 80px; position: relative; z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-lg-11 col-xl-10">
+            <div class="card contact-card">
+                <div class="row g-0">
+                    <!-- Info Column -->
+                    <div class="col-md-5 order-2 order-md-1">
+                        <div class="info-column text-start h-100">
+                            @if (isRtl)
+                            {
+                                <div class="text-end">
+                                    <h4 class="fw-bold mb-4" style="color: #F2C94C;">معلومات الاتصال</h4>
+                                    <p class="text-light opacity-75 mb-5 small">
+                                        يسعدنا تواصلك معنا مباشرة عبر قنوات الدعم والمساعدة المتاحة على مدار الساعة.
+                                    </p>
+
+                                    <div class="d-flex flex-column gap-4">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-geo-alt-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">موقعنا</small>
+                                                <span class="fw-semibold">القاهرة، جمهورية مصر العربية</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-telephone-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">اتصل بنا</small>
+                                                <span class="fw-semibold" dir="ltr">+20 100 123 4567</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-envelope-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">البريد الإلكتروني</small>
+                                                <span class="fw-semibold">support@shtbly.com</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5 text-end">
+                                    <h6 class="fw-bold mb-3">تابعنا على وسائل التواصل</h6>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="#" class="social-link-item"><i class="bi bi-facebook"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-instagram"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-twitter-x"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-linkedin"></i></a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <h4 class="fw-bold mb-4" style="color: #F2C94C;">Contact Information</h4>
+                                    <p class="text-light opacity-75 mb-5 small">
+                                        We would love to hear from you. Feel free to contact us through any of our official support channels.
+                                    </p>
+
+                                    <div class="d-flex flex-column gap-4">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-geo-alt-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">Our Location</small>
+                                                <span class="fw-semibold">Cairo, Arab Republic of Egypt</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-telephone-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">Call Us</small>
+                                                <span class="fw-semibold">+20 100 123 4567</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="contact-icon-circle"><i class="bi bi-envelope-fill"></i></div>
+                                            <div>
+                                                <small class="d-block text-white-50">Email Us</small>
+                                                <span class="fw-semibold">support@shtbly.com</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5">
+                                    <h6 class="fw-bold mb-3">Follow Us</h6>
+                                    <div class="d-flex gap-2">
+                                        <a href="#" class="social-link-item"><i class="bi bi-facebook"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-instagram"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-twitter-x"></i></a>
+                                        <a href="#" class="social-link-item"><i class="bi bi-linkedin"></i></a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Form Column -->
+                    <div class="col-md-7 order-1 order-md-2">
+                        <div class="form-column h-100">
+                            @if (isRtl)
+                            {
+                                <div class="text-end">
+                                    <h3 class="fw-bold text-dark mb-1">أرسل لنا رسالة</h3>
+                                    <p class="text-muted small mb-4">سنقوم بالرد عليك في أقرب وقت ممكن.</p>
+
+                                    <form id="contactForm">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">الاسم الكامل</label>
+                                            <input type="text" class="form-control form-control-custom text-end" id="contactName" placeholder="أدخل اسمك الكريم" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">البريد الإلكتروني</label>
+                                            <input type="email" class="form-control form-control-custom text-end" id="contactEmail" placeholder="name@example.com" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">الموضوع</label>
+                                            <input type="text" class="form-control form-control-custom text-end" id="contactSubject" placeholder="عنوان رسالتك" required>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-secondary">الرسالة</label>
+                                            <textarea class="form-control form-control-custom text-end" id="contactMessage" rows="4" placeholder="كيف يمكننا مساعدتك؟" required></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-send w-100 fw-bold" id="btnSubmit">
+                                            <span id="btnText"><i class="bi bi-send-fill ms-2"></i>إرسال الرسالة</span>
+                                            <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-start">
+                                    <h3 class="fw-bold text-dark mb-1">Send us a Message</h3>
+                                    <p class="text-muted small mb-4">We will get back to you as soon as possible.</p>
+
+                                    <form id="contactForm">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">Full Name</label>
+                                            <input type="text" class="form-control form-control-custom" id="contactName" placeholder="Enter your full name" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">Email Address</label>
+                                            <input type="email" class="form-control form-control-custom" id="contactEmail" placeholder="name@example.com" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">Subject</label>
+                                            <input type="text" class="form-control form-control-custom" id="contactSubject" placeholder="Subject of your message" required>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-secondary">Message</label>
+                                            <textarea class="form-control form-control-custom" id="contactMessage" rows="4" placeholder="How can we help you?" required></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-send w-100 fw-bold" id="btnSubmit">
+                                            <span id="btnText"><i class="bi bi-send-fill me-2"></i>Send Message</span>
+                                            <span id="btnSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#contactForm').on('submit', function (e) {
+                e.preventDefault();
+                
+                var btn = $('#btnSubmit');
+                var text = $('#btnText');
+                var spinner = $('#btnSpinner');
+                
+                btn.prop('disabled', true);
+                text.addClass('d-none');
+                spinner.removeClass('d-none');
+                
+                setTimeout(function () {
+                    // Reset button state
+                    btn.prop('disabled', false);
+                    text.removeClass('d-none');
+                    spinner.addClass('d-none');
+                    
+                    // Show success message
+                    var isAr = '@isRtl' === 'True';
+                    var msg = isAr ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.' : 'Your message has been sent successfully! We will contact you soon.';
+                    
+                    toastr.success(msg);
+                    
+                    // Reset form
+                    $('#contactForm')[0].reset();
+                }, 1200);
+            });
+        });
+    </script>
+}

@@ -1,152 +1,183 @@
-﻿@model UsersVM
+@model UsersVM
+@using Microsoft.AspNetCore.Localization
+@using Shatbly.Utilities
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewBag.Title = isRtl ? "إدارة المستخدمين" : "User Management";
+}
 
-<div class="container">
-
-    <div class="row mb-3 align-items-center my-3">
-        <div class="col-md-6">
-            <h3 class="display-6">All User</h3>
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 my-3 @(isRtl ? "text-end flex-row-reverse" : "text-start")">
+        <div>
+            <h2 class="fw-bold mb-1">@(isRtl ? "إدارة المستخدمين" : "User Management")</h2>
+            <p class="text-muted mb-0">@(isRtl ? "عرض وإدارة وتعديل أدوار وحسابات مستخدمي المنصة" : "View, manage, and edit platform user accounts and roles")</p>
         </div>
-
-
-        <!-- Create -->
-        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
-            <a href="/Admin/User/Create" class="btn btn-success">
-                + Create New
+        <div>
+            <a href="/Admin/User/Create" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> @(isRtl ? "إضافة مستخدم جديد" : "Create New User")
             </a>
         </div>
     </div>
-    <section class="py-3 filter-bar">
-        <div class="container">
-            <div class="row" style="background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important">
-                <div class="col-md-6">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <input type="text" name="name" value="@ViewData["CurrentFilter"]" class="form-control me-2" placeholder="name..." />
-                            </div>
-                            <div class="col-md-2 ">
-                                <button type="submit" class="btn btn-primary">Search</button>
-                            </div>
-                        </div>
-                    </form>
+
+    <!-- Filter Bar Card -->
+    <div class="dashboard-card mb-4 p-3">
+        <form method="get" class="row align-items-center g-3">
+            <div class="col-12 col-md-5 @(isRtl ? "ms-auto" : "")">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="name" value="@ViewData["CurrentFilter"]" class="form-control border-start-0 bg-light" 
+                           placeholder="@(isRtl ? "البحث عن طريق الاسم أو اسم المستخدم..." : "Search by name or username...")" />
+                    @if (ViewData["CurrentFilter"] != null && !string.IsNullOrEmpty(ViewData["CurrentFilter"].ToString()))
+                    {
+                        <a href="/Admin/User/Index" class="btn btn-outline-secondary d-flex align-items-center">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                    <button class="btn btn-primary" type="submit">@(isRtl ? "بحث" : "Search")</button>
                 </div>
             </div>
+            <div class="col-12 col-md-auto">
+                <a asp-controller="User" asp-action="ExportPdf" class="btn btn-outline-danger d-flex align-items-center gap-2 px-3 fw-semibold">
+                    <i class="bi bi-file-pdf-fill"></i>
+                    <span>@(isRtl ? "تصدير تقرير PDF" : "Export PDF Report")</span>
+                </a>
+            </div>
+        </form>
+    </div>
 
-    </section>
-
-
-
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Role</th>
-                        <th scope="col">Actions</th>
+    <!-- Data Table Card -->
+    <div class="dashboard-card p-0 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary">
+                    <tr class="@(isRtl ? "text-end" : "text-start")">
+                        <th scope="col" style="width: 80px;">ID</th>
+                        <th scope="col">@(isRtl ? "اسم المستخدم / الحساب" : "Username / Account")</th>
+                        <th scope="col" style="width: 200px;">@(isRtl ? "الدور / الصلاحية" : "Role")</th>
+                        <th scope="col" class="text-center" style="width: 220px;">@(isRtl ? "العمليات" : "Actions")</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    @foreach (var item in Model.Users)
+                    @if (Model.Users == null || !Model.Users.Any())
                     {
                         <tr>
-                            <td>@item.Id</td>
-                            <td>@item.UserName</td>
-                            <td>
-                                <span class="badge bg-secondary">@item.RoleName</span>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-people fs-1 d-block mb-3 opacity-50"></i>
+                                @(isRtl ? "لم يتم العثور على مستخدمين." : "No users found.")
                             </td>
-
-                            @if (User.IsInRole(SD.ROLE_SUPER_ADMIN) || User.IsInRole(SD.ROLE_ADMIN))
-                            {
-                                <td>
-
-                                    <!-- Update -->
-                                    <a href="/Admin/User/Edit/@item.Id"
-                                       class="btn btn-sm btn-outline-warning">
-                                        Edit
-                                    </a>
-
-                                    <!-- Delete -->
-                                    <a href="/Admin/User/Delete/@item.Id"
-                                       class="btn btn-sm btn-outline-danger">
-                                        Delete
-                                    </a>
-                                </td>
-                            }
-                            else
-                            {
-                                <td>
-                                    NoActions!!
-                                </td>
-                            }
                         </tr>
                     }
+                    else
+                    {
+                        foreach (var item in Model.Users)
+                        {
+                            var badgeColor = "bg-secondary";
+                            if (item.RoleName == SD.ROLE_SUPER_ADMIN) { badgeColor = "bg-danger bg-opacity-10 text-danger"; }
+                            else if (item.RoleName == SD.ROLE_ADMIN) { badgeColor = "bg-warning bg-opacity-10 text-warning"; }
+                            else if (item.RoleName == SD.ROLE_WORKER) { badgeColor = "bg-primary bg-opacity-10 text-primary"; }
+                            else if (item.RoleName == SD.ROLE_CUSTOMER) { badgeColor = "bg-success bg-opacity-10 text-success"; }
+
+                            <tr class="@(isRtl ? "text-end" : "text-start")">
+                                <td class="fw-bold text-dark">@item.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2 justify-content-start @(isRtl ? "flex-row-reverse" : "")">
+                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                            <i class="bi bi-person text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark">@item.UserName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-3 py-1.5 fw-semibold @badgeColor" style="font-size: 0.8rem;">
+                                        @item.RoleName
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        @if (User.IsInRole(SD.ROLE_SUPER_ADMIN) || User.IsInRole(SD.ROLE_ADMIN))
+                                        {
+                                            <a href="/Admin/User/Edit/@item.Id"
+                                               class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold">
+                                                <i class="bi bi-pencil-square me-1"></i> @(isRtl ? "تعديل" : "Edit")
+                                            </a>
+                                            <a href="/Admin/User/Delete/@item.Id"
+                                               class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold js-delete-user"
+                                               data-id="@item.Id" data-name="@item.UserName">
+                                                <i class="bi bi-trash-fill me-1"></i> @(isRtl ? "حذف" : "Delete")
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">@(isRtl ? "لا توجد صلاحيات" : "No Actions")</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
-
             </table>
-
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-12 d-flex justify-content-center">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    @if (Model.CurrentPage > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage - 1)">Previous</a>
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center gap-1">
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;" 
+                               href="/Admin/User/Index?page=@(Model.CurrentPage - 1)" aria-label="Previous">
+                                <i class="bi bi-chevron-@(isRtl ? "right" : "left")"></i>
+                            </a>
                         </li>
-                    }
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        if (i == Model.CurrentPage)
+                        @for (int i = 1; i <= Model.TotalPages; i++)
                         {
-                            <li class="page-item active">
-                                <a class="page-link" href="/Admin/User/Index?page=@i">@i</a>
+                            <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                                   href="/Admin/User/Index?page=@i">@i</a>
                             </li>
                         }
-                        else
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="~/Admin/User/Index?page=@i">@i</a>
-                            </li>
-                        }
-                    }
-                    @if (Model.CurrentPage < Model.TotalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Admin/User/Index?page=@(Model.CurrentPage + 1)">Next</a>
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                               href="/Admin/User/Index?page=@(Model.CurrentPage + 1)" aria-label="Next">
+                                <i class="bi bi-chevron-@(isRtl ? "left" : "right")"></i>
+                            </a>
                         </li>
-                    }
-
-                </ul>
-            </nav>
+                    </ul>
+                </nav>
+            </div>
         </div>
-    </div>
-    <a asp-controller="User" asp-action="ExportPdf" class="btn btn-primary">
-        Download PDF Report
-    </a>
-
+    }
 </div>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const deleteLinks = document.querySelectorAll('a.btn-outline-danger');
+        const isRtl = '@isRtl' === 'True';
+        const deleteLinks = document.querySelectorAll('.js-delete-user');
         deleteLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault();
                 const url = this.href;
+                const name = this.dataset.name;
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
+                    title: isRtl ? "هل أنت متأكد؟" : "Are you sure?",
+                    text: isRtl ? `هل ترغب في حذف المستخدم "${name}"؟ لا يمكن التراجع عن هذا الإجراء.` : `Do you want to delete "${name}"? This action cannot be undone.`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: isRtl ? "نعم، احذفه!" : "Yes, delete it!",
+                    cancelButtonText: isRtl ? "إلغاء" : "Cancel"
                 }).then((result) => {
                     if (result.isConfirmed) {
                         window.location.href = url;
@@ -156,7 +187,7 @@
         });
     });
 </script>
+
 @section Scripts {
     <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
-
 }

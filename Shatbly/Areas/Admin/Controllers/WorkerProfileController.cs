@@ -89,7 +89,7 @@ namespace Shatbly.Areas.Admin.Controllers
             var workerProfile = new WorkerProfile
             {
                 UserId = model.UserId,
-                Bio = model.Bio,
+                Bio = model.Bio ?? string.Empty,
                 IsVerified = model.IsVerified,
                 IsAvailable = model.IsAvailable,
                 AcceptsOnline = model.AcceptsOnline,
@@ -97,6 +97,15 @@ namespace Shatbly.Areas.Admin.Controllers
                 InterviewDate = model.InterviewDate,
                 HRNotes = model.HRNotes
             };
+
+            if (model.IsApproved)
+            {
+                var user = await _userRepo.GetOneAsync(u => u.Id == model.UserId, tracking: true);
+                if (user != null)
+                {
+                    user.EmailConfirmed = true;
+                }
+            }
 
             if (model.CVFile is not null)
             {
@@ -150,7 +159,6 @@ namespace Shatbly.Areas.Admin.Controllers
             return View(vm);
         }
 
-        // ───────── EDIT (POST) ─────────
         [HttpPost]
         public async Task<IActionResult> Edit(WorkerProfilesVM model)
         {
@@ -161,29 +169,30 @@ namespace Shatbly.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var existing = await _workerProfileRepo.GetOneAsync(e => e.Id == model.Id, tracking: false);
-            if (existing is null)
+            var workerProfile = await _workerProfileRepo.GetOneAsync(
+                expression: e => e.Id == model.Id,
+                includes: [e => e.WorkerServices, e => e.User],
+                tracking: true);
+
+            if (workerProfile is null)
             {
                 TempData["error-notification"] = _localizer["WorkerProfileNotFound"].Value;
                 return NotFound();
             }
 
-            var workerProfile = new WorkerProfile
+            workerProfile.UserId = model.UserId;
+            workerProfile.Bio = model.Bio ?? string.Empty;
+            workerProfile.IsVerified = model.IsVerified;
+            workerProfile.IsAvailable = model.IsAvailable;
+            workerProfile.AcceptsOnline = model.AcceptsOnline;
+            workerProfile.IsApproved = model.IsApproved;
+            workerProfile.InterviewDate = model.InterviewDate;
+            workerProfile.HRNotes = model.HRNotes;
+
+            if (model.IsApproved && workerProfile.User != null)
             {
-                Id = model.Id,
-                UserId = model.UserId,
-                Bio = model.Bio,
-                IsVerified = model.IsVerified,
-                IsAvailable = model.IsAvailable,
-                AcceptsOnline = model.AcceptsOnline,
-                IsApproved = model.IsApproved,
-                InterviewDate = model.InterviewDate,
-                HRNotes = model.HRNotes,
-                CVPath = existing.CVPath,
-                RatingAvg = existing.RatingAvg,
-                RatingCount = existing.RatingCount,
-                CreatedAt = existing.CreatedAt
-            };
+                workerProfile.User.EmailConfirmed = true;
+            }
 
             if (model.CVFile is not null)
             {
@@ -195,9 +204,9 @@ namespace Shatbly.Areas.Admin.Controllers
                     await model.CVFile.CopyToAsync(stream);
                 }
                 
-                if (!string.IsNullOrEmpty(existing.CVPath))
+                if (!string.IsNullOrEmpty(workerProfile.CVPath))
                 {
-                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", existing.CVPath);
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", workerProfile.CVPath);
                     if (System.IO.File.Exists(oldFilePath))
                     {
                         System.IO.File.Delete(oldFilePath);
@@ -207,7 +216,11 @@ namespace Shatbly.Areas.Admin.Controllers
                 workerProfile.CVPath = newFileName;
             }
 
-            _workerProfileRepo.Update(workerProfile);
+            if (workerProfile.WorkerServices != null)
+            {
+                workerProfile.WorkerServices.IsActive = model.IsAvailable;
+            }
+
             await _workerProfileRepo.CommitAsync();
             TempData["success-notification"] = _localizer["WorkerProfileUpdatedSuccess"].Value;
             return RedirectToAction(nameof(Index));

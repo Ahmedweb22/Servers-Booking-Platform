@@ -28,5 +28,10 @@
   <data name="WorkerService" xml:space="preserve"><value>خدمات الفنيين</value></data>
   <data name="WorkerProfile" xml:space="preserve"><value>ملفات الفنيين</value></data>
   <data name="Reports" xml:space="preserve"><value>التقارير</value></data>
+  <data name="Withdrawals" xml:space="preserve"><value>طلبات السحب</value></data>
+  <data name="Reviews" xml:space="preserve"><value>التقييمات</value></data>
   <data name="Settings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Messages" xml:space="preserve"><value>الرسائل والطلبات</value></data>
+  <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
+  <data name="Disputes" xml:space="preserve"><value>الشكاوى والنزاعات</value></data>
 </root>

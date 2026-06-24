@@ -1,4 +1,4 @@
-﻿using Shatbly.Services.CurrentWorkerService1;
+using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.ViewModels;
 
 namespace Shatbly.Services.WithdrawalService
@@ -70,6 +70,63 @@ namespace Shatbly.Services.WithdrawalService
             {
                 return ServiceResult.Failure("You cannot withdraw more than your available balance.");
             }
+
+            return ServiceResult.Success();
+        }
+
+        public async Task<IReadOnlyList<WithdrawalRequest>> GetAllRequestsAsync()
+        {
+            return await _unitOfWork.WithdrawalRequests.GetAsync(
+                includes: new System.Linq.Expressions.Expression<System.Func<WithdrawalRequest, object>>[]
+                {
+                    x => x.Worker,
+                    x => x.Worker.User
+                },
+                tracking: false);
+        }
+
+        public async Task<ServiceResult> ApproveRequestAsync(int requestId)
+        {
+            var request = await _unitOfWork.WithdrawalRequests.GetOneAsync(
+                x => x.Id == requestId,
+                tracking: true);
+
+            if (request == null)
+            {
+                return ServiceResult.Failure("Withdrawal request not found.");
+            }
+
+            if (request.Status != PendingStatus)
+            {
+                return ServiceResult.Failure("Only pending requests can be approved.");
+            }
+
+            request.Status = "Approved";
+            _unitOfWork.WithdrawalRequests.Update(request);
+            await _unitOfWork.CommitAsync();
+
+            return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> RejectRequestAsync(int requestId)
+        {
+            var request = await _unitOfWork.WithdrawalRequests.GetOneAsync(
+                x => x.Id == requestId,
+                tracking: true);
+
+            if (request == null)
+            {
+                return ServiceResult.Failure("Withdrawal request not found.");
+            }
+
+            if (request.Status != PendingStatus)
+            {
+                return ServiceResult.Failure("Only pending requests can be rejected.");
+            }
+
+            request.Status = "Rejected";
+            _unitOfWork.WithdrawalRequests.Update(request);
+            await _unitOfWork.CommitAsync();
 
             return ServiceResult.Success();
         }

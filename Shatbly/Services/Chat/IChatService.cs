@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.Chat
+namespace Shatbly.Services.Chat
 {
         public interface IChatService
         {
@@ -6,7 +6,8 @@
                 string senderId,
                 string receiverId,
                 int bookingId,
-                string message,
+                string? message,
+                string? imageUrl = null,
                 CancellationToken cancellationToken = default);
 
             Task<IReadOnlyList<ChatMessage>> GetConversationAsync(

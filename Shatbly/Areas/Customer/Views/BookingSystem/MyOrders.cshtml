@@ -1,0 +1,632 @@
+@model IEnumerable<Order>
+@using Shatbly.Models
+
+@{
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+    ViewData["Title"] = Localizer["PageTitle"];
+
+    Func<string, string> getCategoryClass = (categoryName) =>
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "cat-default";
+        var lower = categoryName.ToLower();
+        if (lower.Contains("clean")) return "cat-cleaning";
+        if (lower.Contains("plumb")) return "cat-plumbing";
+        if (lower.Contains("elect")) return "cat-electrical";
+        if (lower.Contains("ac") || lower.Contains("air")) return "cat-ac";
+        return "cat-default";
+    };
+
+    Func<string, string> getCategoryIcon = (categoryName) =>
+    {
+        if (string.IsNullOrEmpty(categoryName)) return "bi-wrench";
+        var lower = categoryName.ToLower();
+        if (lower.Contains("clean")) return "bi-house-heart";
+        if (lower.Contains("plumb")) return "bi-droplet-half";
+        if (lower.Contains("elect")) return "bi-lightning-charge";
+        if (lower.Contains("ac") || lower.Contains("air")) return "bi-snow";
+        return "bi-wrench";
+    };
+
+    Func<Order, string> getStatusText = (order) =>
+    {
+        if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+        {
+            return isRtl ? "متنازع عليه" : "Disputed";
+        }
+        return Localizer[order.Status.ToString()].Value;
+    };
+
+    Func<Order, string> getStatusClass = (order) =>
+    {
+        if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+        {
+            return "status-disputed";
+        }
+        return order.Status switch
+        {
+            OrderStatuses.Pending => "status-pending",
+            OrderStatuses.Confirmed => "status-confirmed",
+            OrderStatuses.Completed => "status-completed",
+            OrderStatuses.Cancelled => "status-cancelled",
+            OrderStatuses.Rescheduled => "status-confirmed",
+            OrderStatuses.Rejected => "status-cancelled",
+            _ => "status-inprogress"
+        };
+    };
+}
+
+<style>
+    html, body {
+        overflow: auto !important;
+        height: auto !important;
+        background-color: #f8fafc;
+    }
+
+    .orders-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    /* Hero Header */
+    .orders-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .orders-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .orders-hero h1 {
+        color: white;
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 2.2rem;
+        font-weight: 800;
+    }
+    .orders-hero p {
+        color: #94a3b8;
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 500;
+    }
+
+    /* Search & Filter Bar */
+    .control-bar {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    @@media (min-width: 768px) {
+        .control-bar {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    /* Search Box */
+    .search-box-custom {
+        position: relative;
+        flex-grow: 1;
+        max-width: 400px;
+    }
+    .search-box-custom i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1.1rem;
+    }
+    html[dir="rtl"] .search-box-custom i {
+        left: auto;
+        right: 16px;
+    }
+    .search-input-custom {
+        width: 100%;
+        padding: 12px 16px 12px 48px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        background-color: #f8fafc;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    html[dir="rtl"] .search-input-custom {
+        padding: 12px 48px 12px 16px;
+    }
+    .search-input-custom:focus {
+        outline: none;
+        border-color: #3b82f6;
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Filter Pills */
+    .filter-pills {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+    .filter-pills::-webkit-scrollbar {
+        display: none;
+    }
+    .filter-pill {
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 700;
+        border: none;
+        background-color: #f1f5f9;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    .filter-pill:hover {
+        background-color: #e2e8f0;
+        color: #1e293b;
+    }
+    .filter-pill.active {
+        background-color: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Orders Grid */
+    .orders-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    @@media (min-width: 992px) {
+        .orders-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Card Styles */
+    .order-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.06);
+        border-color: #cbd5e1;
+    }
+
+    /* Header section of card */
+    .card-header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    .service-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .service-icon-bg {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    /* Category styles */
+    .cat-cleaning { background-color: #ecfeff; color: #0891b2; }
+    .cat-plumbing { background-color: #f0fdf4; color: #16a34a; }
+    .cat-electrical { background-color: #fffbeb; color: #d97706; }
+    .cat-ac { background-color: #eff6ff; color: #2563eb; }
+    .cat-default { background-color: #f1f5f9; color: #475569; }
+
+    .service-details h4 {
+        margin: 0;
+        font-weight: 800;
+        font-size: 1.15rem;
+        color: #0f172a;
+    }
+    .order-ref {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 700;
+        margin-top: 2px;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-weight: 800;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    .status-pending { background-color: #fffbeb; color: #d97706; }
+    .status-confirmed { background-color: #eff6ff; color: #2563eb; }
+    .status-inprogress { background-color: #f3e8ff; color: #9333ea; }
+    .status-completed { background-color: #f0fdf4; color: #16a34a; }
+    .status-cancelled { background-color: #fef2f2; color: #dc2626; }
+    .status-disputed { background-color: #ffe4e6; color: #e11d48; }
+
+    /* Main section details */
+    .card-body-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #475569;
+        font-size: 0.92rem;
+        font-weight: 600;
+    }
+    .detail-item i {
+        color: #94a3b8;
+        font-size: 1.15rem;
+    }
+
+    /* Footer section */
+    .card-footer-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+        margin-top: auto;
+    }
+    .price-details {
+        display: flex;
+        flex-direction: column;
+    }
+    .price-label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .price-val {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+    .payment-tag {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 2px;
+    }
+
+    /* Actions */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-action {
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-action-primary {
+        background-color: #0f172a;
+        color: white;
+    }
+    .btn-action-primary:hover {
+        background-color: #1e293b;
+        transform: translateY(-1px);
+        color: white;
+    }
+    .btn-action-accent {
+        background-color: #3b82f6;
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    .btn-action-accent:hover {
+        background-color: #2563eb;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+        transform: translateY(-1px);
+        color: white;
+    }
+
+    /* Empty States */
+    .empty-state {
+        background: white;
+        border-radius: 24px;
+        padding: 60px 40px;
+        text-align: center;
+        border: 1.5px dashed #cbd5e1;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.02);
+        max-width: 600px;
+        margin: 40px auto;
+        display: none;
+    }
+    .empty-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 20px;
+    }
+    .empty-state h3 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+    .empty-state p {
+        color: #64748b;
+        margin-bottom: 24px;
+        font-weight: 500;
+    }
+</style>
+
+<div class="orders-shell">
+    <!-- Hero Block -->
+    <div class="orders-hero">
+        <h1>@Localizer["PageTitle"]</h1>
+        <p>@Localizer["PageSubtitle"]</p>
+    </div>
+
+    <!-- Filter Control Bar -->
+    <div class="control-bar">
+        <!-- Search -->
+        <div class="search-box-custom">
+            <i class="bi bi-search"></i>
+            <input type="text" id="orderSearchInput" class="search-input-custom" placeholder="@Localizer["SearchPlaceholder"]" />
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-pills">
+            <button class="filter-pill active" onclick="filterOrders('all')">@Localizer["FilterAll"]</button>
+            <button class="filter-pill" onclick="filterOrders('pending')">@Localizer["FilterPending"]</button>
+            <button class="filter-pill" onclick="filterOrders('active')">@Localizer["FilterActive"]</button>
+            <button class="filter-pill" onclick="filterOrders('completed')">@Localizer["FilterCompleted"]</button>
+            <button class="filter-pill" onclick="filterOrders('cancelled')">@Localizer["FilterCancelled"]</button>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Main Empty State (No orders at all) -->
+        <div class="text-center py-5" style="display: block;">
+            <div class="empty-icon-wrapper">
+                <i class="bi bi-journal-x"></i>
+            </div>
+            <h3>@Localizer["EmptyStateTitle"]</h3>
+            <p>@Localizer["EmptyStateSubtitle"]</p>
+            <a href="/Customer/Home/Index" class="btn btn-action btn-action-accent px-4 py-2">
+                <i class="bi bi-plus-lg me-1"></i> @Localizer["BookNowBtn"]
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Orders Grid -->
+        <div class="orders-grid" id="ordersGrid">
+            @foreach (var order in Model)
+            {
+                var categoryName = order.Service?.NameEn ?? "";
+                var svcName = isRtl ? (order.Service?.NameAr ?? order.Service?.NameEn ?? "") : (order.Service?.NameEn ?? "");
+                var catClass = getCategoryClass(categoryName);
+                var catIcon = getCategoryIcon(categoryName);
+                var statusText = getStatusText(order);
+                var statusClass = getStatusClass(order);
+
+                // Group state logic for filtering tabs: pending, active, completed, cancelled
+                var filterGroup = "pending";
+                if (order.Booking != null && order.Booking.Status == BookingStatus.Disputed)
+                {
+                    filterGroup = "active";
+                }
+                else
+                {
+                    filterGroup = order.Status switch
+                    {
+                        OrderStatuses.Pending => "pending",
+                        OrderStatuses.Confirmed => "active",
+                        OrderStatuses.Rescheduled => "active",
+                        OrderStatuses.Completed => "completed",
+                        OrderStatuses.Cancelled => "cancelled",
+                        OrderStatuses.Rejected => "cancelled",
+                        _ => "active"
+                    };
+                }
+
+                // Payment Display Info
+                var paymentMethodText = Localizer[order.PaymentMethod.ToString()].Value;
+                var paymentStatusText = Localizer[order.PaymentStatus.ToString()].Value;
+
+                // Pay Now button condition: Electronic payment && Pending/Failed && not finished or cancelled
+                var showPayButton = order.PaymentMethod == PaymentMethods.Card
+                                    && (order.PaymentStatus == PaymentStatuses.Pending || order.PaymentStatus == PaymentStatuses.Failed)
+                                    && order.Status != OrderStatuses.Cancelled
+                                    && order.Status != OrderStatuses.Rejected
+                                    && order.Status != OrderStatuses.Completed;
+
+                // Built search token
+                var searchToken = $"{order.Id} {svcName} {order.Worker?.Name} {order.ScheduledAt.ToString("dd MMMM yyyy")}".ToLower();
+
+                <div class="order-card" data-status-group="@filterGroup" data-search-text="@searchToken">
+                    <!-- Card Top Header -->
+                    <div class="card-header-section">
+                        <div class="service-info">
+                            <div class="service-icon-bg @catClass">
+                                <i class="bi @catIcon"></i>
+                            </div>
+                            <div class="service-details">
+                                <h4>@svcName</h4>
+                                <div class="order-ref">@string.Format(Localizer["OrderNo"].Value, order.Id)</div>
+                            </div>
+                        </div>
+                        <span class="status-badge @statusClass">@statusText</span>
+                    </div>
+
+                    <!-- Card Body Details -->
+                    <div class="card-body-section">
+                        <div class="detail-item">
+                            <i class="bi bi-calendar3"></i>
+                            <span>@order.ScheduledAt.ToString("dddd, dd MMM yyyy - hh:mm tt")</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="bi bi-person-badge"></i>
+                            <span>@Localizer["WorkerLabel"]: @(order.Worker?.Name ?? (isRtl ? "غير محدد" : "Not Assigned"))</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>@order.AddressLabel - @order.AddressLine</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer Actions & Price -->
+                    <div class="card-footer-section">
+                        <div class="price-details">
+                            <span class="price-label">@Localizer["PriceLabel"]</span>
+                            <span class="price-val">@string.Format(Localizer["CurrencyFormat"].Value, order.TotalPrice.ToString("0.00"))</span>
+                            <span class="payment-tag">
+                                <i class="bi bi-wallet2"></i>
+                                @paymentMethodText (@paymentStatusText)
+                            </span>
+                        </div>
+                        <div class="action-buttons">
+                            @if (showPayButton)
+                            {
+                                <a href="/Customer/BookingSystem/Pay/@order.Id" class="btn-action btn-action-accent">
+                                    <i class="bi bi-credit-card me-1"></i> @Localizer["PayNowBtn"]
+                                </a>
+                            }
+                            <a href="/Customer/BookingSystem/DetailsBooking/@order.Id" class="btn-action btn-action-primary">
+                                <i class="bi bi-eye me-1"></i> @Localizer["ViewDetailsBtn"]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Dynamic Filtered Empty State (No orders matching query/tab) -->
+        <div id="dynamicEmptyState" class="empty-state">
+            <div class="empty-icon-wrapper">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3>@Localizer["EmptyStateTitle"]</h3>
+            <p>@Localizer["EmptyStateSubtitle"]</p>
+            <a href="/Customer/Home/Index" class="btn btn-action btn-action-accent px-4 py-2">
+                <i class="bi bi-plus-lg me-1"></i> @Localizer["BookNowBtn"]
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        let currentTab = 'all';
+
+        // Filter Functionality
+        function filterOrders(tab) {
+            currentTab = tab;
+            
+            // Toggle active tab class
+            const pills = document.querySelectorAll('.filter-pill');
+            pills.forEach(pill => pill.classList.remove('active'));
+            
+            // Find which pill contains the onclick for this tab
+            const activePill = Array.from(pills).find(p => p.getAttribute('onclick').includes(tab));
+            if (activePill) {
+                activePill.classList.add('active');
+            }
+
+            applyFilters();
+        }
+
+        // Apply Both Search & Tab Filter
+        function applyFilters() {
+            const searchQuery = document.getElementById('orderSearchInput')?.value.toLowerCase().trim() || '';
+            const cards = document.querySelectorAll('.order-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const statusGroup = card.getAttribute('data-status-group');
+                const searchText = card.getAttribute('data-search-text') || '';
+
+                const matchesTab = (currentTab === 'all' || statusGroup === currentTab);
+                const matchesSearch = (searchQuery === '' || searchText.includes(searchQuery));
+
+                if (matchesTab && matchesSearch) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Handle empty states dynamically
+            const emptyState = document.getElementById('dynamicEmptyState');
+            const grid = document.getElementById('ordersGrid');
+
+            if (emptyState && grid) {
+                if (visibleCount === 0) {
+                    emptyState.style.display = 'block';
+                    grid.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    grid.style.display = 'grid';
+                }
+            }
+        }
+
+        // Add real-time event listener to Search Input
+        document.getElementById('orderSearchInput')?.addEventListener('input', applyFilters);
+    </script>
+}

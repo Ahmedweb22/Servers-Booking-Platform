@@ -3,4 +3,6 @@
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>1.3</value></resheader>
   <data name="CvSubmittedSuccess" xml:space="preserve"><value>تم تسليم بياناتك بنجاح سيتم الرد عليك خلال يومين</value></data>
+  <data name="PhoneAlreadyExists" xml:space="preserve"><value>رقم الهاتف هذا مسجل بالفعل.</value></data>
+  <data name="EmailAlreadyExists" xml:space="preserve"><value>البريد الإلكتروني هذا مسجل بالفعل.</value></data>
 </root>

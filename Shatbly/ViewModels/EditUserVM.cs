@@ -19,9 +19,8 @@ namespace Shatbly.ViewModels
         [Required]
         [Phone]
         public string Phone { get; set; }
-        [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
         [Required]
         public string RoleName { get; set; }
         public IEnumerable<IdentityRole> Roles { get; set; }

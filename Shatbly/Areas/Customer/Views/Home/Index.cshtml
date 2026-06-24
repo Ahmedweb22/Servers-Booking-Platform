@@ -230,7 +230,24 @@
                     @foreach (var category in Model.Categories)
                     {
                         <div class="chip @(ViewData["SelectedCategory"]?.ToString() == category.Id.ToString() ? "active" : "")">
-                            <a href="/Customer/Home/Index?categoryId=@category.Id"><i class="bi bi-droplet-fill text-info"></i> @(isRtl ? category.NameAr : category.Name)</a>
+                            <a href="/Customer/Home/Index?categoryId=@category.Id" class="d-flex align-items-center gap-2 text-decoration-none">
+                                @if (!string.IsNullOrEmpty(category.Icon))
+                                {
+                                    if (category.Icon.Contains(" ") || category.Icon.StartsWith("fa-") || category.Icon.StartsWith("bi-"))
+                                    {
+                                        <i class="@category.Icon"></i>
+                                    }
+                                    else
+                                    {
+                                        <img src="/img/service_categories/@category.Icon" style="width: 18px; height: 18px; object-fit: contain;" />
+                                    }
+                                }
+                                else
+                                {
+                                    <i class="bi bi-tag text-secondary"></i>
+                                }
+                                <span>@(isRtl ? category.NameAr : category.Name)</span>
+                            </a>
                         </div>
                     }
                 }
@@ -377,11 +394,32 @@
         {
             @foreach (var worker in Model.Workers)
             {
+                var profilePictureUrl = "";
+                if (!string.IsNullOrEmpty(worker.ProfilePicturePath))
+                {
+                    var cleanedPath = worker.ProfilePicturePath.Trim().Replace("\\", "/");
+                    if (cleanedPath.StartsWith("~/"))
+                    {
+                        profilePictureUrl = Url.Content(cleanedPath);
+                    }
+                    else if (cleanedPath.StartsWith("/"))
+                    {
+                        profilePictureUrl = Url.Content("~" + cleanedPath);
+                    }
+                    else
+                    {
+                        profilePictureUrl = Url.Content("~/" + cleanedPath);
+                    }
+                }
+                else
+                {
+                    profilePictureUrl = "https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop";
+                }
                 <div class="worker-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="d-flex gap-3">
                             <div class="avatar-container">
-                                <img src="https://images.unsplash.com/photo-1506803682981-6e718a9dd3ee?q=80&w=200&auto=format&fit=crop" class="worker-avatar" alt="Worker">
+                                <img src="@profilePictureUrl" class="worker-avatar" alt="Worker">
                                 <span class="online-dot" style="background-color: #f59e0b;"></span>
                             </div>
                             <div>
@@ -412,7 +450,10 @@
                     </div>
 
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="price-tag">200 <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span></div>
+                        <div class="price-tag">
+                            @(worker.WorkerServices != null ? worker.WorkerServices.HourlyRate.ToString("N0") : "0")
+                            <span class="fs-6 text-muted fw-semibold">@Localizer["InspectionFee"]</span>
+                        </div>
                         <div class="d-flex gap-2">
                             @{
                                 var addr = worker.User?.Addresses?.FirstOrDefault();

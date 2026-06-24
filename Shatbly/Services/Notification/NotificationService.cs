@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Identity;
 using Shatbly.Hubs;
 using Shatbly.Models;
 using Shatbly.UnitOfWork;
+using Shatbly.Utilities;
 using NotificationModel = Shatbly.Models.Notification;
 
 namespace Shatbly.Services.Notification
 {
     public class NotificationService(
         IUnitOfWork unitOfWork,
-        IHubContext<NotificationHub> hubContext) : INotificationService
+        IHubContext<NotificationHub> hubContext,
+        UserManager<User> userManager) : INotificationService
     {
         public async Task<NotificationModel> CreateNotificationAsync(
             string userId,
@@ -87,6 +90,41 @@ namespace Shatbly.Services.Notification
 
             unitOfWork.Notifications.Delete(notification);
             await unitOfWork.CommitAsync();
+        }
+
+        public async Task SendMessageToAdminAsync(
+            string senderId,
+            string title,
+            string message,
+            CancellationToken cancellationToken = default)
+        {
+            var admins = await userManager.GetUsersInRoleAsync(SD.ROLE_ADMIN);
+            var superAdmins = await userManager.GetUsersInRoleAsync(SD.ROLE_SUPER_ADMIN);
+            var adminUsers = admins.Concat(superAdmins).GroupBy(u => u.Id).Select(g => g.First()).ToList();
+
+            var formattedMessage = $"[SenderId: {senderId}] {message}";
+
+            if (!adminUsers.Any())
+            {
+                var fallbackAdmin = await userManager.FindByEmailAsync("Admin@gmail.com") 
+                                 ?? await userManager.FindByEmailAsync("SuperAdmin@gmail.com");
+                if (fallbackAdmin != null)
+                {
+                    adminUsers.Add(fallbackAdmin);
+                }
+            }
+
+            foreach (var admin in adminUsers)
+            {
+                await CreateNotificationAsync(
+                    admin.Id,
+                    title,
+                    formattedMessage,
+                    NotificationType.Message,
+                    null,
+                    cancellationToken
+                );
+            }
         }
     }
 }

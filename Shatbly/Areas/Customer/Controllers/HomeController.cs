@@ -170,7 +170,20 @@ namespace Shatbly.Controllers
             var favoriteWorkers = favorites.Select(f => f.Worker).ToList();
             return View(favoriteWorkers);
         }
+        [AllowAnonymous]
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Terms()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Contact()
         {
             return View();
         }

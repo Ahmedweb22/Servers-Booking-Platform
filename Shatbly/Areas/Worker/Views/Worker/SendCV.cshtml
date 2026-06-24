@@ -4,110 +4,306 @@
 @inject IViewLocalizer Localizer
 @model WorkerVM
 @{
+    Layout = "_IdentityLayout";
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
 }
 
-    <title>@Localizer["PageTitle"]</title>
-    @if (isRtl)
-    {
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+<style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #0f172a;
+        background-image: radial-gradient(circle at 10% 20%, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.2) 90%);
+        color: #f8fafc;
     }
-    else
-    {
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    .worker-auth-card {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
     }
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8f9fa; }
-        .hero-section {
-            background: linear-gradient(rgba(10, 38, 71, 0.85), rgba(10, 38, 71, 0.85)),
-                        url('https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070');
-            background-size: cover;
-            padding: 80px 0 140px;
-            color: white;
-            text-align: center;
-        }
-        .auth-card { border: none; border-radius: 25px; overflow: hidden; }
-        .password-strength-bar { height: 5px; border-radius: 5px; transition: all 0.3s; }
-    </style>
+    
+    .form-control-worker {
+        background-color: rgba(15, 23, 42, 0.6);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        color: #f8fafc !important;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-worker:focus {
+        background-color: rgba(15, 23, 42, 0.8);
+        border-color: #F2C94C;
+        box-shadow: 0 0 0 4px rgba(242, 201, 76, 0.15);
+        outline: none;
+    }
 
+    .form-control-worker::placeholder {
+        color: rgba(248, 258, 252, 0.4);
+    }
+    
+    .input-group-worker-text {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+        border-right: none !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+    
+    html[dir="rtl"] .input-group-worker-text {
+        border-left: none !important;
+        border-right: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
 
-<section class="container" style="margin-top: 40px; margin-bottom: 60px;">
+    .input-group-worker-input {
+        border-left: none !important;
+        border-radius: 0 12px 12px 0 !important;
+    }
+
+    html[dir="rtl"] .input-group-worker-input {
+        border-right: none !important;
+        border-radius: 12px 0 0 12px !important;
+    }
+    
+    /* Custom CV Upload */
+    .cv-upload-wrapper {
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        background-color: rgba(15, 23, 42, 0.4);
+        transition: all 0.3s ease;
+        border-radius: 16px;
+    }
+    
+    .cv-upload-wrapper:hover {
+        border-color: #F2C94C;
+        background-color: rgba(242, 201, 76, 0.05);
+    }
+    
+    .cv-upload-wrapper.drag-over {
+        border-color: #F2C94C;
+        background-color: rgba(242, 201, 76, 0.15);
+    }
+
+    .btn-worker-gold {
+        background: linear-gradient(135deg, #F2C94C 0%, #d97706 100%);
+        border: none;
+        color: #0f172a;
+        font-weight: 700;
+        border-radius: 14px;
+        padding: 14px 28px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .btn-worker-gold:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(242, 201, 76, 0.25);
+        background: linear-gradient(135deg, #ffd45d 0%, #e88916 100%);
+    }
+</style>
+
+<section class="container mb-5" style="margin-top: -60px; position: relative; z-index: 10;">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-7">
-            <div class="card auth-card shadow-lg p-4 p-md-5">
+        <div class="col-xl-7 col-lg-8 col-md-10">
+            <div class="card worker-auth-card shadow-lg p-4 p-md-5">
 
                 <div class="text-center mb-4">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width:70px;height:70px;font-size:2rem;">
-                        <i class="bi bi-person-plus-fill"></i>
-                    </div>
-                    <h2 class="fw-bold mb-1">@Localizer["SubmitCVCardTitle"]</h2>
-                    <p class="text-muted small">@Localizer["SubmitCVCardSubtitle"]</p>
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-3" style="border-radius: 10px;">
+                        @(isRtl ? "بوابة شركاء العمل" : "Partner Portal")
+                    </span>
+                    <h3 class="fw-bold text-white mb-2">@Localizer["SubmitCVCardTitle"]</h3>
+                    <p class="text-light opacity-50 small">@Localizer["SubmitCVCardSubtitle"]</p>
                 </div>
 
-                <form asp-action="SendCV" method="post" enctype="multipart/form-data">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <form asp-action="SendCV" method="post" enctype="multipart/form-data" id="cvForm" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 text-danger rounded-4 py-3 small bg-danger bg-opacity-10 mb-4"></div>
 
                     <!-- Name Row -->
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label asp-for="FName" class="form-label fw-bold">@Localizer["FirstNameLabel"]</label>
+                            <label asp-for="FName" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["FirstNameLabel"]</label>
                             <div class="input-group">
-                                <input asp-for="FName" class="form-control" placeholder="@Localizer["FirstNamePlaceholder"]" required minlength="2" autocomplete="given-name">
-                                <span asp-validation-for="FName" class="text-danger w-100 mt-1 small"></span>
-                                <div class="invalid-feedback">@Localizer["FirstNameInvalid"]</div>
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="FName" class="form-control form-control-worker input-group-worker-input" placeholder="@Localizer["FirstNamePlaceholder"]" required minlength="2" autocomplete="given-name">
                             </div>
+                            <span asp-validation-for="FName" class="text-danger d-block mt-1 small"></span>
                         </div>
                         <div class="col-md-6">
-                            <label asp-for="LName" class="form-label fw-bold">@Localizer["LastNameLabel"]</label>
+                            <label asp-for="LName" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["LastNameLabel"]</label>
                             <div class="input-group">
-                                <input asp-for="LName" class="form-control" placeholder="@Localizer["LastNamePlaceholder"]" required minlength="2" autocomplete="family-name">
-                                <span asp-validation-for="LName" class="text-danger w-100 mt-1 small"></span>
-                                <div class="invalid-feedback">@Localizer["LastNameInvalid"]</div>
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-person"></i></span>
+                                <input asp-for="LName" class="form-control form-control-worker input-group-worker-input" placeholder="@Localizer["LastNamePlaceholder"]" required minlength="2" autocomplete="family-name">
                             </div>
+                            <span asp-validation-for="LName" class="text-danger d-block mt-1 small"></span>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label fw-bold">@Localizer["EmailLabel"]</label>
-                        <div class="input-group">
-                            <input asp-for="Email" type="email" class="form-control" placeholder="@Localizer["EmailPlaceholder"]" required autocomplete="email">
-                            <span asp-validation-for="Email" class="text-danger w-100 mt-1 small"></span>
-                            <div class="invalid-feedback">@Localizer["EmailInvalid"]</div>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Phone" class="form-label fw-bold">@Localizer["PhoneLabel"]</label>
-                        <div class="input-group">
-                            <input asp-for="Phone" type="tel" class="form-control" placeholder="@Localizer["PhonePlaceholder"]" required pattern="^(01)[0-9]{9}$" autocomplete="tel">
-                            <span asp-validation-for="Phone" class="text-danger w-100 mt-1 small"></span>
-                            <div class="invalid-feedback">@Localizer["PhoneInvalid"]</div>
-                        </div>
-                    </div>
-
+                    <!-- Email Field -->
                     <div class="mb-4">
-                        <label asp-for="cv" class="form-label fw-bold">@Localizer["CvLabel"]</label>
+                        <label asp-for="Email" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["EmailLabel"]</label>
                         <div class="input-group">
-                            <input asp-for="cv" type="file" class="form-control" required>
-                            <span asp-validation-for="cv" class="text-danger w-100 mt-1 small"></span>
-                            <div class="invalid-feedback">@Localizer["CvInvalid"]</div>
+                            <span class="input-group-text input-group-worker-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" type="email" class="form-control form-control-worker input-group-worker-input" placeholder="@Localizer["EmailPlaceholder"]" required autocomplete="email">
                         </div>
+                        <span asp-validation-for="Email" class="text-danger d-block mt-1 small"></span>
                     </div>
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3 shadow">@Localizer["SubmitBtn"]</button>
+                    <!-- Phone Field -->
+                    <div class="mb-4">
+                        <label asp-for="Phone" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["PhoneLabel"]</label>
+                        <div class="input-group">
+                            <span class="input-group-text input-group-worker-text"><i class="bi bi-telephone"></i></span>
+                            <input asp-for="Phone" type="tel" class="form-control form-control-worker input-group-worker-input" placeholder="@Localizer["PhonePlaceholder"]" required pattern="^(01)[0-9]{9}$" autocomplete="tel">
+                        </div>
+                        <span asp-validation-for="Phone" class="text-danger d-block mt-1 small"></span>
+                    </div>
+
+                    <!-- CV Custom File Upload -->
+                    <div class="mb-4">
+                        <label asp-for="cv" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["CvLabel"]</label>
+                        <div class="cv-upload-wrapper text-center border-2 rounded-4 p-4 mb-2 cursor-pointer position-relative" id="cvDropzone">
+                            <input asp-for="cv" type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" id="cvFileInput" required accept=".pdf,.doc,.docx" />
+                            
+                            <div class="upload-content py-2" id="uploadPrompt">
+                                <div class="upload-icon mb-3 text-warning bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-cloud-arrow-up fs-3 text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1 text-white">@Localizer["CvUploadTitle"]</h6>
+                                <p class="text-light opacity-50 small mb-0">@Localizer["CvUploadSubtitle"]</p>
+                            </div>
+                            
+                            <div class="file-details d-none py-2" id="fileDetails">
+                                <div class="upload-icon mb-3 text-success bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-file-earmark-check fs-3 text-success"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2 text-white text-truncate px-3" id="fileName">file_name.pdf</h6>
+                                <span class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 font-monospace" style="font-size: 0.8rem;">@Localizer["ChangeFile"]</span>
+                            </div>
+                        </div>
+                        <span asp-validation-for="cv" class="text-danger d-block mt-1 small"></span>
+                    </div>
+
+                    <!-- ID Card Photo Custom File Upload -->
+                    <div class="mb-4">
+                        <label asp-for="IdCardPhoto" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "صورة بطاقة الهوية / جواز السفر" : "ID Card Photo / Passport")</label>
+                        <div class="cv-upload-wrapper text-center border-2 rounded-4 p-4 mb-2 cursor-pointer position-relative" id="idDropzone">
+                            <input asp-for="IdCardPhoto" type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" id="idFileInput" required accept="image/*" />
+                            
+                            <div class="upload-content py-2" id="idUploadPrompt">
+                                <div class="upload-icon mb-3 text-warning bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-card-image fs-3 text-warning"></i>
+                                </div>
+                                <h6 class="fw-bold mb-1 text-white">@(isRtl ? "اسحب وأسقط صورة الهوية هنا أو انقر للتصفح" : "Drag and drop your ID photo here or click to browse")</h6>
+                                <p class="text-light opacity-50 small mb-0">@(isRtl ? "الصيغ المدعومة: PNG, JPG, JPEG, WEBP حتى 5 ميجابايت" : "Supported formats: PNG, JPG, JPEG, WEBP up to 5MB")</p>
+                            </div>
+                            
+                            <div class="file-details d-none py-2" id="idFileDetails">
+                                <div class="upload-icon mb-3 text-success bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                                    <i class="bi bi-file-earmark-check fs-3 text-success"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2 text-white text-truncate px-3" id="idFileName">id_card.png</h6>
+                                <span class="btn btn-outline-success btn-sm rounded-pill px-3 py-1 font-monospace" style="font-size: 0.8rem;">@(isRtl ? "تغيير الصورة" : "Change Image")</span>
+                            </div>
+                        </div>
+                        <span asp-validation-for="IdCardPhoto" class="text-danger d-block mt-1 small"></span>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-worker-gold btn-lg">
+                            <i class="bi bi-send-fill me-2"></i> @Localizer["SubmitBtn"]
+                        </button>
+                    </div>
+
+                    <div class="text-center pt-3 border-top border-secondary mt-4">
+                        <span class="small text-light opacity-50">@(isRtl ? "لديك حساب بالفعل؟" : "Already have an account?")</span>
+                        <a href="/Identity/Account/WorkerLogin" class="small text-warning fw-bold text-decoration-none ms-1">
+                            @(isRtl ? "سجل دخولك من هنا" : "Sign in here")
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</section>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 @section Scripts {
     <partial name="~/Views/Shared/_NotificationPartial.cshtml" />
     <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    
+    <script>
+        $(document).ready(function() {
+            var fileInput = $('#cvFileInput');
+            var dropzone = $('#cvDropzone');
+            var uploadPrompt = $('#uploadPrompt');
+            var fileDetails = $('#fileDetails');
+            var fileNameSpan = $('#fileName');
+
+            fileInput.on('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    fileNameSpan.text(file.name);
+                    uploadPrompt.addClass('d-none');
+                    fileDetails.removeClass('d-none');
+                } else {
+                    uploadPrompt.removeClass('d-none');
+                    fileDetails.addClass('d-none');
+                }
+            });
+
+            var idInput = $('#idFileInput');
+            var idDropzone = $('#idDropzone');
+            var idPrompt = $('#idUploadPrompt');
+            var idDetails = $('#idFileDetails');
+            var idNameSpan = $('#idFileName');
+
+            idInput.on('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    idNameSpan.text(file.name);
+                    idPrompt.addClass('d-none');
+                    idDetails.removeClass('d-none');
+                } else {
+                    idPrompt.removeClass('d-none');
+                    idDetails.addClass('d-none');
+                }
+            });
+
+            // Drag and drop events
+            dropzone.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.addClass('drag-over');
+            });
+
+            dropzone.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.removeClass('drag-over');
+            });
+
+            dropzone.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.removeClass('drag-over');
+            });
+
+            idDropzone.on('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                idDropzone.addClass('drag-over');
+            });
+
+            idDropzone.on('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                idDropzone.removeClass('drag-over');
+            });
+
+            idDropzone.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                idDropzone.removeClass('drag-over');
+            });
+        });
+    </script>
 }

@@ -30,4 +30,5 @@
   <data name="SaveChanges" xml:space="preserve"><value>Save Changes</value></data>
   <data name="PersonalInformation" xml:space="preserve"><value>Personal Information</value></data>
   <data name="EmailCannotBeChanged" xml:space="preserve"><value>Email address cannot be changed.</value></data>
+  <data name="PhoneAlreadyExists" xml:space="preserve"><value>This phone number is already registered by another user.</value></data>
 </root>

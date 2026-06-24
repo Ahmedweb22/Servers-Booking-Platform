@@ -1,0 +1,258 @@
+@model IReadOnlyList<Shatbly.Models.Review>
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewData["Title"] = isRtl ? "التقييمات" : "Reviews";
+}
+
+<style>
+    .review-header {
+        margin-bottom: 2rem;
+    }
+
+    .review-stat-cards {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .review-stat-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        flex: 1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .review-stat-card .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .review-stat-card .stat-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .review-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .review-card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .review-stars {
+        color: #f59e0b;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+
+    .review-stars .star-empty {
+        color: #d1d5db;
+    }
+
+    .review-meta {
+        font-size: 0.82rem;
+        color: #94a3b8;
+    }
+
+    .review-comment {
+        margin-top: 0.75rem;
+        color: #334155;
+        line-height: 1.65;
+        font-size: 0.95rem;
+    }
+
+    .reviewer-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .category-badge {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+        font-size: 0.78rem;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .empty-reviews-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+    }
+
+    .empty-reviews-state i {
+        font-size: 3.5rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    @@media (max-width: 768px) {
+        .review-stat-cards {
+            flex-direction: column;
+        }
+    }
+    .review-thumb:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="review-header">
+    <h2 class="mb-1">@(isRtl ? "تقييماتي" : "My Reviews")</h2>
+    <p class="text-muted mb-0">@(isRtl ? "التقييمات المعتمدة من عملائك" : "Approved reviews from your customers")</p>
+</div>
+
+@{
+    var totalReviews = Model.Count;
+    var avgRating = totalReviews > 0 ? Model.Average(r => r.Rating) : 0;
+    var fiveStarCount = Model.Count(r => r.Rating == 5);
+}
+
+<div class="review-stat-cards">
+    <div class="review-stat-card">
+        <div class="stat-value">@totalReviews</div>
+        <div class="stat-label">@(isRtl ? "إجمالي التقييمات" : "Total Reviews")</div>
+    </div>
+    <div class="review-stat-card">
+        <div class="stat-value">@avgRating.ToString("0.0") <i class="bi bi-star-fill" style="color: #f59e0b; font-size: 1.2rem;"></i></div>
+        <div class="stat-label">@(isRtl ? "متوسط التقييم" : "Average Rating")</div>
+    </div>
+    <div class="review-stat-card">
+        <div class="stat-value">@fiveStarCount</div>
+        <div class="stat-label">@(isRtl ? "تقييمات 5 نجوم" : "5-Star Reviews")</div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-reviews-state">
+        <i class="bi bi-chat-square-text d-block"></i>
+        <h5 class="mb-2">@(isRtl ? "لا توجد تقييمات بعد" : "No reviews yet")</h5>
+        <p class="text-muted mb-0">@(isRtl ? "عندما يقيّمك العملاء وتتم الموافقة عليها، ستظهر هنا." : "When customers review you and they are approved, they will appear here.")</p>
+    </div>
+}
+else
+{
+    <div class="reviews-list">
+        @foreach (var review in Model)
+        {
+            var initial = review.Reviewer?.FName?.Substring(0, 1).ToUpper() ?? review.Reviewer?.UserName?.Substring(0, 1).ToUpper() ?? "?";
+            var reviewerName = review.Reviewer?.Name ?? review.Reviewer?.UserName ?? (isRtl ? "عميل" : "Customer");
+            var categoryName = isRtl ? review.Category?.NameAr : review.Category?.NameEn;
+
+            <div class="review-card">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="reviewer-avatar">@initial</div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <h6 class="mb-1 fw-bold">@reviewerName</h6>
+                                <div class="review-stars">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star-fill star-empty"></i>
+                                        }
+                                    }
+                                    <span class="ms-1 text-muted small">(@review.Rating/5)</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(categoryName))
+                                {
+                                    <span class="category-badge">@categoryName</span>
+                                }
+                                <span class="review-meta">@review.CreatedAt.ToString("dd MMM yyyy")</span>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(review.Comment))
+                        {
+                            <div class="review-comment">@review.Comment</div>
+                        }
+                        @if (!string.IsNullOrEmpty(review.BeforeImageUrl) || !string.IsNullOrEmpty(review.AfterImageUrl))
+                        {
+                            <div class="d-flex gap-3 mt-3">
+                                @if (!string.IsNullOrEmpty(review.BeforeImageUrl))
+                                {
+                                    <div class="text-center">
+                                        <div class="text-muted small mb-1" style="font-size:0.75rem;">@(isRtl ? "قبل البدء" : "Before Work")</div>
+                                        <img src="/@review.BeforeImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                             style="width: 80px; height: 80px; object-fit: cover; transition: transform 0.2s;" 
+                                             onclick="openReviewImageModal('/@review.BeforeImageUrl', '@(isRtl ? "صورة قبل البدء" : "Before Work Image")')" />
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(review.AfterImageUrl))
+                                {
+                                    <div class="text-center">
+                                        <div class="text-muted small mb-1" style="font-size:0.75rem;">@(isRtl ? "بعد الانتهاء" : "After Work")</div>
+                                        <img src="/@review.AfterImageUrl" class="rounded border cursor-pointer review-thumb" 
+                                             style="width: 80px; height: 80px; object-fit: cover; transition: transform 0.2s;" 
+                                             onclick="openReviewImageModal('/@review.AfterImageUrl', '@(isRtl ? "صورة بعد الانتهاء" : "After Work Image")')" />
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Modal for viewing review images -->
+<div class="modal fade" id="reviewImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold" id="reviewImageTitle">@(isRtl ? "معاينة الصورة" : "Image Preview")</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center bg-light">
+                <img id="reviewImagePreview" src="" class="img-fluid" style="max-height: 75vh; width: auto; object-fit: contain;" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openReviewImageModal(imageUrl, title) {
+            document.getElementById('reviewImagePreview').src = imageUrl;
+            document.getElementById('reviewImageTitle').innerText = title;
+            var modal = new bootstrap.Modal(document.getElementById('reviewImageModal'));
+            modal.show();
+        }
+    </script>
+}

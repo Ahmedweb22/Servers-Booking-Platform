@@ -1,171 +1,194 @@
-﻿@model ServiceCategoriesVM
+@model ServiceCategoriesVM
+@using Microsoft.AspNetCore.Localization
+@{
+    var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
+    var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
+    var isRtl = curCulture.StartsWith("ar");
+    ViewBag.Title = isRtl ? "تخصصات الخدمات" : "Service Categories";
+}
 
-<div class="container">
-
-    <div class="row mb-3 align-items-center my-3">
-        <div class="col-md-6">
-            <h3 class="display-6">All Service Categories</h3>
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4 my-3 @(isRtl ? "text-end flex-row-reverse" : "text-start")">
+        <div>
+            <h2 class="fw-bold mb-1">@(isRtl ? "تخصصات وفئات الخدمات" : "Service Categories")</h2>
+            <p class="text-muted mb-0">@(isRtl ? "عرض وإدارة الفئات والتخصصات المختلفة للخدمات المتاحة بالمنصة" : "View and manage the service categories and professions available on the platform")</p>
         </div>
-        <!-- Create -->
-        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
-            <a href="/Admin/ServiceCategory/Create" class="btn btn-success">
-                + Create New
+        <div>
+            <a href="/Admin/ServiceCategory/Create" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> @(isRtl ? "إضافة فئة جديدة" : "Create New Category")
             </a>
         </div>
     </div>
-    <section class="py-3 filter-bar">
-        <div class="container">
-            <div class="row" style="background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important">
-                <div class="col-md-6">
-                    <form>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <input type="text" name="name" value="@ViewData["CurrentFilter"]" class="form-control me-2" placeholder="title..." />
-                            </div>
-                            <div class="col-md-2 ">
-                                <button type="submit" class="btn btn-primary">Search</button>
-                            </div>
-                        </div>
-                    </form>
+
+    <!-- Filter Bar Card -->
+    <div class="dashboard-card mb-4 p-3">
+        <form method="get" class="row align-items-center g-3">
+            <div class="col-12 col-md-5 @(isRtl ? "ms-auto" : "")">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="name" value="@ViewData["CurrentFilter"]" class="form-control border-start-0 bg-light" 
+                           placeholder="@(isRtl ? "البحث عن طريق اسم الفئة..." : "Search by category name...")" />
+                    @if (ViewData["CurrentFilter"] != null && !string.IsNullOrEmpty(ViewData["CurrentFilter"].ToString()))
+                    {
+                        <a href="/Admin/ServiceCategory/Index" class="btn btn-outline-secondary d-flex align-items-center">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                    <button class="btn btn-primary" type="submit">@(isRtl ? "بحث" : "Search")</button>
                 </div>
             </div>
-            
-        </section>
+        </form>
+    </div>
 
-     
-
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+    <!-- Data Table Card -->
+    <div class="dashboard-card p-0 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary">
+                    <tr class="@(isRtl ? "text-end" : "text-start")">
+                        <th scope="col" style="width: 80px;">ID</th>
+                        <th scope="col" style="width: 120px;">@(isRtl ? "الأيقونة" : "Icon")</th>
+                        <th scope="col">@(isRtl ? "الاسم (بالعربية)" : "Name (Arabic)")</th>
+                        <th scope="col">@(isRtl ? "الاسم (بالإنجليزية)" : "Name (English)")</th>
+                        <th scope="col" style="width: 150px;">@(isRtl ? "الحالة" : "Status")</th>
+                        <th scope="col" class="text-center" style="width: 220px;">@(isRtl ? "العمليات" : "Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ServiceCategories == null || !Model.ServiceCategories.Any())
+                    {
                         <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Name(Ar)</th>
-                            <th scope="col">Name(En)</th>
-                            <th scope="col">Icon</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Actions</th>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-tag fs-1 d-block mb-3 opacity-50"></i>
+                                @(isRtl ? "لم يتم العثور على فئات خدمات." : "No service categories found.")
+                            </td>
                         </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var item in Model.ServiceCategories)
+                    }
+                    else
+                    {
+                        foreach (var item in Model.ServiceCategories)
                         {
-                            <tr>
-                                <td>@item.Id</td>
-                                <td>@item.NameAr</td>
-                                <td>@item.NameEn</td>
+                            <tr class="@(isRtl ? "text-end" : "text-start")">
+                                <td class="fw-bold text-dark">@item.Id</td>
                                 <td>
-                                    <img src="~/img/service_categories/@item.Icon" width="100px" />
+                                    @if (!string.IsNullOrEmpty(item.Icon))
+                                    {
+                                        if (item.Icon.Contains(" ") || item.Icon.StartsWith("fa-") || item.Icon.StartsWith("bi-"))
+                                        {
+                                            <span class="d-inline-flex align-items-center justify-content-center border rounded bg-white shadow-sm" style="width: 50px; height: 50px; font-size: 1.5rem;">
+                                                <i class="@item.Icon text-primary"></i>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <img src="~/img/service_categories/@item.Icon" class="rounded border p-1 bg-white" 
+                                                 style="width: 50px; height: 50px; object-fit: contain;" asp-append-version="true" />
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded border bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    }
                                 </td>
-                                @if (item.IsActive)
-                                {
-                                    <td>
-                                        <span class="badge bg-success">Active</span>
-                                    </td>
-                                }
-                                else
-                                {
-                                    <td>
-                                        <span class="badge bg-secondary">Inactive</span>
-                                    </td>
-                                }
-                                @* <!-- Read -->
-                                    <a asp-action="Details" asp-route-id=""
-                                           class="btn btn-sm btn-outline-primary">
-                                        Details
-                                    </a> *@
-                                @* @if (User.IsInRole(SD.ROLE_SUPER_ADMIN))
-                                { *@
-                                    <td>
-                                        <!-- Update -->
+                                <td class="fw-semibold text-dark">@item.NameAr</td>
+                                <td class="text-secondary">@item.NameEn</td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.8rem;">
+                                            @(isRtl ? "نشط" : "Active")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.8rem;">
+                                            @(isRtl ? "غير نشط" : "Inactive")
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
                                         <a href="/Admin/ServiceCategory/Edit/@item.Id"
-                                               class="btn btn-sm btn-outline-success">
-                                            Edit
+                                           class="btn btn-outline-primary btn-sm px-3 rounded-pill fw-semibold">
+                                            <i class="bi bi-pencil-square me-1"></i> @(isRtl ? "تعديل" : "Edit")
                                         </a>
-
-                                        <!-- Delete -->
                                         <a href="/Admin/ServiceCategory/Delete/@item.Id"
-                                               class="btn btn-sm btn-outline-danger">
-                                            Delete
+                                           class="btn btn-outline-danger btn-sm px-3 rounded-pill fw-semibold js-delete-category"
+                                           data-id="@item.Id" data-name="@(isRtl ? item.NameAr : item.NameEn)">
+                                            <i class="bi bi-trash-fill me-1"></i> @(isRtl ? "حذف" : "Delete")
                                         </a>
-                                    </td>
-                                @* }
-                                else
-                                {
-                                    <td>
-                                        No Actions Available!!
-                                    </td>
-                                } *@
+                                    </div>
+                                </td>
                             </tr>
                         }
-                    </tbody>
-
-                </table>
-
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <div class="row">
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="row mb-4">
             <div class="col-12 d-flex justify-content-center">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center">
-                        @if (Model.CurrentPage > 1)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="/Admin/ServiceCategory/Index?page=@(Model.CurrentPage - 1)">Previous</a>
-                            </li>
-                        }
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center gap-1">
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;" 
+                               href="/Admin/ServiceCategory/Index?page=@(Model.CurrentPage - 1)" aria-label="Previous">
+                                <i class="bi bi-chevron-@(isRtl ? "right" : "left")"></i>
+                            </a>
+                        </li>
                         @for (int i = 1; i <= Model.TotalPages; i++)
                         {
-                            if (i == Model.CurrentPage)
-                            {
-                                <li class="page-item active">
-                                    <a class="page-link" href="/Admin/ServiceCategory/Index?page=@i">@i</a>
-                                </li>
-                            }
-                            else
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="/Admin/ServiceCategory/Index?page=@i">@i</a>
-                                </li>
-                            }
-                        }
-                        @if (Model.CurrentPage < Model.TotalPages)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="/Admin/ServiceCategory/Index?page=@(Model.CurrentPage + 1)">Next</a>
+                            <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                                   href="/Admin/ServiceCategory/Index?page=@i">@i</a>
                             </li>
                         }
-                 
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width:36px; height:36px;"
+                               href="/Admin/ServiceCategory/Index?page=@(Model.CurrentPage + 1)" aria-label="Next">
+                                <i class="bi bi-chevron-@(isRtl ? "left" : "right")"></i>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>
         </div>
+    }
+</div>
 
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const deleteLinks = document.querySelectorAll('a.btn-outline-danger');
-            deleteLinks.forEach(function(link) {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const url = this.href;
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Yes, delete it!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = url;
-                        }
-                    });
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const isRtl = '@isRtl' === 'True';
+        const deleteLinks = document.querySelectorAll('.js-delete-category');
+        deleteLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const url = this.href;
+                const name = this.dataset.name;
+                Swal.fire({
+                    title: isRtl ? "هل أنت متأكد؟" : "Are you sure?",
+                    text: isRtl ? `هل ترغب في حذف فئة الخدمة "${name}"؟ لا يمكن التراجع عن هذا الإجراء.` : `Do you want to delete category "${name}"? This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: isRtl ? "نعم، احذفه!" : "Yes, delete it!",
+                    cancelButtonText: isRtl ? "إلغاء" : "Cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
                 });
             });
         });
-    </script>
+    });
+</script>

@@ -62,14 +62,12 @@
                     <div class="mb-4">
                         <label class="form-label fw-bold d-block text-center mb-3">@Localizer["OtpLabel"]</label>
 
-                        <!-- 6 individual OTP digit inputs -->
+                        <!-- 4 individual OTP digit inputs -->
                         <div class="d-flex justify-content-center gap-2 flex-wrap" id="otpContainer" role="group" aria-label="@Localizer["OtpAriaLabel"]">
                             <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit1"]" id="otp0" autocomplete="one-time-code">
                             <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit2"]" id="otp1">
                             <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit3"]" id="otp2">
                             <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit4"]" id="otp3">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit5"]" id="otp4">
-                            <input type="text" class="form-control otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="@Localizer["Digit6"]" id="otp5">
                         </div>
 
                         <!-- Hidden combined input for form submission -->
@@ -121,7 +119,7 @@
         inp.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g,'').slice(-1);
             this.classList.remove('is-invalid');
-            if (this.value && i < 5) otpInputs[i+1].focus();
+            if (this.value && i < 3) otpInputs[i+1].focus();
             updateHiddenCode();
         });
         inp.addEventListener('keydown', function(e) {
@@ -131,15 +129,15 @@
                 updateHiddenCode();
             }
             if (e.key === 'ArrowLeft'  && i > 0) { e.preventDefault(); otpInputs[i-1].focus(); }
-            if (e.key === 'ArrowRight' && i < 5) { e.preventDefault(); otpInputs[i+1].focus(); }
+            if (e.key === 'ArrowRight' && i < 3) { e.preventDefault(); otpInputs[i+1].focus(); }
         });
         inp.addEventListener('paste', function(e) {
             e.preventDefault();
             const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'');
-            pasted.split('').slice(0,6).forEach((ch, j) => {
+            pasted.split('').slice(0,4).forEach((ch, j) => {
                 if (otpInputs[i+j]) { otpInputs[i+j].value = ch; otpInputs[i+j].classList.remove('is-invalid'); }
             });
-            const next = Math.min(i + pasted.length, 5);
+            const next = Math.min(i + pasted.length, 3);
             otpInputs[next].focus();
             updateHiddenCode();
         });
@@ -191,7 +189,7 @@
         const otpInput = document.getElementById('OTP');
         const otpVal = otpInput ? otpInput.value : '';
         const errEl = document.getElementById('otpError');
-        if (otpVal.length < 6) {
+        if (otpVal.length < 4) {
             e.preventDefault(); // Block submit
             otpInputs.forEach(i => { if(!i.value) i.classList.add('is-invalid'); });
             errEl.classList.remove('d-none');

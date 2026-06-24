@@ -67,6 +67,17 @@ namespace Shatbly.Areas.Customer.Controllers
                 return View(model);
             }
 
+            // Check if phone number is already registered by another user
+            if (user.Phone != model.Phone)
+            {
+                var phoneExists = await _userManager.Users.AnyAsync(u => u.Phone == model.Phone && u.Id != user.Id);
+                if (phoneExists)
+                {
+                    ModelState.AddModelError("Phone", _localizer["PhoneAlreadyExists"].Value);
+                    return View(model);
+                }
+            }
+
             user.FName = model.FName;
             user.LName = model.LName;
             user.Name = model.FName + " " + model.LName;

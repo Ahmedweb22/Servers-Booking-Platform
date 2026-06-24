@@ -1,4 +1,6 @@
-﻿namespace Shatbly.ViewModels
+using Shatbly.Models;
+
+namespace Shatbly.ViewModels
 {
     public class WorkerProfileVM
     {
@@ -19,7 +21,13 @@
         public bool AcceptsOnline { get; set; }
 
         public string? CVPath { get; set; }
+        public string? ProfilePicturePath { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public ICollection<Avalability>? Availabilities { get; set; }
+
+        public string? CategoryName { get; set; }
+        public decimal HourlyRate { get; set; }
     }
 }

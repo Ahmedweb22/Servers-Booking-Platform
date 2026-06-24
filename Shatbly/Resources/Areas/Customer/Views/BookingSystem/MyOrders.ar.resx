@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <data name="PageTitle" xml:space="preserve"><value>حجوزاتي وطلباتي</value></data>
+  <data name="PageSubtitle" xml:space="preserve"><value>إدارة خدماتك المنزلية المجدولة، تتبع الفنيين، وعرض المدفوعات.</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>بحث في الطلبات...</value></data>
+  <data name="FilterAll" xml:space="preserve"><value>كل الحجوزات</value></data>
+  <data name="FilterPending" xml:space="preserve"><value>قيد الانتظار</value></data>
+  <data name="FilterActive" xml:space="preserve"><value>نشط</value></data>
+  <data name="FilterCompleted" xml:space="preserve"><value>مكتمل</value></data>
+  <data name="FilterCancelled" xml:space="preserve"><value>ملغى</value></data>
+  <data name="OrderNo" xml:space="preserve"><value>طلب رقم #{0}</value></data>
+  <data name="ScheduledFor" xml:space="preserve"><value>موعد الحجز</value></data>
+  <data name="WorkerLabel" xml:space="preserve"><value>الفني</value></data>
+  <data name="PriceLabel" xml:space="preserve"><value>السعر الإجمالي</value></data>
+  <data name="PaymentLabel" xml:space="preserve"><value>الدفع</value></data>
+  <data name="ViewDetailsBtn" xml:space="preserve"><value>عرض التفاصيل</value></data>
+  <data name="PayNowBtn" xml:space="preserve"><value>ادفع الآن</value></data>
+  <data name="EmptyStateTitle" xml:space="preserve"><value>لا توجد حجوزات</value></data>
+  <data name="EmptyStateSubtitle" xml:space="preserve"><value>لم تقم بحجز أي خدمات صيانة منزلية بعد.</value></data>
+  <data name="BookNowBtn" xml:space="preserve"><value>احجز خدمة الآن</value></data>
+  <data name="CurrencyFormat" xml:space="preserve"><value>{0} ج.م</value></data>
+</root>
