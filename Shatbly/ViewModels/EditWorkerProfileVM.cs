@@ -36,5 +36,14 @@ namespace Shatbly.ViewModels
         public int CategoryId { get; set; }
 
         public IEnumerable<SelectListItem>? Categories { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password (optional)")]
+        public string? Password { get; set; }
+
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
+        [Display(Name = "Confirm New Password")]
+        public string? ConfirmPassword { get; set; }
     }
 }

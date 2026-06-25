@@ -237,6 +237,26 @@
                                             <td style="max-width: 250px;" class="text-truncate" title="@notif.Message">@notif.Message</td>
                                             <td>
                                                 <span class="badge @(notif.Type == NotificationType.System ? "bg-warning text-dark" : notif.Type == NotificationType.Promotion ? "bg-info" : "bg-primary")">
+                                                    @if (notif.Type == NotificationType.System)
+                                                    {
+                                                        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                                    }
+                                                    else if (notif.Type == NotificationType.Promotion)
+                                                    {
+                                                        <i class="fa-solid fa-gift me-1"></i>
+                                                    }
+                                                    else if (notif.Type == NotificationType.Message)
+                                                    {
+                                                        <i class="fa-solid fa-comment me-1"></i>
+                                                    }
+                                                    else if (notif.Type == NotificationType.BookingUpdate)
+                                                    {
+                                                        <i class="fa-solid fa-calendar-alt me-1"></i>
+                                                    }
+                                                    else if (notif.Type == NotificationType.PaymentUpdate)
+                                                    {
+                                                        <i class="fa-solid fa-credit-card me-1"></i>
+                                                    }
                                                     @notif.Type
                                                 </span>
                                             </td>

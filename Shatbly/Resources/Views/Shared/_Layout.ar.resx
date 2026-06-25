@@ -47,4 +47,9 @@
   <data name="SuperAdmin" xml:space="preserve"><value>المدير العام</value></data>
   <data name="Worker" xml:space="preserve"><value>فني</value></data>
   <data name="Customer" xml:space="preserve"><value>عميل</value></data>
+  <data name="Notifications" xml:space="preserve"><value>الإشعارات</value></data>
+  <data name="LoadingNotifications" xml:space="preserve"><value>جاري تحميل الإشعارات...</value></data>
+  <data name="NoNotifications" xml:space="preserve"><value>لا توجد إشعارات حالياً</value></data>
+  <data name="ErrorLoadingNotifications" xml:space="preserve"><value>حدث خطأ أثناء تحميل الإشعارات.</value></data>
+  <data name="ViewAll" xml:space="preserve"><value>عرض الكل</value></data>
 </root>

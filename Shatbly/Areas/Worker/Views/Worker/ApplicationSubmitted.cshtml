@@ -1,0 +1,109 @@
+@using Microsoft.AspNetCore.Builder
+@using Microsoft.AspNetCore.Localization
+@using Microsoft.Extensions.Localization
+@inject IViewLocalizer Localizer
+@{
+    Layout = "_IdentityLayout";
+    var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
+    ViewData["Title"] = isRtl ? "تم تقديم طلبك بنجاح" : "Application Submitted Successfully";
+}
+
+<style>
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: #0f172a;
+        background-image: radial-gradient(circle at 10% 20%, rgba(30, 41, 59, 0.1) 0%, rgba(15, 23, 42, 0.2) 90%);
+        color: #f8fafc;
+    }
+
+    .worker-success-card {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 30px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+
+    .success-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: rgba(242, 201, 76, 0.1);
+        border: 2px solid #F2C94C;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+        animation: pulse 2s infinite;
+    }
+
+    .success-icon-wrapper i {
+        font-size: 3rem;
+        color: #F2C94C;
+    }
+
+    .btn-worker-gold {
+        background: linear-gradient(135deg, #F2C94C 0%, #d97706 100%);
+        border: none;
+        color: #0f172a;
+        font-weight: 700;
+        border-radius: 14px;
+        padding: 14px 28px;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        text-decoration: none;
+    }
+
+    .btn-worker-gold:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(242, 201, 76, 0.25);
+        color: #0f172a;
+        background: linear-gradient(135deg, #ffd45d 0%, #e88916 100%);
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(242, 201, 76, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(242, 201, 76, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(242, 201, 76, 0);
+        }
+    }
+</style>
+
+<section class="container mb-5" style="margin-top: -30px; position: relative; z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-7 col-md-9">
+            <div class="card worker-success-card shadow-lg p-5 text-center">
+                
+                <div class="success-icon-wrapper">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+
+                <h3 class="fw-bold text-white mb-3">
+                    @(isRtl ? "تم تقديم طلب الانضمام بنجاح!" : "Application Submitted Successfully!")
+                </h3>
+                
+                <p class="text-light opacity-75 mb-4 px-md-3" style="font-size: 1.1rem; line-height: 1.7;">
+                    @(isRtl 
+                        ? "شكراً لاهتمامك بالانضمام إلينا. لقد تم استلام طلبك وسيرتك الذاتية بنجاح. سنقوم بمراجعة بياناتك والتواصل معك في أقرب وقت ممكن." 
+                        : "Thank you for your interest in joining us. Your application and CV have been received successfully. We will review your profile and contact you as soon as possible.")
+                </p>
+
+                <hr class="border-secondary opacity-25 my-4" />
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                    <a href="/Identity/Account/WorkerLogin" class="btn btn-worker-gold px-4">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>@(isRtl ? "بوابة تسجيل الدخول" : "Worker Login Portal")
+                    </a>
+                    <a href="/" class="btn btn-outline-light px-4" style="border-radius: 14px; padding: 14px 28px;">
+                        <i class="bi bi-house-door-fill me-2"></i>@(isRtl ? "العودة للرئيسية" : "Back to Home")
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
