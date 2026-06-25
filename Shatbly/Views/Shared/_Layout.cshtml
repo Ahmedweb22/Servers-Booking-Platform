@@ -629,6 +629,12 @@
                     <i class="bi bi-bell fs-5 text-secondary"></i>
                 </a>
             }
+            <button class="btn btn-light rounded-circle p-2 position-relative border">
+                <i class="bi bi-bell fs-5 text-secondary"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                    <span class="visually-hidden">@Localizer["NewAlerts"]</span>
+                </span>
+            </button>
 
             @{
                 var displayName = isRtl ? "زائر" : "Guest";
