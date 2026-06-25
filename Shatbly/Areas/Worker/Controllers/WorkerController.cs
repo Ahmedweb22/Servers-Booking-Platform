@@ -78,7 +78,7 @@ namespace Shatbly.Areas.Worker.Controllers
                 Email = model.Email,
                 Phone = model.Phone,
             };
-            var result = await _userManager.CreateAsync(applicationUser);
+            var result = await _userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
@@ -87,6 +87,8 @@ namespace Shatbly.Areas.Worker.Controllers
                 }
                 return View(model);
             }
+
+            await _userManager.AddToRoleAsync(applicationUser, SD.ROLE_WORKER);
           
             var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(model.cv.FileName);
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", newFileName);
@@ -131,7 +133,14 @@ namespace Shatbly.Areas.Worker.Controllers
             }
 
             TempData["Notification"] = _localizer["CvSubmittedSuccess"].Value;
-            return RedirectToAction("Index", "Home", new { area = "Customer" });
+            return RedirectToAction(nameof(ApplicationSubmitted));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ApplicationSubmitted()
+        {
+            return View();
         }
     }
 }

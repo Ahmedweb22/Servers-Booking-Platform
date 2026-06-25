@@ -164,6 +164,24 @@
                         </div>
                     </div>
 
+                    <!-- Password Change Section -->
+                    <div class="mb-4 @(isRtl ? "text-end" : "text-start")">
+                        <span class="section-header-pill mb-3">@(isRtl ? "تغيير كلمة المرور" : "Change Password")</span>
+                        
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label fw-bold text-dark mb-2">@(isRtl ? "كلمة المرور الجديدة" : "New Password")</label>
+                                <input asp-for="Password" type="password" class="form-control form-control-custom" placeholder="@(isRtl ? "اتركها فارغة للإبقاء على الحالية" : "Leave blank to keep current")" autocomplete="new-password" />
+                                <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label fw-bold text-dark mb-2">@(isRtl ? "تأكيد كلمة المرور الجديدة" : "Confirm New Password")</label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control form-control-custom" placeholder="@(isRtl ? "تأكيد كلمة المرور الجديدة" : "Confirm new password")" autocomplete="new-password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="@(isRtl ? "text-end" : "text-start") mt-4 pt-2">
                         <button type="submit" class="btn btn-primary px-5 py-3 fw-bold" style="border-radius: 12px; width: 100%;">

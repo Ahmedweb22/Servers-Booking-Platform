@@ -312,64 +312,119 @@
                         if (emptyAlert) emptyAlert.remove();
 
                         const isRtl = document.documentElement.getAttribute("dir") === "rtl";
-                        const item = document.createElement("div");
-                        item.className = "list-group-item d-flex justify-content-between align-items-start";
-
-                        let actionButtons = "";
-                        // Map NotificationType
+                        
+                        // Map NotificationType enums/names to CSS classes and icons
                         const typeVal = typeof notification.type === "string" ? notification.type : 
-                                      (notification.type === 0 ? "Message" : 
-                                       notification.type === 1 ? "BookingUpdate" : 
-                                       notification.type === 2 ? "PaymentUpdate" : 
-                                       notification.type === 3 ? "Promotion" : "System");
+                                      (notification.type === 0 ? "BookingUpdate" : 
+                                       notification.type === 1 ? "PaymentUpdate" : 
+                                       notification.type === 2 ? "Promotion" : 
+                                       notification.type === 3 ? "Message" : "System");
 
+                        let typeClass = "";
+                        let iconClass = "";
+                        let filterGroup = "System";
+                        let localizedType = typeVal;
+
+                        switch (typeVal) {
+                            case "Message":
+                                typeClass = "type-message";
+                                iconClass = "bi-chat-left-text-fill";
+                                filterGroup = "Message";
+                                localizedType = isRtl ? "رسالة" : "Message";
+                                break;
+                            case "BookingUpdate":
+                                typeClass = "type-booking";
+                                iconClass = "bi-calendar-event-fill";
+                                filterGroup = "BookingUpdate";
+                                localizedType = isRtl ? "تحديث الحجز" : "BookingUpdate";
+                                break;
+                            case "PaymentUpdate":
+                                typeClass = "type-payment";
+                                iconClass = "bi-credit-card-2-back-fill";
+                                filterGroup = "System";
+                                localizedType = isRtl ? "تحديث الدفع" : "PaymentUpdate";
+                                break;
+                            case "Promotion":
+                                typeClass = "type-promotion";
+                                iconClass = "bi-gift-fill";
+                                filterGroup = "System";
+                                localizedType = isRtl ? "عروض" : "Promotion";
+                                break;
+                            default:
+                                typeClass = "type-system";
+                                iconClass = "bi-shield-fill-exclamation";
+                                filterGroup = "System";
+                                localizedType = isRtl ? "النظام" : "System";
+                                break;
+                        }
+
+                        const card = document.createElement("div");
+                        card.className = "notification-card unread";
+                        card.setAttribute("data-type", typeVal);
+                        card.setAttribute("data-group", filterGroup);
+
+                        let actionsHtml = "";
                         if (typeVal === "Message" && notification.bookingId) {
-                            actionButtons += `
-                                <a href="/Worker/Chat/Conversation?bookingId=${notification.bookingId}" class="btn btn-sm btn-success">
-                                    Open Chat
+                            const openChatLabel = isRtl ? "فتح المحادثة" : "Open Chat";
+                            actionsHtml += `
+                                <a href="/Worker/Chat/Conversation?bookingId=${notification.bookingId}" class="action-btn btn-chat shadow-sm">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                    <span>${openChatLabel}</span>
                                 </a>
                             `;
                         }
 
+                        const markReadLabel = isRtl ? "تحديد كمقروء" : "Mark Read";
+                        const deleteLabel = isRtl ? "حذف" : "Delete";
                         const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
                         const tokenValue = tokenElement ? tokenElement.value : "";
 
-                        actionButtons += `
+                        actionsHtml += `
                             <form action="/Worker/Messages/MarkAsRead" method="post" style="margin:0;">
                                 <input type="hidden" name="__RequestVerificationToken" value="${tokenValue}" />
                                 <input type="hidden" name="id" value="${notification.id}" />
-                                <button type="submit" class="btn btn-sm btn-outline-primary">
-                                    Mark Read
+                                <button type="submit" class="action-btn btn-read shadow-sm" title="${markReadLabel}">
+                                    <i class="bi bi-check-lg"></i>
                                 </button>
                             </form>
                             <form action="/Worker/Messages/Delete" method="post" style="margin:0;">
                                 <input type="hidden" name="__RequestVerificationToken" value="${tokenValue}" />
                                 <input type="hidden" name="id" value="${notification.id}" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    Delete
+                                <button type="submit" class="action-btn btn-delete shadow-sm" title="${deleteLabel}">
+                                    <i class="bi bi-trash-fill"></i>
                                 </button>
                             </form>
                         `;
 
                         const dateStr = new Date(notification.createdAt).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-                        item.innerHTML = `
-                            <div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <strong>${notification.title}</strong>
-                                    <span class="badge bg-primary">New</span>
-                                </div>
-                                <p class="mb-1">${notification.message}</p>
-                                <small class="text-muted">
-                                    ${typeVal} - ${dateStr}
-                                </small>
+                        card.innerHTML = `
+                            <div class="icon-wrapper ${typeClass}">
+                                <i class="bi ${iconClass}"></i>
                             </div>
-                            <div class="d-flex gap-2">
-                                ${actionButtons}
+                            <div class="card-main-content">
+                                <div class="card-header-row">
+                                    <h4 class="card-title">${notification.title}</h4>
+                                    <span class="unread-indicator" title="Unread"></span>
+                                </div>
+                                <p class="card-message-text">${notification.message}</p>
+                                <div class="card-meta-row">
+                                    <span class="card-meta-item">
+                                        <i class="bi bi-clock"></i>
+                                        ${dateStr}
+                                    </span>
+                                    <span class="card-meta-item">
+                                        <i class="bi bi-bookmark-fill"></i>
+                                        ${localizedType}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                ${actionsHtml}
                             </div>
                         `;
 
-                        notificationsList.insertBefore(item, notificationsList.firstChild);
+                        notificationsList.insertBefore(card, notificationsList.firstChild);
                     }
                 });
 

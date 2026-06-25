@@ -122,40 +122,13 @@ body.dashboard-body {
     z-index: 1020;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
     padding: 22px 28px;
     background: rgba(248, 250, 252, 0.85);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(226, 232, 240, 0.7);
 }
-
-.topbar-search {
-    position: relative;
-    width: min(460px, 100%);
-}
-
-    .topbar-search i {
-        position: absolute;
-        left: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-    }
-
-    .topbar-search .form-control {
-        height: 50px;
-        border: 1px solid transparent;
-        border-radius: 16px;
-        padding-left: 45px;
-        background: #fff;
-        box-shadow: var(--shadow-soft);
-    }
-
-        .topbar-search .form-control:focus {
-            border-color: rgba(37, 99, 235, 0.22);
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.08);
-        }
 
 .topbar-actions {
     display: flex;
@@ -174,7 +147,6 @@ body.dashboard-body {
 }
 
     .icon-btn:hover,
-    .profile-btn:hover,
     .btn-soft:hover,
     .stat-card:hover,
     .dashboard-card:hover {
@@ -192,16 +164,14 @@ body.dashboard-body {
     border: 2px solid #fff;
 }
 
-.profile-btn {
+.profile-display {
     display: flex;
     align-items: center;
     gap: 12px;
-    border: 0;
     background: #fff;
     border-radius: 18px;
     padding: 8px 14px 8px 8px;
     box-shadow: var(--shadow-soft);
-    transition: var(--transition);
 }
 
 .profile-avatar {

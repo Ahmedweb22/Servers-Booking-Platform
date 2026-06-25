@@ -159,6 +159,26 @@
                         <span asp-validation-for="Phone" class="text-danger d-block mt-1 small"></span>
                     </div>
 
+                    <!-- Password & Confirm Password Row -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "كلمة المرور" : "Password")</label>
+                            <div class="input-group">
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "أدخل كلمة المرور" : "Enter password")" required autocomplete="new-password">
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger d-block mt-1 small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "تأكيد كلمة المرور" : "Confirm Password")</label>
+                            <div class="input-group">
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-lock-fill"></i></span>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "تأكيد كلمة المرور" : "Confirm password")" required autocomplete="new-password">
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger d-block mt-1 small"></span>
+                        </div>
+                    </div>
+
                     <!-- CV Custom File Upload -->
                     <div class="mb-4">
                         <label asp-for="cv" class="form-label text-light opacity-75 fw-semibold mb-2">@Localizer["CvLabel"]</label>

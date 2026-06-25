@@ -540,6 +540,28 @@
             .chip.active a {
                 color: white;
             }
+
+            /* Notification Dropdown Styles */
+            .hover-bg-light { transition: background-color 0.2s ease; }
+            .hover-bg-light:hover { background-color: #f8fafc !important; }
+            .unread-notification { background-color: #f0f6ff !important; }
+            
+            /* Icon Wrapper for Dropdown */
+            .notification-dropdown-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+            .dropdown-type-message { background: #eff6ff; color: #3b82f6; }
+            .dropdown-type-booking { background: #ecfdf5; color: #10b981; }
+            .dropdown-type-payment { background: #fef3c7; color: #d97706; }
+            .dropdown-type-promotion { background: #faf5ff; color: #8b5cf6; }
+            .dropdown-type-system { background: #fff5f5; color: #ef4444; }
     </style>
 </head>
 <body>
@@ -576,12 +598,37 @@
         <div class="d-flex align-items-center gap-3">
             @await Html.PartialAsync("_LanguageSwitcher")
 
-            <button class="btn btn-light rounded-circle p-2 position-relative border">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                    <span class="visually-hidden">@Localizer["NewAlerts"]</span>
-                </span>
-            </button>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="dropdown">
+                    <button class="btn btn-light rounded-circle p-2 position-relative border" type="button" id="headerNotificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="@Localizer["Notifications"]">
+                        <i class="bi bi-bell fs-5 text-secondary"></i>
+                        <span id="headerUnreadDot" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none">
+                            <span class="visually-hidden">@Localizer["NewAlerts"]</span>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-4 p-0" aria-labelledby="headerNotificationsDropdown" style="width: 340px; max-height: 450px; overflow-y: auto; z-index: 9999;">
+                        <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-4">
+                            <h6 class="mb-0 fw-bold text-dark">@Localizer["Notifications"]</h6>
+                            <a href="/Customer/Notification/MyNotification" class="text-decoration-none small fw-semibold text-primary">@Localizer["ViewAll"]</a>
+                        </li>
+                        <div id="header-notifications-list" style="max-height: 350px; overflow-y: auto;">
+                            <div class="p-4 text-center text-muted">
+                                <div class="spinner-border text-primary spinner-border-sm mb-2" role="status">
+                                    <span class="visually-hidden">@Localizer["LoadingNotifications"]</span>
+                                </div>
+                                <p class="mb-0 small">@Localizer["LoadingNotifications"]</p>
+                            </div>
+                        </div>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <a href="/Identity/Account/Login" class="btn btn-light rounded-circle p-2 position-relative border" title="@Localizer["Notifications"]">
+                    <i class="bi bi-bell fs-5 text-secondary"></i>
+                </a>
+            }
 
             @{
                 var displayName = isRtl ? "زائر" : "Guest";
@@ -699,6 +746,12 @@
                         }
                     }
 
+                    // Show red dot on header bell dropdown
+                    const headerDot = document.getElementById("headerUnreadDot");
+                    if (headerDot) {
+                        headerDot.classList.remove("d-none");
+                    }
+
                     // 2. Show Toastr notification if toastr is loaded
                     if (typeof toastr !== "undefined") {
                         toastr.info(notification.message, notification.title, {
@@ -725,10 +778,10 @@
 
                         // Map NotificationType enums/names to CSS classes and icons
                         const typeVal = typeof notification.type === "string" ? notification.type : 
-                                      (notification.type === 0 ? "Message" : 
-                                       notification.type === 1 ? "BookingUpdate" : 
-                                       notification.type === 2 ? "PaymentUpdate" : 
-                                       notification.type === 3 ? "Promotion" : "System");
+                                      (notification.type === 0 ? "BookingUpdate" : 
+                                       notification.type === 1 ? "PaymentUpdate" : 
+                                       notification.type === 2 ? "Promotion" : 
+                                       notification.type === 3 ? "Message" : "System");
 
                         switch (typeVal) {
                             case "Message":
@@ -757,7 +810,7 @@
                                 break;
                             default:
                                 typeClass = "type-system";
-                                iconClass = "bi-shield-exclamation-fill";
+                                iconClass = "bi-shield-fill-exclamation";
                                 filterGroup = "System";
                                 localizedType = isRtl ? "النظام" : "System";
                                 break;
@@ -859,6 +912,157 @@
                 notificationConnection.start()
                     .then(() => console.log("Connected to NotificationHub successfully!"))
                     .catch(err => console.error("Error connecting to NotificationHub:", err));
+
+                // Page load count initialization: if unread badge exists and count > 0, show the red dot
+                const badge = document.querySelector("#unreadNotificationsCountContainer .badge");
+                if (badge) {
+                    const count = parseInt(badge.textContent.trim()) || 0;
+                    if (count > 0) {
+                        const headerDot = document.getElementById("headerUnreadDot");
+                        if (headerDot) {
+                            headerDot.classList.remove("d-none");
+                        }
+                    }
+                }
+
+                // Dropdown show event listener to fetch notifications
+                const dropdownBtn = document.getElementById("headerNotificationsDropdown");
+                if (dropdownBtn) {
+                    dropdownBtn.addEventListener("show.bs.dropdown", function () {
+                        const listContainer = document.getElementById("header-notifications-list");
+                        const isRtl = document.documentElement.getAttribute("dir") === "rtl";
+                        
+                        listContainer.innerHTML = `
+                            <div class="p-4 text-center text-muted">
+                                <div class="spinner-border text-primary spinner-border-sm mb-2" role="status">
+                                    <span class="visually-hidden">${isRtl ? "جاري تحميل الإشعارات..." : "Loading notifications..."}</span>
+                                </div>
+                                <p class="mb-0 small">${isRtl ? "جاري تحميل الإشعارات..." : "Loading notifications..."}</p>
+                            </div>
+                        `;
+
+                        fetch('/Customer/Notification/GetNotifications')
+                            .then(response => {
+                                if (!response.ok) throw new Error('Failed to fetch notifications');
+                                return response.json();
+                            })
+                            .then(data => {
+                                listContainer.innerHTML = '';
+                                if (!data || data.length === 0) {
+                                    listContainer.innerHTML = `
+                                        <div class="p-4 text-center text-muted">
+                                            <i class="bi bi-bell-slash fs-2 mb-2 d-block"></i>
+                                            <p class="mb-0 small">${isRtl ? "لا توجد إشعارات حالياً" : "No notifications at the moment"}</p>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+
+                                data.forEach(notification => {
+                                    const item = document.createElement('div');
+                                    item.className = `p-3 border-bottom d-flex align-items-start gap-2 hover-bg-light ${notification.isRead ? '' : 'unread-notification'}`;
+                                    item.style.cursor = 'pointer';
+
+                                    let typeClass = "";
+                                    let iconClass = "";
+                                    
+                                    switch (notification.type) {
+                                        case "Message":
+                                            typeClass = "dropdown-type-message";
+                                            iconClass = "bi-chat-left-text-fill";
+                                            break;
+                                        case "BookingUpdate":
+                                            typeClass = "dropdown-type-booking";
+                                            iconClass = "bi-calendar-event-fill";
+                                            break;
+                                        case "PaymentUpdate":
+                                            typeClass = "dropdown-type-payment";
+                                            iconClass = "bi-credit-card-2-back-fill";
+                                            break;
+                                        case "Promotion":
+                                            typeClass = "dropdown-type-promotion";
+                                            iconClass = "bi-gift-fill";
+                                            break;
+                                        default:
+                                            typeClass = "dropdown-type-system";
+                                            iconClass = "bi-shield-fill-exclamation";
+                                            break;
+                                    }
+
+                                    item.innerHTML = `
+                                        <div class="notification-dropdown-icon ${typeClass}">
+                                            <i class="bi ${iconClass}"></i>
+                                        </div>
+                                        <div class="flex-grow-1" style="min-width: 0;">
+                                            <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
+                                                <span class="fw-bold small text-dark text-truncate d-inline-block" style="max-width: 160px;">${notification.title}</span>
+                                                <span class="text-muted" style="font-size: 0.72rem; flex-shrink: 0;">${notification.createdAt}</span>
+                                            </div>
+                                            <p class="mb-0 text-secondary small" style="font-size: 0.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3;">
+                                                ${notification.message}
+                                            </p>
+                                        </div>
+                                        ${!notification.isRead ? '<span class="badge bg-primary rounded-circle p-1 align-self-center mx-1" style="width: 8px; height: 8px; flex-shrink: 0; min-width: auto; min-height: auto;"> </span>' : ''}
+                                    `;
+
+                                    item.addEventListener('click', function (e) {
+                                        e.preventDefault();
+                                        
+                                        // Function to navigate after marking read or if already read
+                                        const navigate = () => {
+                                            if (notification.type === "Message" && notification.bookingId) {
+                                                window.location.href = `/Customer/Chats/Conversation?bookingId=${notification.bookingId}`;
+                                            } else {
+                                                window.location.href = `/Customer/Notification/MyNotification`;
+                                            }
+                                        };
+
+                                        if (!notification.isRead) {
+                                            fetch(`/Customer/Notification/MarkAsReadApi/${notification.id}`, {
+                                                method: 'POST'
+                                            }).then(res => {
+                                                if (res.ok) {
+                                                    // Decrement main badge count in Messages tab
+                                                    const mainBadge = document.querySelector("#unreadNotificationsCountContainer .badge");
+                                                    if (mainBadge) {
+                                                        let count = parseInt(mainBadge.textContent.trim()) || 0;
+                                                        if (count > 0) {
+                                                            count--;
+                                                            if (count === 0) {
+                                                                mainBadge.remove();
+                                                                const headerDot = document.getElementById("headerUnreadDot");
+                                                                if (headerDot) {
+                                                                    headerDot.classList.add("d-none");
+                                                                }
+                                                            } else {
+                                                                mainBadge.textContent = count;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                navigate();
+                                            }).catch(() => {
+                                                navigate();
+                                            });
+                                        } else {
+                                            navigate();
+                                        }
+                                    });
+
+                                    listContainer.appendChild(item);
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error loading notifications:', error);
+                                listContainer.innerHTML = `
+                                    <div class="p-4 text-center text-danger">
+                                        <i class="bi bi-exclamation-triangle-fill fs-2 mb-2 d-block"></i>
+                                        <p class="mb-0 small">${isRtl ? "حدث خطأ أثناء تحميل الإشعارات." : "Failed to load notifications."}</p>
+                                    </div>
+                                `;
+                            });
+                    });
+                }
             });
         </script>
     }

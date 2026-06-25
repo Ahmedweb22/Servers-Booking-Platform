@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
@@ -22,10 +23,12 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
         private readonly IRepository<WorkerService> _workerServiceRepo;
         private readonly IRepository<ServiceCategory> _categoryRepo;
+        private readonly UserManager<User> _userManager;
 
         public WorkerProfileController(IUnitOfWork unitOfWork, IFileService fileService,
             IStringLocalizer<WorkerProfileController> localizer, IStringLocalizer<SharedResource> sharedLocalizer,
-            IRepository<WorkerService> workerServiceRepo, IRepository<ServiceCategory> categoryRepo)
+            IRepository<WorkerService> workerServiceRepo, IRepository<ServiceCategory> categoryRepo,
+            UserManager<User> userManager)
         {
             _unitOfWork = unitOfWork;
             _fileService = fileService;
@@ -33,6 +36,7 @@ namespace Shatbly.Areas.Worker.Controllers
             _sharedLocalizer = sharedLocalizer;
             _workerServiceRepo = workerServiceRepo;
             _categoryRepo = categoryRepo;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -104,6 +108,32 @@ namespace Shatbly.Areas.Worker.Controllers
             profile.Bio = model.Bio.Trim();
             profile.IsAvailable = model.IsAvailable;
             profile.AcceptsOnline = model.AcceptsOnline;
+
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                var user = await _userManager.FindByIdAsync(profile.UserId);
+                if (user != null)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var passwordResult = await _userManager.ResetPasswordAsync(user, token, model.Password);
+                    if (!passwordResult.Succeeded)
+                    {
+                        foreach (var error in passwordResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        var categories = await _categoryRepo.GetAsync(c => c.IsActive, tracking: false);
+                        var isRtl = System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("ar");
+                        model.Categories = categories.Select(c => new SelectListItem
+                        {
+                            Value = c.Id.ToString(),
+                            Text = isRtl ? c.NameAr : c.NameEn,
+                            Selected = c.Id == model.CategoryId
+                        }).ToList();
+                        return View(model);
+                    }
+                }
+            }
 
             // Update or Create WorkerService
             if (profile.WorkerServices == null)

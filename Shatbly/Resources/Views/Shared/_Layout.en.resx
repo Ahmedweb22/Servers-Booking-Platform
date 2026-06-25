@@ -47,4 +47,9 @@
   <data name="SuperAdmin" xml:space="preserve"><value>Super Admin</value></data>
   <data name="Worker" xml:space="preserve"><value>Technician</value></data>
   <data name="Customer" xml:space="preserve"><value>Customer</value></data>
+  <data name="Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="LoadingNotifications" xml:space="preserve"><value>Loading notifications...</value></data>
+  <data name="NoNotifications" xml:space="preserve"><value>No notifications yet</value></data>
+  <data name="ErrorLoadingNotifications" xml:space="preserve"><value>Failed to load notifications.</value></data>
+  <data name="ViewAll" xml:space="preserve"><value>View All</value></data>
 </root>
