@@ -1,14 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Localization;
-using Shatbly.Models;
-using Shatbly.ViewModels;
-using Shatbly.Repositories.IRepositories;
 using Shatbly.Services.File_Service;
-using Shatbly.UnitOfWork;
-using Shatbly.Utilities;
 using System.Security.Claims;
 
 namespace Shatbly.Areas.Worker.Controllers

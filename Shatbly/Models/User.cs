@@ -16,6 +16,8 @@ namespace Shatbly.Models
         public string Phone { get; set; }
         public string? Address { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+
         public WorkerProfile WorkerProfile { get; set; }  
         public Wallet Wallet { get; set; }
         public string? RefreshToken { get; set; }
