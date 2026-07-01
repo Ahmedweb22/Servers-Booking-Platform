@@ -12,7 +12,7 @@ namespace Shatbly.UnitOfWork
         IRepository<PortfolioMedia> PortfolioMedia { get; }
         IRepository<ChatMessage> ChatMessages { get; }
         IRepository<Notification> Notifications { get; }
-
+        public IRepository<Order> Orders { get; }
         Task<int> CommitAsync();
     }
 }
