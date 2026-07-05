@@ -560,6 +560,12 @@ namespace Shatbly.Areas.Identity.Controllers
 
             return RedirectToAction("Index", "Home", new { area = "Customer" });
         }
+   
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 
 }
