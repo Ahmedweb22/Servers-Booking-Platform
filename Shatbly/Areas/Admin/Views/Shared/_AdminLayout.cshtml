@@ -47,5 +47,29 @@
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @RenderSection("Scripts", required: false)
+
+    <script>
+        (function () {
+            const html = document.documentElement;
+            const btn  = document.getElementById('themeToggleBtn');
+            const icon = document.getElementById('themeIcon');
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                if (icon) {
+                    icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+                }
+            }
+            const saved = localStorage.getItem('shatbly-theme') || 'light';
+            applyTheme(saved);
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    const current = html.getAttribute('data-theme') || 'light';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    applyTheme(next);
+                    localStorage.setItem('shatbly-theme', next);
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+
 namespace Shatbly.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
@@ -81,6 +83,16 @@ namespace Shatbly.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId);
                 favoriteWorkerIds = favorites.Select(f => f.WorkerId).ToList();
+
+                var userWithAddresses = await _userManager.Users
+                    .Include(u => u.Addresses)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+                var defaultAddress = userWithAddresses?.Addresses?.FirstOrDefault(a => a.IsDefault);
+                if (defaultAddress != null)
+                {
+                    ViewBag.UserLat = defaultAddress.Lat;
+                    ViewBag.UserLng = defaultAddress.Lng;
+                }
             }
 
             var banners = await _bannerRepository.GetAsync(

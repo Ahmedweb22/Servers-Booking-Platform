@@ -32,5 +32,9 @@ namespace Shatbly.ViewModels
         [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
         [System.ComponentModel.DataAnnotations.Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        public double? Lat { get; set; }
+
+        public double? Lng { get; set; }
     }
 }

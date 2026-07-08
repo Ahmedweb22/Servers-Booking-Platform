@@ -378,6 +378,8 @@
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="PromoCodeId" id="promoCodeIdHidden" />
             <input type="hidden" asp-for="PromoCodeText" id="promoCodeTextHidden" />
+            <input type="hidden" asp-for="CouponId" id="couponIdHidden" />
+            <input type="hidden" asp-for="CouponCode" id="couponCodeHidden" />
             <div asp-validation-summary="ModelOnly" class="banner error"></div>
 
             <div class="steps">
@@ -533,8 +535,18 @@
                     </div>
 
                     <div class="field">
-                        <label>Estimated duration</label>
-                        <input value="1 hour" readonly />
+                        <label asp-for="DurationHours">Estimated duration</label>
+                        <select asp-for="DurationHours" id="durationSelect">
+                            <option value="1">1 hour</option>
+                            <option value="2">2 hours</option>
+                            <option value="3">3 hours</option>
+                            <option value="4">4 hours</option>
+                            <option value="5">5 hours</option>
+                            <option value="6">6 hours</option>
+                            <option value="7">7 hours</option>
+                            <option value="8">8 hours</option>
+                        </select>
+                        <span asp-validation-for="DurationHours" class="validation"></span>
                     </div>
 
                     <div class="full">
@@ -614,6 +626,10 @@
                 <span>Promo Discount (<span id="appliedPromoCodeText"></span>)</span>
                 <strong>- EGP <span id="promoDiscountAmount">0.00</span></strong>
             </div>
+            <div class="summary-line" id="couponDiscountLine" style="display: none; color: var(--success);">
+                <span>Coupon Discount (<span id="appliedCouponText"></span>)</span>
+                <strong>- EGP <span id="couponDiscountAmount">0.00</span></strong>
+            </div>
             
             <!-- Promo Code Input Group -->
             <div style="margin-top: 16px; margin-bottom: 12px; padding: 12px; background: #faf6f0; border: 1px solid var(--line); border-radius: 16px;">
@@ -623,6 +639,16 @@
                     <button type="button" id="applyPromoBtn" class="btn btn-primary" style="padding: 8px 16px; border-radius: 12px; font-size: 0.9rem; margin-top: 0;">Apply</button>
                 </div>
                 <div id="promoMsg" style="font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;"></div>
+            </div>
+
+            <!-- Coupon Input Group -->
+            <div style="margin-top: 12px; margin-bottom: 12px; padding: 12px; background: #faf6f0; border: 1px solid var(--line); border-radius: 16px;">
+                <label for="couponInput" style="font-size: 0.85rem; font-weight: 600; color: var(--ink); display: block; margin-bottom: 6px;">Have a Coupon?</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="couponInput" placeholder="Enter coupon" value="@Model.CouponCode" style="padding: 8px 12px; border-radius: 12px; border: 1px solid #d9c5b2; flex: 1; text-transform: uppercase; font-size: 0.9rem;" />
+                    <button type="button" id="applyCouponBtn" class="btn btn-primary" style="padding: 8px 16px; border-radius: 12px; font-size: 0.9rem; margin-top: 0;">Apply</button>
+                </div>
+                <div id="couponMsg" style="font-size: 0.85rem; margin-top: 6px; display: none; font-weight: 500;"></div>
             </div>
 
             <div class="summary-total">
@@ -639,7 +665,46 @@
 
 <script>
     (() => {
-        const modelAvailability = @Html.Raw(Model.AvailabilityJson);
+        let modelAvailability = @Html.Raw(Model.AvailabilityJson);
+
+        async function fetchAvailability(workerId) {
+            if (!workerId) {
+                syncAvailability();
+                return;
+            }
+
+            try {
+                dateSelect.disabled = true;
+                timeSelect.disabled = true;
+
+                const response = await fetch(`/Customer/BookingSystem/GetWorkerAvailability?workerId=${encodeURIComponent(workerId)}`);
+                const data = await response.json();
+                modelAvailability[workerId] = data;
+            } catch (err) {
+                console.error("Error fetching availability:", err);
+                modelAvailability[workerId] = {};
+            } finally {
+                dateSelect.disabled = false;
+                timeSelect.disabled = false;
+                syncAvailability();
+            }
+        }
+
+        function format12Hour(timeStr) {
+            if (!timeStr) return "";
+            const [hStr, mStr] = timeStr.split(":");
+            let h = parseInt(hStr, 10);
+            const m = mStr;
+            const isRtl = document.documentElement.getAttribute("dir") === "rtl";
+            const ampm = h >= 12 
+                ? (isRtl ? "م" : "PM") 
+                : (isRtl ? "ص" : "AM");
+            h = h % 12;
+            h = h ? h : 12; // the hour '0' should be '12'
+            const hFormatted = String(h).padStart(2, '0');
+            return `${hFormatted}:${m} ${ampm}`;
+        }
+
         const workerDetails = JSON.parse('@Html.Raw(Model.WorkerDetailsJson)');
         const serviceDetails = JSON.parse('@Html.Raw(Model.ServiceDetailsJson)');
         const steps = Array.from(document.querySelectorAll("[data-step]"));
@@ -678,10 +743,24 @@
         const promoDiscountAmount = document.getElementById("promoDiscountAmount");
         const appliedPromoCodeText = document.getElementById("appliedPromoCodeText");
 
+        // Coupon elements
+        const couponIdHidden = document.getElementById("couponIdHidden");
+        const couponCodeHidden = document.getElementById("couponCodeHidden");
+        const couponInput = document.getElementById("couponInput");
+        const applyCouponBtn = document.getElementById("applyCouponBtn");
+        const couponMsg = document.getElementById("couponMsg");
+        const couponDiscountLine = document.getElementById("couponDiscountLine");
+        const couponDiscountAmount = document.getElementById("couponDiscountAmount");
+        const appliedCouponText = document.getElementById("appliedCouponText");
+
         let currentStep = 1;
         let promoDiscountValue = 0;
         let appliedPromoId = null;
         let appliedPromoCode = "";
+
+        let couponDiscountValue = 0;
+        let appliedCouponId = null;
+        let appliedCoupon = "";
 
         function getBookingType() {
             const selected = bookingTypeInputs.find(input => input.checked);
@@ -713,9 +792,45 @@
             });
         }
 
-        function syncAvailability() {
+        function getFilteredAvailability() {
             const workerId = workerSelect.value;
             const datesForWorker = modelAvailability[workerId] || {};
+            const duration = Number(document.getElementById("durationSelect").value || "1");
+            const filtered = {};
+
+            for (const date in datesForWorker) {
+                const times = datesForWorker[date] || [];
+                const filteredTimes = [];
+
+                for (let i = 0; i < times.length; i++) {
+                    const timeStr = times[i];
+                    const [h, m] = timeStr.split(":").map(Number);
+                    
+                    let hasAllConsecutive = true;
+                    for (let d = 0; d < duration; d++) {
+                        const checkH = h + d;
+                        const checkTimeStr = `${String(checkH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                        if (!times.includes(checkTimeStr)) {
+                            hasAllConsecutive = false;
+                            break;
+                        }
+                    }
+
+                    if (hasAllConsecutive) {
+                        filteredTimes.push(timeStr);
+                    }
+                }
+
+                if (filteredTimes.length > 0) {
+                    filtered[date] = filteredTimes;
+                }
+            }
+
+            return filtered;
+        }
+
+        function syncAvailability() {
+            const datesForWorker = getFilteredAvailability();
             const dateItems = Object.keys(datesForWorker).map(date => ({ value: date, label: date }));
 
             // Save currently selected date & time
@@ -744,11 +859,11 @@
         }
 
         function syncTimes(preselectedTime) {
-            const workerId = workerSelect.value;
+            const datesForWorker = getFilteredAvailability();
             const selectedDate = dateSelect.value;
-            const times = ((modelAvailability[workerId] || {})[selectedDate] || []).map(time => ({
+            const times = (datesForWorker[selectedDate] || []).map(time => ({
                 value: time,
-                label: time
+                label: format12Hour(time)
             }));
 
             fillSelect(timeSelect, times, "No slots");
@@ -774,8 +889,11 @@
             
             // Get base price from selected worker's hourly rate, fallback to selected service price
             const selectedService = serviceOptions.find(option => option.id === serviceSelect.value) || { name: "Choose a service", price: 0 };
-            const basePrice = detail ? detail.hourlyRate : selectedService.price;
+            let basePrice = detail ? detail.hourlyRate : selectedService.price;
             
+            const duration = Number(document.getElementById("durationSelect").value || "1");
+            basePrice = basePrice * duration;
+
             const bookingType = getBookingType();
             const recurrence = recurrenceSelect.value || "None";
             const convenience = bookingType === "Instant" ? 45 : 25;
@@ -802,6 +920,16 @@
                 promoDiscountLine.style.display = "none";
             }
 
+            // Apply coupon discount if we have a validated one
+            if (couponDiscountValue > 0) {
+                couponDiscountLine.style.display = "flex";
+                appliedCouponText.textContent = appliedCoupon;
+                couponDiscountAmount.textContent = couponDiscountValue.toFixed(2);
+                total = Math.max(0, total - couponDiscountValue);
+            } else {
+                couponDiscountLine.style.display = "none";
+            }
+
             document.getElementById("summaryService").textContent = selectedService.name;
             document.getElementById("servicePrice").textContent = basePrice.toFixed(2);
             document.getElementById("convenienceFee").textContent = convenience.toFixed(2);
@@ -814,7 +942,7 @@
             const workerText = workerSelect.options[workerSelect.selectedIndex]?.text || "Choose a worker";
             document.getElementById("summaryService").textContent = serviceText;
             document.getElementById("summaryWorker").textContent = workerText;
-            document.getElementById("summarySlot").textContent = dateSelect.value && timeSelect.value ? `${dateSelect.value} ${timeSelect.value}` : "Select step 2";
+            document.getElementById("summarySlot").textContent = dateSelect.value && timeSelect.value ? `${dateSelect.value} ${format12Hour(timeSelect.value)}` : "Select step 2";
             document.getElementById("summaryAddress").textContent = addressLineInput.value || "Add in step 3";
             updatePricing();
         }
@@ -836,7 +964,8 @@
 
             const workerId = workerSelect.value;
             const detail = workerDetails[workerId];
-            const originalPrice = detail ? detail.hourlyRate : (serviceOptions.find(option => option.id === serviceSelect.value)?.price || 0);
+            const duration = Number(document.getElementById("durationSelect").value || "1");
+            const originalPrice = (detail ? detail.hourlyRate : (serviceOptions.find(option => option.id === serviceSelect.value)?.price || 0)) * duration;
             const serviceId = serviceSelect.value;
 
             try {
@@ -894,6 +1023,74 @@
             updatePricing();
         }
 
+        async function validateAndApplyCoupon() {
+            const code = couponInput.value.trim().toUpperCase();
+            if (!code) {
+                clearCoupon();
+                return;
+            }
+
+            const workerId = workerSelect.value;
+            const detail = workerDetails[workerId];
+            const duration = Number(document.getElementById("durationSelect").value || "1");
+            const originalPrice = (detail ? detail.hourlyRate : (serviceOptions.find(option => option.id === serviceSelect.value)?.price || 0)) * duration;
+            const serviceId = serviceSelect.value;
+
+            try {
+                applyCouponBtn.disabled = true;
+                applyCouponBtn.textContent = "Checking...";
+                couponMsg.style.display = "none";
+
+                const response = await fetch('/Customer/BookingSystem/ValidateCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `code=${encodeURIComponent(code)}&serviceId=${encodeURIComponent(serviceId)}&originalPrice=${encodeURIComponent(originalPrice)}`
+                });
+
+                const data = await response.json();
+                if (data.succeeded) {
+                    couponMsg.textContent = data.message;
+                    couponMsg.style.color = "var(--success)";
+                    couponMsg.style.display = "block";
+
+                    couponDiscountValue = Number(data.discountAmount);
+                    appliedCouponId = data.couponId;
+                    appliedCoupon = code;
+
+                    couponIdHidden.value = appliedCouponId;
+                    couponCodeHidden.value = appliedCoupon;
+
+                    updatePricing();
+                } else {
+                    couponMsg.textContent = data.message;
+                    couponMsg.style.color = "#b42318";
+                    couponMsg.style.display = "block";
+                    clearCoupon();
+                }
+            } catch (err) {
+                console.error(err);
+                couponMsg.textContent = "Error validating coupon.";
+                couponMsg.style.color = "#b42318";
+                couponMsg.style.display = "block";
+                clearCoupon();
+            } finally {
+                applyCouponBtn.disabled = false;
+                applyCouponBtn.textContent = "Apply";
+            }
+        }
+
+        function clearCoupon() {
+            couponDiscountValue = 0;
+            appliedCouponId = null;
+            appliedCoupon = "";
+            couponIdHidden.value = "";
+            couponCodeHidden.value = "";
+            updatePricing();
+        }
+
         function handleServiceChange() {
             const serviceId = Number(serviceSelect.value);
             const filtered = allWorkers.filter(w => {
@@ -918,23 +1115,22 @@
                 workerSelect.value = filtered[0].value;
             }
 
-            syncAvailability();
-
-            if (appliedPromoCode) {
-                validateAndApplyPromo();
-            }
+            handleWorkerChange();
         }
 
-        function handleWorkerChange() {
+        async function handleWorkerChange() {
             const workerId = workerSelect.value;
             const detail = workerDetails[workerId];
             if (detail) {
                 serviceSelect.value = detail.categoryId;
             }
-            syncAvailability();
+            await fetchAvailability(workerId);
 
             if (appliedPromoCode) {
                 validateAndApplyPromo();
+            }
+            if (appliedCoupon) {
+                validateAndApplyCoupon();
             }
         }
 
@@ -947,6 +1143,21 @@
         });
 
         applyPromoBtn.addEventListener("click", validateAndApplyPromo);
+        applyCouponBtn.addEventListener("click", validateAndApplyCoupon);
+
+        couponInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                applyCouponBtn.click();
+            }
+        });
+        
+        const durationSelect = document.getElementById("durationSelect");
+        durationSelect.addEventListener("change", () => {
+            syncAvailability();
+            updatePricing();
+        });
+
         workerSelect.addEventListener("change", handleWorkerChange);
         serviceSelect.addEventListener("change", handleServiceChange);
         dateSelect.addEventListener("change", syncTimes);
@@ -994,6 +1205,14 @@
             appliedPromoId = Number(promoCodeIdHidden.value);
             appliedPromoCode = promoCodeTextHidden.value;
             validateAndApplyPromo();
+        }
+
+        // If coupon exists from backend, auto-apply it
+        if (couponIdHidden.value && couponCodeHidden.value) {
+            couponInput.value = couponCodeHidden.value;
+            appliedCouponId = Number(couponIdHidden.value);
+            appliedCoupon = couponCodeHidden.value;
+            validateAndApplyCoupon();
         }
     })();
 </script>

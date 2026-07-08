@@ -120,6 +120,18 @@ namespace Shatbly.Areas.Customer.Controllers
                 return NotFound();
             }
 
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+
+            var isCustomer = User.IsInRole(SD.ROLE_CUSTOMER);
+            if (isCustomer && model.Booking.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
             return View(model);
         }
 
@@ -127,6 +139,24 @@ namespace Shatbly.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reschedule(int id, string scheduledAt)
         {
+            var model = await _bookingSystemService.GetDetailsAsync(id);
+            if (model is null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+
+            var isCustomer = User.IsInRole(SD.ROLE_CUSTOMER);
+            if (isCustomer && model.Booking.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
             var result = await _bookingSystemService.RescheduleAsync(id, scheduledAt);
             if (result.NotFound)
             {
@@ -168,6 +198,24 @@ namespace Shatbly.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id, string? cancellationReason)
         {
+            var model = await _bookingSystemService.GetDetailsAsync(id);
+            if (model is null)
+            {
+                return NotFound();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+
+            var isCustomer = User.IsInRole(SD.ROLE_CUSTOMER);
+            if (isCustomer && model.Booking.UserId != user.Id)
+            {
+                return Forbid();
+            }
+
             var result = await _bookingSystemService.CancelAsync(id, cancellationReason);
             if (result.NotFound)
             {
@@ -278,6 +326,74 @@ namespace Shatbly.Areas.Customer.Controllers
                 discountAmount = discountAmount, 
                 promoCodeId = promo.Id,
                 message = _localizer["PromoCodeApplied"]?.Value ?? "Promo code applied successfully!" 
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWorkerAvailability(string workerId)
+        {
+            if (string.IsNullOrEmpty(workerId))
+            {
+                return Json(new Dictionary<string, List<string>>());
+            }
+
+            var availability = await _bookingSystemService.GetAvailableSlotsByDateAsync(workerId);
+            return Json(availability);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ValidateCoupon(string code, int serviceId, decimal originalPrice)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return Json(new { succeeded = false, message = _localizer["CouponRequired"]?.Value ?? "Coupon code is required." });
+            }
+
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code == code && c.IsActive);
+
+            if (coupon == null)
+            {
+                return Json(new { succeeded = false, message = _localizer["InvalidCoupon"]?.Value ?? "Invalid coupon code." });
+            }
+
+            if (coupon.UsedCount >= coupon.MaxUses)
+            {
+                return Json(new { succeeded = false, message = _localizer["CouponFullyUsed"]?.Value ?? "This coupon has reached its maximum uses." });
+            }
+
+            var now = DateTime.UtcNow;
+            if (coupon.ValidFrom > now)
+            {
+                return Json(new { succeeded = false, message = _localizer["CouponNotStarted"]?.Value ?? "This coupon is not active yet." });
+            }
+
+            if (coupon.ValidUntil < now)
+            {
+                return Json(new { succeeded = false, message = _localizer["CouponExpired"]?.Value ?? "This coupon has expired." });
+            }
+
+            if (coupon.CategoryId.HasValue && coupon.CategoryId.Value != serviceId)
+            {
+                return Json(new { succeeded = false, message = _localizer["CouponInvalidForService"]?.Value ?? "This coupon is not valid for the selected service." });
+            }
+
+            decimal discountAmount = 0;
+            if (coupon.DiscountType == DiscountType.Percentage)
+            {
+                discountAmount = Math.Round(originalPrice * (coupon.DiscountValue / 100m), 2);
+            }
+            else if (coupon.DiscountType == DiscountType.FixedAmount)
+            {
+                discountAmount = Math.Min(coupon.DiscountValue, originalPrice);
+            }
+
+            return Json(new { 
+                succeeded = true, 
+                discountAmount = discountAmount, 
+                couponId = coupon.Id,
+                message = _localizer["CouponApplied"]?.Value ?? "Coupon applied successfully!" 
             });
         }
 

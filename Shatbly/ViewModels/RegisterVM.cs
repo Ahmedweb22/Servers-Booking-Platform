@@ -1,4 +1,4 @@
-﻿namespace Shatbly.ViewModels
+namespace Shatbly.ViewModels
 {
     public class RegisterVM
     {
@@ -24,5 +24,17 @@
         [DataType(DataType.Password)]
         [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required]
+        public string City { get; set; } = string.Empty;
+
+        public string? District { get; set; }
+
+        [Required]
+        public string Street { get; set; } = string.Empty;
+
+        public double? Lat { get; set; }
+
+        public double? Lng { get; set; }
     }
 }

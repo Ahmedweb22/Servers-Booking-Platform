@@ -37,7 +37,7 @@ namespace Shatbly.Areas.Admin.Controllers
      {
         b => b.Address,
         b => b.Client,
-        b => b.Worker,
+        b => b.Worker.User,
         b => b.Coupon,
         b => b.PromoCode
      },
@@ -142,11 +142,24 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Booking booking)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    await LoadDropdownsAsync(booking);
-            //    return View(booking);
-            //}
+            if (booking.TotalPrice < 0)
+            {
+                ModelState.AddModelError(nameof(booking.TotalPrice), "Total price cannot be negative.");
+            }
+            if (booking.DiscountAmt < 0)
+            {
+                ModelState.AddModelError(nameof(booking.DiscountAmt), "Discount amount cannot be negative.");
+            }
+            if (booking.DurationHours <= 0)
+            {
+                ModelState.AddModelError(nameof(booking.DurationHours), "Duration must be greater than zero.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await LoadDropdownsAsync(booking);
+                return View(booking);
+            }
 
             var existingBooking = await _bookingRepo.GetOneAsync(b => b.Id == booking.Id);
 

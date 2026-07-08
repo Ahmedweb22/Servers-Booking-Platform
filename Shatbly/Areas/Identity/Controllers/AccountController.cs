@@ -16,6 +16,7 @@ namespace Shatbly.Areas.Identity.Controllers
     [Area(SD.IDENTITY_AREA)]
     public class AccountController : Controller
     {
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, int> _otpAttempts = new();
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
@@ -23,8 +24,11 @@ namespace Shatbly.Areas.Identity.Controllers
         private readonly IRepository<OTP_Verification> _otpRepository;
         private readonly ITokenService _tokenService;
         private readonly IStringLocalizer<AccountController> _localizer;
+        private readonly IRepository<Shatbly.Models.Address> _addressRepository;
+
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IAccountService accountService,
-            IRepository<OTP_Verification> otpRepository, ITokenService tokenService, IStringLocalizer<AccountController> localizer)
+            IRepository<OTP_Verification> otpRepository, ITokenService tokenService, IStringLocalizer<AccountController> localizer,
+            IRepository<Shatbly.Models.Address> addressRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -33,6 +37,7 @@ namespace Shatbly.Areas.Identity.Controllers
             _otpRepository = otpRepository;
             _tokenService = tokenService;
             _localizer = localizer;
+            _addressRepository = addressRepository;
         }
         public IActionResult Index()
         { 
@@ -80,7 +85,9 @@ namespace Shatbly.Areas.Identity.Controllers
                LName = model.LName,
                Name = model.FName + model.LName,
                Phone = model.Phone
-           };
+               
+
+            };
             var result = await _userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded)
             {
@@ -90,6 +97,20 @@ namespace Shatbly.Areas.Identity.Controllers
                 }
                 return View(model);
             }
+
+            // Create and save customer's default address
+            var address = new Shatbly.Models.Address
+            {
+                City = model.City,
+                District = model.District ?? string.Empty,
+                Street = model.Street,
+                Lat = model.Lat,
+                Lng = model.Lng,
+                IsDefault = true,
+                UserId = applicationUser.Id
+            };
+            await _addressRepository.CreateAsync(address);
+            await _addressRepository.CommitAsync();
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(applicationUser);
             var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = applicationUser.Id, token = token }, Request.Scheme);
@@ -418,11 +439,32 @@ namespace Shatbly.Areas.Identity.Controllers
             }
 
             var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
-            if (otp == null || otp.Code != model.OTP || otp.ExpiresAt < DateTime.UtcNow)
+            if (otp == null || otp.ExpiresAt < DateTime.UtcNow)
             {
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
+
+            if (otp.Code != model.OTP)
+            {
+                _otpAttempts.AddOrUpdate(user.Id, 1, (key, val) => val + 1);
+                _otpAttempts.TryGetValue(user.Id, out int attempts);
+
+                if (attempts >= 3)
+                {
+                    otp.IsUsed = true; // Invalidate the OTP on 3 failed attempts
+                    await _otpRepository.CommitAsync();
+                    _otpAttempts.TryRemove(user.Id, out _);
+                    ModelState.AddModelError(string.Empty, "Too many failed attempts. This OTP has been invalidated. Please request a new one.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, $"{_localizer["InvalidOtp"].Value} ({3 - attempts} attempts remaining)");
+                }
+                return View(model);
+            }
+
+            _otpAttempts.TryRemove(user.Id, out _);
             otp.IsUsed = true;
             await _otpRepository.CommitAsync();
             return RedirectToAction("ResetPassword", new { userId = user.Id });

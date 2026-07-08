@@ -32,7 +32,7 @@ namespace Shatbly.Services.Chat
                 SenderId = senderId,
                 ReceiverId = receiverId,
                 BookingId = bookingId,
-                Message = message?.Trim(),
+                Message = string.IsNullOrWhiteSpace(message) ? null : System.Net.WebUtility.HtmlEncode(message.Trim()),
                 ImageUrl = imageUrl,
                 IsRead = false,
                 SentAt = DateTime.UtcNow

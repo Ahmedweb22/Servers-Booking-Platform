@@ -42,6 +42,126 @@
             --worker-border: #e5e7eb;
         }
 
+        [data-theme="dark"] {
+            --worker-bg: #0f172a;
+            --worker-sidebar: #020617;
+            --worker-sidebar-muted: #94a3b8;
+            --worker-primary: #60a5fa;
+            --worker-border: #334155;
+        }
+
+        [data-theme="dark"] .worker-topbar {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        [data-theme="dark"] .worker-content,
+        [data-theme="dark"] .page-card {
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .page-card,
+        [data-theme="dark"] .card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .card-header {
+            background: #334155 !important;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .worker-footer {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #94a3b8;
+        }
+
+        [data-theme="dark"] .text-dark { color: #e2e8f0 !important; }
+        [data-theme="dark"] .text-muted { color: #94a3b8 !important; }
+        [data-theme="dark"] .bg-light { background: #334155 !important; }
+
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .table {
+            color: #e2e8f0;
+            --bs-table-bg: #1e293b;
+            --bs-table-border-color: #334155;
+        }
+
+        [data-theme="dark"] .list-group-item {
+            background: transparent;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .alert-success {
+            background: rgba(52, 211, 153, 0.15) !important;
+            border-color: #34d399 !important;
+            color: #34d399 !important;
+        }
+
+        [data-theme="dark"] .alert-danger {
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
+
+        [data-theme="dark"] .dropdown-menu {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background: rgba(96, 165, 250, 0.1) !important;
+        }
+
+        [data-theme="dark"] .btn-outline-secondary {
+            border-color: #475569 !important;
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .btn-outline-primary {
+            border-color: #60a5fa !important;
+            color: #60a5fa !important;
+        }
+
+        [data-theme="dark"] .btn-outline-danger {
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
+
+        .theme-toggle-worker {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--worker-border);
+            background: transparent;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle-worker:hover {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.08);
+            transform: rotate(20deg);
+        }
+
         body {
             background: var(--worker-bg);
             min-height: 100vh;
@@ -233,6 +353,9 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
+                    <button class="theme-toggle-worker" id="themeToggleBtn" type="button" title="Toggle dark/light mode">
+                        <i class="bi bi-moon-fill" id="themeIcon"></i>
+                    </button>
                     @await Html.PartialAsync("_LanguageSwitcher")
 
                     <span class="text-muted small">@User.Identity?.Name</span>
@@ -434,5 +557,29 @@
             });
         </script>
     }
+
+    <script>
+        (function () {
+            const html = document.documentElement;
+            const btn  = document.getElementById('themeToggleBtn');
+            const icon = document.getElementById('themeIcon');
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                if (icon) {
+                    icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+                }
+            }
+            const saved = localStorage.getItem('shatbly-theme') || 'light';
+            applyTheme(saved);
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    const current = html.getAttribute('data-theme') || 'light';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    applyTheme(next);
+                    localStorage.setItem('shatbly-theme', next);
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

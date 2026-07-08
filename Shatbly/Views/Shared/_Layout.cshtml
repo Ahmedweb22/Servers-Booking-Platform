@@ -42,6 +42,207 @@
                 --sidebar-width: 460px;
             }
 
+            /* Dark Mode Variables */
+            [data-theme="dark"] {
+                --primary-color: #e2e8f0;
+                --secondary-color: #60a5fa;
+                --accent-color: #fbbf24;
+                --success-color: #34d399;
+                --bg-color: #0f172a;
+                --surface-color: #1e293b;
+                --border-color: #334155;
+                --text-main: #e2e8f0;
+                --text-muted: #94a3b8;
+            }
+
+            [data-theme="dark"] .top-nav {
+                background: rgba(30, 41, 59, 0.95);
+                box-shadow: 0 1px 8px rgba(0,0,0,0.3);
+            }
+
+            [data-theme="dark"] .filter-bar {
+                background: var(--surface-color);
+                box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .nav-link-custom:hover,
+            [data-theme="dark"] .nav-link-custom.active {
+                color: var(--secondary-color);
+                background: rgba(96, 165, 250, 0.1);
+            }
+
+            [data-theme="dark"] .worker-card {
+                background: var(--surface-color);
+                box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .worker-card.featured {
+                background: linear-gradient(to bottom right, #1e293b, #0f172a);
+                box-shadow: 0 2px 16px rgba(96, 165, 250, 0.15);
+            }
+
+            [data-theme="dark"] .card {
+                background: var(--surface-color) !important;
+                border-color: var(--border-color) !important;
+            }
+
+            [data-theme="dark"] .card-header {
+                background: #334155 !important;
+            }
+
+            [data-theme="dark"] .rating-box {
+                background: rgba(251, 191, 36, 0.1);
+                color: #fbbf24;
+            }
+
+            [data-theme="dark"] .chip {
+                background: var(--surface-color);
+                color: var(--text-muted);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .chip:hover {
+                color: var(--secondary-color);
+                box-shadow: 0 2px 8px rgba(96, 165, 250, 0.15);
+            }
+
+            [data-theme="dark"] .search-input {
+                background: var(--bg-color);
+                color: var(--text-main);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .search-input:focus {
+                background: var(--surface-color);
+                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+            }
+
+            [data-theme="dark"] .filter-select {
+                background-color: var(--bg-color);
+                color: var(--text-main);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .map-badge {
+                background: rgba(30, 41, 59, 0.95);
+            }
+
+            [data-theme="dark"] .btn-light {
+                background: var(--surface-color) !important;
+                border-color: var(--border-color) !important;
+                color: var(--text-main) !important;
+            }
+
+            [data-theme="dark"] .dropdown-menu {
+                background: var(--surface-color) !important;
+                border-color: var(--border-color) !important;
+            }
+
+            [data-theme="dark"] .dropdown-item {
+                color: var(--text-main) !important;
+            }
+
+            [data-theme="dark"] .dropdown-item:hover {
+                background: rgba(96, 165, 250, 0.1) !important;
+            }
+
+            [data-theme="dark"] .dropdown-divider {
+                border-color: var(--border-color) !important;
+            }
+
+            [data-theme="dark"] .text-dark {
+                color: var(--text-main) !important;
+            }
+
+            [data-theme="dark"] .text-muted {
+                color: var(--text-muted) !important;
+            }
+
+            [data-theme="dark"] .bg-light {
+                background: #334155 !important;
+            }
+
+            [data-theme="dark"] .border-bottom {
+                border-color: var(--border-color) !important;
+            }
+
+            [data-theme="dark"] .hover-bg-light:hover {
+                background-color: #334155 !important;
+            }
+
+            [data-theme="dark"] .unread-notification {
+                background-color: rgba(96, 165, 250, 0.08) !important;
+            }
+
+            [data-theme="dark"] .brand-logo {
+                background: linear-gradient(135deg, var(--secondary-color), #93c5fd);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            [data-theme="dark"] .workers-sidebar {
+                background: var(--surface-color);
+                box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+            }
+
+            [data-theme="dark"] .tag {
+                background: rgba(96, 165, 250, 0.1);
+                color: var(--text-muted);
+            }
+
+            [data-theme="dark"] .alert-success {
+                background: rgba(52, 211, 153, 0.15) !important;
+                border-color: #34d399 !important;
+                color: #34d399 !important;
+            }
+
+            [data-theme="dark"] .alert-danger {
+                background: rgba(239, 68, 68, 0.15) !important;
+                border-color: #ef4444 !important;
+                color: #ef4444 !important;
+            }
+
+            [data-theme="dark"] .form-control,
+            [data-theme="dark"] .form-select {
+                background-color: #0f172a !important;
+                border-color: var(--border-color) !important;
+                color: var(--text-main) !important;
+            }
+
+            [data-theme="dark"] .list-group-item {
+                background: transparent;
+                border-color: var(--border-color);
+                color: var(--text-main);
+            }
+
+            [data-theme="dark"] .table {
+                color: var(--text-main);
+                --bs-table-bg: var(--surface-color);
+                --bs-table-border-color: var(--border-color);
+            }
+
+            /* Theme Toggle Button */
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 1px solid var(--border-color);
+                background: transparent;
+                color: var(--text-muted);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1.15rem;
+            }
+
+            .theme-toggle:hover {
+                color: var(--accent-color);
+                background: rgba(245, 158, 11, 0.08);
+                transform: rotate(20deg);
+            }
+
             html, body {
                 height: 100%;
                 overflow: hidden;
@@ -596,6 +797,9 @@
         </div>
 
         <div class="d-flex align-items-center gap-3">
+            <button class="theme-toggle" id="themeToggleBtn" type="button" title="Toggle dark/light mode">
+                <i class="bi bi-moon-fill" id="themeIcon"></i>
+            </button>
             @await Html.PartialAsync("_LanguageSwitcher")
 
             @if (SignInManager.IsSignedIn(User))
@@ -629,12 +833,7 @@
                     <i class="bi bi-bell fs-5 text-secondary"></i>
                 </a>
             }
-            <button class="btn btn-light rounded-circle p-2 position-relative border">
-                <i class="bi bi-bell fs-5 text-secondary"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                    <span class="visually-hidden">@Localizer["NewAlerts"]</span>
-                </span>
-            </button>
+
 
             @{
                 var displayName = isRtl ? "زائر" : "Guest";
@@ -1072,5 +1271,36 @@
             });
         </script>
     }
+
+    <script>
+        // ── Dark / Light Theme Toggle ──
+        (function () {
+            const html = document.documentElement;
+            const btn  = document.getElementById('themeToggleBtn');
+            const icon = document.getElementById('themeIcon');
+
+            function applyTheme(theme) {
+                html.setAttribute('data-theme', theme);
+                if (icon) {
+                    icon.className = theme === 'dark'
+                        ? 'bi bi-sun-fill'
+                        : 'bi bi-moon-fill';
+                }
+            }
+
+            // Load saved preference (default: light)
+            const saved = localStorage.getItem('shatbly-theme') || 'light';
+            applyTheme(saved);
+
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    const current = html.getAttribute('data-theme') || 'light';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    applyTheme(next);
+                    localStorage.setItem('shatbly-theme', next);
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
