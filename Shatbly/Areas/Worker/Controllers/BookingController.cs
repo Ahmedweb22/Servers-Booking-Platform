@@ -8,6 +8,9 @@ using Shatbly.Services.Notification;
 using Microsoft.AspNetCore.Localization;
 using Shatbly.Services.BookingSystem;
 
+using Shatbly.DataAccess;
+using Microsoft.EntityFrameworkCore;
+
 namespace Shatbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
@@ -17,15 +20,18 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IRepository<Order> _orderRepository;
         private readonly INotificationService _notificationService;
         private readonly UserManager<User> _userManager;
+        private readonly ApplicationDbContext _context;
 
         public BookingController(
             IRepository<Order> orderRepository,
             INotificationService notificationService,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            ApplicationDbContext context)
         {
             _orderRepository = orderRepository;
             _notificationService = notificationService;
             _userManager = userManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -90,6 +96,35 @@ namespace Shatbly.Areas.Worker.Controllers
                 else if (status == OrderStatuses.Completed)
                 {
                     order.Booking.Status = BookingStatus.Completed;
+
+                    // Fetch the worker's wallet
+                    var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == order.WorkerId);
+                    if (wallet == null)
+                    {
+                        wallet = new Wallet { UserId = order.WorkerId, Balance = 0, UpdatedAt = DateTime.UtcNow };
+                        await _context.Wallets.AddAsync(wallet);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    // Calculate payout: TotalPrice - ConvenienceFee
+                    decimal payout = Math.Max(0m, order.TotalPrice - order.ConvenienceFee);
+
+                    // Credit wallet
+                    wallet.Balance += payout;
+                    wallet.UpdatedAt = DateTime.UtcNow;
+                    _context.Wallets.Update(wallet);
+
+                    // Create WalletTransaction
+                    var transaction = new WalletTransaction
+                    {
+                        WalletId = wallet.Id,
+                        Amount = payout,
+                        Type = WalletTransactionType.Earning,
+                        Reference = $"Payout for Booking #{order.Id}",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _context.WalletTransactions.AddAsync(transaction);
+                    await _context.SaveChangesAsync();
                 }
                 else if (status == OrderStatuses.Cancelled || status == OrderStatuses.Rejected)
                 {

@@ -53,4 +53,10 @@
   <data name="PwdMedium" xml:space="preserve"><value>متوسطة</value></data>
   <data name="PwdStrong" xml:space="preserve"><value>قوية</value></data>
   <data name="PwdStrengthLabel" xml:space="preserve"><value>قوة كلمة المرور: </value></data>
+  <data name="City" xml:space="preserve"><value>المدينة</value></data>
+  <data name="District" xml:space="preserve"><value>المنطقة</value></data>
+  <data name="Street" xml:space="preserve"><value>عنوان الشارع</value></data>
+  <data name="SelectLocationOnMap" xml:space="preserve"><value>حدد موقعك على الخريطة</value></data>
+  <data name="CityRequired" xml:space="preserve"><value>المدينة مطلوبة.</value></data>
+  <data name="StreetRequired" xml:space="preserve"><value>الشارع مطلوب.</value></data>
 </root>

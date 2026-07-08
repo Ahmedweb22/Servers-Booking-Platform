@@ -84,6 +84,11 @@ namespace Shatbly.Areas.Worker.Controllers
                 return Forbid();
             }
 
+            if (model.HourlyRate <= 0)
+            {
+                ModelState.AddModelError("HourlyRate", "Hourly rate must be greater than 0.");
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _categoryRepo.GetAsync(c => c.IsActive, tracking: false);

@@ -1,4 +1,4 @@
-﻿using Azure;
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -53,6 +53,15 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(PromotionCreateVM vm)
         {
+            if (vm.Promotion.DiscountType == DiscountType.Percentage && vm.Promotion.DiscountValue > 100)
+            {
+                ModelState.AddModelError("Promotion.DiscountValue", "Percentage discount cannot exceed 100%.");
+            }
+            if (vm.Promotion.StartDate.HasValue && vm.Promotion.EndDate.HasValue && vm.Promotion.StartDate.Value > vm.Promotion.EndDate.Value)
+            {
+                ModelState.AddModelError("Promotion.EndDate", "End Date must be after Start Date.");
+            }
+
             if (!ModelState.IsValid)
             {
                 foreach (var item in ModelState)
@@ -91,6 +100,15 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(PromotionUpdateResponseVM vm)
         {
+            if (vm.Promotion.DiscountType == DiscountType.Percentage && vm.Promotion.DiscountValue > 100)
+            {
+                ModelState.AddModelError("Promotion.DiscountValue", "Percentage discount cannot exceed 100%.");
+            }
+            if (vm.Promotion.StartDate.HasValue && vm.Promotion.EndDate.HasValue && vm.Promotion.StartDate.Value > vm.Promotion.EndDate.Value)
+            {
+                ModelState.AddModelError("Promotion.EndDate", "End Date must be after Start Date.");
+            }
+
             if (!ModelState.IsValid)
             {
                 vm.ServiceCategories = await _serviceCategoryRepository.GetAsync(tracking: false);

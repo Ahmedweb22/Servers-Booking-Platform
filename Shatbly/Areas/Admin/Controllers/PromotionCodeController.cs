@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Shatbly.Areas.Admin.Controllers
@@ -51,6 +51,11 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(PromotionCodeCreateVM vm)
         {
+            if (vm.PromotionCode.MaxUses < 1)
+            {
+                ModelState.AddModelError("PromotionCode.MaxUses", "Max Uses must be at least 1.");
+            }
+
             if (!ModelState.IsValid)
             {
                 vm.Promotions = await _promotionRepository.GetAsync(tracking: false);
@@ -81,6 +86,11 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(PromotionCodeUpdateResponseVM vm)
         {
+            if (vm.PromotionCode.MaxUses < 1)
+            {
+                ModelState.AddModelError("PromotionCode.MaxUses", "Max Uses must be at least 1.");
+            }
+
             if (!ModelState.IsValid)
             {
                 vm.Promotions = await _promotionRepository.GetAsync(tracking: false);

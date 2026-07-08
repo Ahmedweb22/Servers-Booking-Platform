@@ -244,6 +244,26 @@
                     <strong>@Localizer["CurrencyFormat", Model.Booking.TotalPrice.ToString("0.00")]</strong>
                 </div>
             </div>
+
+            @if (Model.Booking.Booking != null && (Model.Booking.Booking.PromoCode != null || Model.Booking.Booking.Coupon != null))
+            {
+                <div class="stats" style="margin-top: 14px; border-top: 1px dashed #e7d7c8; padding-top: 14px;">
+                    @if (Model.Booking.Booking.PromoCode != null)
+                    {
+                        <div class="stat">
+                            <label>@Localizer["AppliedPromoCodeLabel"]</label>
+                            <strong>@Model.Booking.Booking.PromoCode.Code</strong>
+                        </div>
+                    }
+                    @if (Model.Booking.Booking.Coupon != null)
+                    {
+                        <div class="stat">
+                            <label>@Localizer["AppliedCouponLabel"]</label>
+                            <strong>@Model.Booking.Booking.Coupon.Code</strong>
+                        </div>
+                    }
+                </div>
+            }
         </section>
 
         <section class="stack">

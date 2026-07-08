@@ -53,4 +53,10 @@
   <data name="PwdMedium" xml:space="preserve"><value>Medium</value></data>
   <data name="PwdStrong" xml:space="preserve"><value>Strong</value></data>
   <data name="PwdStrengthLabel" xml:space="preserve"><value>Password strength: </value></data>
+  <data name="City" xml:space="preserve"><value>City</value></data>
+  <data name="District" xml:space="preserve"><value>District</value></data>
+  <data name="Street" xml:space="preserve"><value>Street Address</value></data>
+  <data name="SelectLocationOnMap" xml:space="preserve"><value>Select Location on Map</value></data>
+  <data name="CityRequired" xml:space="preserve"><value>City is required.</value></data>
+  <data name="StreetRequired" xml:space="preserve"><value>Street is required.</value></data>
 </root>

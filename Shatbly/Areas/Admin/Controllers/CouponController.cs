@@ -53,6 +53,19 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Coupon coupon)
         {
+            if (coupon.DiscountType == DiscountType.Percentage && coupon.DiscountValue > 100)
+            {
+                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%.");
+            }
+            if (coupon.MaxUses < 1)
+            {
+                ModelState.AddModelError("MaxUses", "Max Uses must be at least 1.");
+            }
+            if (coupon.ValidFrom > coupon.ValidUntil)
+            {
+                ModelState.AddModelError("ValidUntil", "Valid Until date must be after Valid From date.");
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;
@@ -78,6 +91,19 @@ namespace Shatbly.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Coupon coupon)
         {
+            if (coupon.DiscountType == DiscountType.Percentage && coupon.DiscountValue > 100)
+            {
+                ModelState.AddModelError("DiscountValue", "Percentage discount cannot exceed 100%.");
+            }
+            if (coupon.MaxUses < 1)
+            {
+                ModelState.AddModelError("MaxUses", "Max Uses must be at least 1.");
+            }
+            if (coupon.ValidFrom > coupon.ValidUntil)
+            {
+                ModelState.AddModelError("ValidUntil", "Valid Until date must be after Valid From date.");
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["error-notification"] = _sharedLocalizer["PleaseCorrectErrors"].Value;

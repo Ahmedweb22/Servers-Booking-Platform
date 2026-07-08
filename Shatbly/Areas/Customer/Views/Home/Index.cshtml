@@ -498,13 +498,45 @@
     <script>
         var map;
         var marker;
+        
+        var userLat = @(ViewBag.UserLat != null ? ViewBag.UserLat.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null");
+        var userLng = @(ViewBag.UserLng != null ? ViewBag.UserLng.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null");
+
+        var userIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        var workerIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
         function initMap() {
-            map = L.map('map-container').setView([26.8206, 30.8025], 6);
+            var centerLat = userLat ? userLat : 26.8206;
+            var centerLng = userLng ? userLng : 30.8025;
+            var centerZoom = userLat ? 12 : 6;
+
+            map = L.map('map-container').setView([centerLat, centerLng], centerZoom);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
+
+            if (userLat && userLng) {
+                var isAr = @(isRtl ? "true" : "false");
+                L.marker([userLat, userLng], { icon: userIcon }).addTo(map)
+                    .bindPopup("<b>" + (isAr ? "موقعك الحالي" : "Your Location") + "</b>")
+                    .openPopup();
+            }
 
             document.querySelector('.map-overlay').style.display = 'none';
         }
@@ -517,11 +549,16 @@
                 map.removeLayer(marker);
             }
 
-            map.setView([lat, lng], 15);
-
-            marker = L.marker([lat, lng]).addTo(map)
+            marker = L.marker([lat, lng], { icon: workerIcon }).addTo(map)
                 .bindPopup("<b>" + name + "</b><br>" + mapPopupText)
                 .openPopup();
+
+            if (userLat && userLng) {
+                var bounds = L.latLngBounds([[userLat, userLng], [lat, lng]]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            } else {
+                map.setView([lat, lng], 15);
+            }
         }
 
         window.onload = function() {

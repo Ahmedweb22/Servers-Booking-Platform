@@ -1,5 +1,8 @@
 <header class="topbar-panel">
     <div class="topbar-actions">
+        <button class="theme-toggle-admin" id="themeToggleBtn" type="button" title="Toggle dark/light mode">
+            <i class="bi bi-moon-fill" id="themeIcon"></i>
+        </button>
         @await Html.PartialAsync("_LanguageSwitcher")
 
         <div class="dropdown">

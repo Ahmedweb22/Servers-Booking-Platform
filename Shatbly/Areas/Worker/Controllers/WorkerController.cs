@@ -16,19 +16,22 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IStringLocalizer<WorkerController> _localizer;
         private readonly INotificationService _notificationService;
         private readonly IIdValidationService _idValidationService;
+        private readonly IRepository<Shatbly.Models.Address> _addressRepository;
 
         public WorkerController(
             UserManager<User> userManager, 
             IRepository<WorkerProfile> profileRepository, 
             IStringLocalizer<WorkerController> localizer,
             INotificationService notificationService,
-            IIdValidationService idValidationService)
+            IIdValidationService idValidationService,
+            IRepository<Shatbly.Models.Address> addressRepository)
         {
             _userManager = userManager;
             _profileRepository = profileRepository;
             _localizer = localizer;
             _notificationService = notificationService;
             _idValidationService = idValidationService;
+            _addressRepository = addressRepository;
         }
 
         [HttpGet]
@@ -116,6 +119,20 @@ namespace Shatbly.Areas.Worker.Controllers
         
             await _profileRepository.CreateAsync(Worker);
             await _profileRepository.CommitAsync();
+
+            // Create and save worker's address
+            var address = new Shatbly.Models.Address
+            {
+                City = "القاهرة",
+                District = "وسط البلد",
+                Street = model.Address ?? string.Empty,
+                Lat = model.Lat,
+                Lng = model.Lng,
+                IsDefault = true,
+                UserId = applicationUser.Id
+            };
+            await _addressRepository.CreateAsync(address);
+            await _addressRepository.CommitAsync();
 
             // Notify admins
             var admins = await _userManager.GetUsersInRoleAsync(SD.ROLE_ADMIN);

@@ -26,6 +26,7 @@ public class BookingSystemService : IBookingSystemService
 {
     private const int WorkerResponseWindowMinutes = 30;
     private static readonly TimeSpan SlotLeadTime = TimeSpan.FromHours(1);
+    private static readonly System.Threading.SemaphoreSlim _bookingLock = new System.Threading.SemaphoreSlim(1, 1);
 
     private readonly IRepository<ServiceCategory> _serviceCategoryRepository;
     private readonly IRepository<Order> _orderRepository;
@@ -122,7 +123,11 @@ public class BookingSystemService : IBookingSystemService
             basePrice = wDetails.hourlyRate;
         }
 
+        basePrice = basePrice * model.DurationHours;
+
         var pricing = CalculatePricing(basePrice, model.BookingType, (RecurrencePatterns)model.RecurrencePattern);
+
+        decimal additionalDiscount = 0;
 
         // Apply promo code discount if valid
         if (model.PromoCodeId.HasValue)
@@ -130,7 +135,7 @@ public class BookingSystemService : IBookingSystemService
             var promoCode = await _context.PromotionCodes
                 .Include(pc => pc.Promotion)
                 .FirstOrDefaultAsync(pc => pc.Id == model.PromoCodeId.Value);
-            if (promoCode != null && promoCode.IsActive && promoCode.Promotion.IsActive)
+            if (promoCode != null && promoCode.IsActive && promoCode.Promotion.IsActive && (!promoCode.Promotion.CategoryId.HasValue || promoCode.Promotion.CategoryId.Value == model.ServiceId))
             {
                 decimal promoDiscount = 0;
                 var promotion = promoCode.Promotion;
@@ -142,14 +147,38 @@ public class BookingSystemService : IBookingSystemService
                 {
                     promoDiscount = Math.Min(promotion.DiscountValue, pricing.ServicePrice);
                 }
-
-                pricing = (
-                    ServicePrice: pricing.ServicePrice,
-                    ConvenienceFee: pricing.ConvenienceFee,
-                    DiscountAmount: pricing.DiscountAmount + promoDiscount,
-                    TotalPrice: Math.Max(0, pricing.TotalPrice - promoDiscount)
-                );
+                additionalDiscount += promoDiscount;
             }
+        }
+
+        // Apply coupon discount if valid
+        if (model.CouponId.HasValue)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Id == model.CouponId.Value);
+            if (coupon != null && coupon.IsActive && coupon.UsedCount < coupon.MaxUses && coupon.ValidFrom <= DateTime.UtcNow && coupon.ValidUntil >= DateTime.UtcNow && (!coupon.CategoryId.HasValue || coupon.CategoryId.Value == model.ServiceId))
+            {
+                decimal couponDiscount = 0;
+                if (coupon.DiscountType == DiscountType.Percentage)
+                {
+                    couponDiscount = Math.Round(pricing.ServicePrice * (coupon.DiscountValue / 100m), 2);
+                }
+                else if (coupon.DiscountType == DiscountType.FixedAmount)
+                {
+                    couponDiscount = Math.Min(coupon.DiscountValue, pricing.ServicePrice);
+                }
+                additionalDiscount += couponDiscount;
+            }
+        }
+
+        if (additionalDiscount > 0)
+        {
+            pricing = (
+                ServicePrice: pricing.ServicePrice,
+                ConvenienceFee: pricing.ConvenienceFee,
+                DiscountAmount: pricing.DiscountAmount + additionalDiscount,
+                TotalPrice: Math.Max(0, pricing.TotalPrice - additionalDiscount)
+            );
         }
 
         model.ServiceOptions = services
@@ -188,7 +217,8 @@ public class BookingSystemService : IBookingSystemService
             new SelectListItem("Villa - 15 Lotus Compound, Sheikh Zayed", "15 Lotus Compound, Sheikh Zayed")
         ];
 
-        model.AvailabilityJson = System.Text.Json.JsonSerializer.Serialize(await BuildAvailabilityAsync(workers.Select(w => w.Id)));
+        var selectedWorkerIds = selectedWorker != null ? new List<string> { selectedWorker.Id } : new List<string>();
+        model.AvailabilityJson = System.Text.Json.JsonSerializer.Serialize(await BuildAvailabilityAsync(selectedWorkerIds));
         model.SelectedServiceName = selectedService?.Name ?? _localizer["ChooseService"].Value;
 
         var selectedWorkerName = selectedWorker != null ? $"{selectedWorker.FName} {selectedWorker.LName}".Trim() : "";
@@ -205,7 +235,7 @@ public class BookingSystemService : IBookingSystemService
 
         if (string.IsNullOrWhiteSpace(model.SelectedDate) &&
             selectedWorker is not null &&
-            await TryGetEarliestAvailableSlotAsync(selectedWorker.Id) is DateTime earliest)
+            await TryGetEarliestAvailableSlotAsync(selectedWorker.Id, model.DurationHours) is DateTime earliest)
         {
             model.SelectedDate = earliest.ToString("yyyy-MM-dd");
             model.SelectedTime = earliest.ToString("HH:mm");
@@ -224,23 +254,56 @@ public class BookingSystemService : IBookingSystemService
 
         return availability;
     }
-    private async Task<DateTime?> TryGetEarliestAvailableSlotAsync(string workerId)
+    private async Task<DateTime?> TryGetEarliestAvailableSlotAsync(string workerId, int durationHours)
     {
         var availability = await GetAvailableSlotsByDateAsync(workerId);
-        var firstDate = availability.OrderBy(kvp => kvp.Key).FirstOrDefault();
-
-        if (string.IsNullOrWhiteSpace(firstDate.Key) || firstDate.Value.Count == 0)
+        
+        foreach (var dateKvp in availability.OrderBy(kvp => kvp.Key))
         {
-            return null;
+            var dateStr = dateKvp.Key;
+            var times = dateKvp.Value;
+            
+            foreach (var timeStr in times)
+            {
+                if (DateTime.TryParse($"{dateStr} {timeStr}", out var scheduledAt))
+                {
+                    bool allConsecutiveAvailable = true;
+                    for (int i = 0; i < durationHours; i++)
+                    {
+                        var nextSlotStr = scheduledAt.AddHours(i).ToString("HH:mm");
+                        if (!times.Contains(nextSlotStr))
+                        {
+                            allConsecutiveAvailable = false;
+                            break;
+                        }
+                    }
+                    
+                    if (allConsecutiveAvailable)
+                    {
+                        return scheduledAt;
+                    }
+                }
+            }
         }
 
-        return DateTime.TryParse($"{firstDate.Key} {firstDate.Value[0]}", out var scheduledAt)
-            ? scheduledAt
-            : null;
+        return null;
     }
 
 
     public async Task<BookingCreateResult> CreateAsync(BookingWizardViewModel model)
+    {
+        await _bookingLock.WaitAsync();
+        try
+        {
+            return await CreateInternalAsync(model);
+        }
+        finally
+        {
+            _bookingLock.Release();
+        }
+    }
+
+    private async Task<BookingCreateResult> CreateInternalAsync(BookingWizardViewModel model)
     {
         var validationErrors = new Dictionary<string, IReadOnlyList<string>>();
 
@@ -307,6 +370,7 @@ public class BookingSystemService : IBookingSystemService
         var customer = await GetOrCreateCustomerAsync(model);
 
         decimal basePrice = workerProfile!.WorkerServices.HourlyRate;
+        basePrice = basePrice * model.DurationHours;
         var pricing = CalculatePricing(basePrice, model.BookingType, (RecurrencePatterns)model.RecurrencePattern);
 
         // Validate and apply promo code discount
@@ -316,7 +380,7 @@ public class BookingSystemService : IBookingSystemService
             promoCode = await _context.PromotionCodes
                 .Include(pc => pc.Promotion)
                 .FirstOrDefaultAsync(pc => pc.Id == model.PromoCodeId.Value);
-            if (promoCode != null && promoCode.IsActive && promoCode.Promotion.IsActive && promoCode.UsedCount < promoCode.MaxUses)
+            if (promoCode != null && promoCode.IsActive && promoCode.Promotion.IsActive && promoCode.UsedCount < promoCode.MaxUses && (!promoCode.Promotion.CategoryId.HasValue || promoCode.Promotion.CategoryId.Value == model.ServiceId))
             {
                 decimal promoDiscount = 0;
                 var promotion = promoCode.Promotion;
@@ -342,6 +406,37 @@ public class BookingSystemService : IBookingSystemService
             }
         }
 
+        // Validate and apply coupon discount
+        Shatbly.Models.Coupon? coupon = null;
+        if (model.CouponId.HasValue)
+        {
+            coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Id == model.CouponId.Value);
+            if (coupon != null && coupon.IsActive && coupon.UsedCount < coupon.MaxUses && coupon.ValidFrom <= DateTime.UtcNow && coupon.ValidUntil >= DateTime.UtcNow && (!coupon.CategoryId.HasValue || coupon.CategoryId.Value == model.ServiceId))
+            {
+                decimal couponDiscount = 0;
+                if (coupon.DiscountType == DiscountType.Percentage)
+                {
+                    couponDiscount = Math.Round(pricing.ServicePrice * (coupon.DiscountValue / 100m), 2);
+                }
+                else if (coupon.DiscountType == DiscountType.FixedAmount)
+                {
+                    couponDiscount = Math.Min(coupon.DiscountValue, pricing.ServicePrice);
+                }
+
+                pricing = (
+                    ServicePrice: pricing.ServicePrice,
+                    ConvenienceFee: pricing.ConvenienceFee,
+                    DiscountAmount: pricing.DiscountAmount + couponDiscount,
+                    TotalPrice: Math.Max(0, pricing.TotalPrice - couponDiscount)
+                );
+
+                coupon.UsedCount++;
+                _context.Coupons.Update(coupon);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         var address = (await _addressRepository.GetAsync(a => a.UserId == customer.Id && a.Street == model.AddressLine)).FirstOrDefault();
         if (address is null)
         {
@@ -363,11 +458,12 @@ public class BookingSystemService : IBookingSystemService
             WorkerId = workerProfile.Id,
             AddressId = address.Id,
             ScheduledAt = resolvedScheduledAt!.Value,
-            DurationHours = 1,
+            DurationHours = model.DurationHours,
             TotalPrice = pricing.TotalPrice,
             DiscountAmt = pricing.DiscountAmount,
             Status = Shatbly.Models.BookingStatus.Pending,
             PromoCodeId = promoCode?.Id,
+            CouponId = coupon?.Id,
             CreatedAt = DateTime.UtcNow
         };
         await _bookingRepository.CreateAsync(parentBooking);
@@ -383,7 +479,7 @@ public class BookingSystemService : IBookingSystemService
                 typeof(Shatbly.Models.BookingTypes),
                 model.BookingType.ToString()),
             ScheduledAt = resolvedScheduledAt!.Value,
-            DurationHours = 1,
+            DurationHours = model.DurationHours,
             AddressLabel = model.AddressLabel ?? "Home",
             AddressLine = model.AddressLine ?? "",
             Notes = model.Notes,
@@ -438,15 +534,38 @@ public class BookingSystemService : IBookingSystemService
 
     public async Task<BookingActionResult> RescheduleAsync(int id, string scheduledAt)
     {
+        await _bookingLock.WaitAsync();
+        try
+        {
+            return await RescheduleInternalAsync(id, scheduledAt);
+        }
+        finally
+        {
+            _bookingLock.Release();
+        }
+    }
+
+    private async Task<BookingActionResult> RescheduleInternalAsync(int id, string scheduledAt)
+    {
         var booking = (await _orderRepository.GetAsync(o => o.Id == id, new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Booking })).FirstOrDefault();
         if (booking is null)
         {
             return new BookingActionResult { NotFound = true };
         }
 
+        if (!CanManageBooking(booking))
+        {
+            return FailAction(id, "This booking cannot be rescheduled in its current status.");
+        }
+
         if (!DateTime.TryParse(scheduledAt, out var parsedSlot) || booking.WorkerId is null)
         {
             return FailAction(id, _localizer["ChooseValidSlot"].Value);
+        }
+
+        if (parsedSlot.ToString("yyyy-MM-dd HH:mm") == booking.ScheduledAt.ToString("yyyy-MM-dd HH:mm"))
+        {
+            return FailAction(id, "Please select a different date and time from the current scheduled slot.");
         }
 
         var slot = await TryResolveScheduledAtAsync(
@@ -474,7 +593,7 @@ public class BookingSystemService : IBookingSystemService
             booking.Booking.Status = Shatbly.Models.BookingStatus.Pending;
         }
 
-         _orderRepository.Update(booking);
+        _orderRepository.Update(booking);
         await _orderRepository.CommitAsync();
         //await _userManager.UpdateAsync(booking);
 
@@ -495,11 +614,19 @@ public class BookingSystemService : IBookingSystemService
             return new BookingActionResult { NotFound = true };
         }
 
+        if (!CanManageBooking(booking))
+        {
+            return FailAction(id, "This booking cannot be cancelled in its current status.");
+        }
+
+        if (string.IsNullOrWhiteSpace(cancellationReason))
+        {
+            return FailAction(id, "Cancellation reason is required.");
+        }
+
         booking.Status = OrderStatuses.Cancelled;
         booking.CancelledAt = DateTime.UtcNow;
-        booking.CancellationReason = string.IsNullOrWhiteSpace(cancellationReason)
-            ? _localizer["CancelledByCustomer"].Value
-            : cancellationReason.Trim();
+        booking.CancellationReason = cancellationReason.Trim();
         booking.RefundAmount = CalculateRefund(booking);
 
         if (booking.Booking is not null)
@@ -530,6 +657,16 @@ public class BookingSystemService : IBookingSystemService
         if (!string.IsNullOrWhiteSpace(booking.WorkerId))
         {
             booking.Worker = await _userManager.FindByIdAsync(booking.WorkerId);
+        }
+
+        if (booking.Booking != null)
+        {
+            await _context.Entry(booking.Booking).Reference(b => b.Coupon).LoadAsync();
+            await _context.Entry(booking.Booking).Reference(b => b.PromoCode).LoadAsync();
+            if (booking.Booking.PromoCode != null)
+            {
+                await _context.Entry(booking.Booking.PromoCode).Reference(pc => pc.Promotion).LoadAsync();
+            }
         }
     }
 
@@ -615,7 +752,7 @@ public class BookingSystemService : IBookingSystemService
 
 
 
-    private async Task<Dictionary<string, List<string>>> GetAvailableSlotsByDateAsync(string workerId, int? ignoreOrderId = null)
+    public async Task<Dictionary<string, List<string>>> GetAvailableSlotsByDateAsync(string workerId, int? ignoreOrderId = null)
     {
         var result = new Dictionary<string, List<string>>();
         var now = DateTime.Now;
@@ -693,7 +830,7 @@ public class BookingSystemService : IBookingSystemService
     {
         if (model.BookingType == BookingTypes.Instant)
         {
-            return await TryGetEarliestAvailableSlotAsync(workerId);
+            return await TryGetEarliestAvailableSlotAsync(workerId, model.DurationHours);
         }
 
         if (!DateTime.TryParse($"{model.SelectedDate} {model.SelectedTime}", out var scheduledAt))
@@ -701,18 +838,31 @@ public class BookingSystemService : IBookingSystemService
             return null;
         }
 
-        return await IsSlotAvailableAsync(workerId, scheduledAt, ignoreOrderId)
+        return await IsSlotAvailableAsync(workerId, scheduledAt, model.DurationHours, ignoreOrderId)
             ? scheduledAt
             : null;
     }
 
 
-    private async Task<bool> IsSlotAvailableAsync(string workerId, DateTime scheduledAt, int? ignoreOrderId = null)
+    private async Task<bool> IsSlotAvailableAsync(string workerId, DateTime scheduledAt, int durationHours, int? ignoreOrderId = null)
     {
         var availability = await GetAvailableSlotsByDateAsync(workerId, ignoreOrderId);
 
-        return availability.TryGetValue(scheduledAt.ToString("yyyy-MM-dd"), out var times)
-               && times.Contains(scheduledAt.ToString("HH:mm"));
+        if (!availability.TryGetValue(scheduledAt.ToString("yyyy-MM-dd"), out var times))
+        {
+            return false;
+        }
+
+        for (int i = 0; i < durationHours; i++)
+        {
+            var slotTime = scheduledAt.AddHours(i).ToString("HH:mm");
+            if (!times.Contains(slotTime))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool CanManageBooking(Order booking)
@@ -755,9 +905,25 @@ public class BookingSystemService : IBookingSystemService
     }
     public async Task<bool> AddReviewAsync(Review review)
     { 
-    var booking = await _orderRepository.GetOneAsync(o => o.Id == review.BookingId);
+        if (review.Rating < 1 || review.Rating > 5)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(review.Comment))
+        {
+            review.Comment = System.Net.WebUtility.HtmlEncode(review.Comment.Trim());
+        }
+
+        var booking = await _orderRepository.GetOneAsync(o => o.Id == review.BookingId);
         if (booking != null && booking.Status == OrderStatuses.Completed)
         {
+            var existingReview = (await _reviewRepository.GetAsync(r => r.BookingId == review.BookingId && r.ReviewerId == review.ReviewerId)).FirstOrDefault();
+            if (existingReview != null)
+            {
+                return false;
+            }
+
             await _reviewRepository.CreateAsync(review);
             await _reviewRepository.CommitAsync();
             return true;
@@ -774,6 +940,10 @@ public class BookingSystemService : IBookingSystemService
 
         if (booking.Booking != null)
         {
+            if (booking.Booking.Status == BookingStatus.Cancelled || booking.Booking.Status == BookingStatus.Disputed)
+            {
+                return false;
+            }
             booking.Booking.Status = BookingStatus.Disputed;
         }
         _orderRepository.Update(booking);

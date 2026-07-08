@@ -62,6 +62,11 @@ namespace Shatbly.ViewModels
         public string ServiceDetailsJson { get; set; } = "{}";
         public int? PromoCodeId { get; set; }
         public string? PromoCodeText { get; set; }
+        public int? CouponId { get; set; }
+        public string? CouponCode { get; set; }
+        [Required(ErrorMessage = "Choose duration.")]
+        [Range(1, 8, ErrorMessage = "Duration must be between 1 and 8 hours.")]
+        public int DurationHours { get; set; } = 1;
         public string SelectedServiceName { get; set; } = string.Empty;
         public string SelectedWorkerName { get; set; } = string.Empty;
         public decimal ServicePrice { get; set; }

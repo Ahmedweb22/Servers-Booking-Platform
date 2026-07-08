@@ -83,7 +83,9 @@
                             else if (item.RoleName == SD.ROLE_CUSTOMER) { badgeColor = "bg-success bg-opacity-10 text-success"; }
 
                             <tr class="@(isRtl ? "text-end" : "text-start")">
-                                <td class="fw-bold text-dark">@item.Id</td>
+                                <td class="fw-bold text-dark text-muted small" style="font-family: monospace;" title="@item.Id">
+                                    @(item.Id.Length > 8 ? item.Id.Substring(0, 8) + "..." : item.Id)
+                                </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2 justify-content-start @(isRtl ? "flex-row-reverse" : "")">
                                         <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
