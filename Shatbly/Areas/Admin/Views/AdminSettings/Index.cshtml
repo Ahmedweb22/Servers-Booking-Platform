@@ -1,0 +1,265 @@
+﻿@model Shatbly.ViewModels.SettingViewModel.SettingsViewModel
+@{
+    ViewData["Title"] = "Account Settings";
+    var isProfile = Model.ActiveTab == "profile";
+    var isPassword = Model.ActiveTab == "password";
+    var success = TempData["SuccessMessage"]?.ToString();
+}
+
+<link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+
+<div class="s-page">
+
+    <header class="s-header">
+        <span class="s-header__eye">Administration</span>
+        <h1 class="s-header__title">Account Settings</h1>
+        <p class="s-header__sub">Manage your name, email address, and login password.</p>
+    </header>
+
+    @if (success is not null)
+    {
+        <div class="s-toast s-toast--ok" role="status">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>
+            @success
+        </div>
+    }
+
+    <div class="s-shell">
+
+        <nav class="s-nav" aria-label="Settings tabs">
+            <a asp-action="Index" asp-route-tab="profile"
+               class="s-nav__link @(isProfile ? "is-on" : "")">
+                <svg width="15" height="15" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+                Profile
+            </a>
+            <a asp-action="Index" asp-route-tab="password"
+               class="s-nav__link @(isPassword ? "is-on" : "")">
+                <svg width="15" height="15" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Password
+            </a>
+        </nav>
+
+        <div class="s-card">
+
+            @if (isProfile)
+            {
+                <div class="s-card__head">
+                    <h2 class="s-card__title">Profile Information</h2>
+                    <p class="s-card__desc">Update your display name or email address.</p>
+                </div>
+
+                @if (Model.Profile.CurrentName is not null)
+                {
+                    <div class="s-chip">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                        </svg>
+                        <span class="s-chip__name">@Model.Profile.CurrentName</span>
+                        <span class="s-chip__sep">·</span>
+                        <span class="s-chip__email">@Model.Profile.CurrentEmail</span>
+                    </div>
+                }
+
+                <form asp-action="UpdateProfile" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="s-errors"></div>
+
+                    <div class="s-fields">
+
+                        <div class="s-field">
+                            <label asp-for="Profile.FullName" class="s-field__lbl"></label>
+                            <div class="s-field__wrap">
+                                <svg class="s-field__ico" width="15" height="15" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                                </svg>
+                                <input asp-for="Profile.FullName" class="s-field__input"
+                                       placeholder="Your full name" autocomplete="name" />
+                            </div>
+                            <span asp-validation-for="Profile.FullName" class="s-field__err"></span>
+                        </div>
+
+                        <div class="s-field">
+                            <label asp-for="Profile.Email" class="s-field__lbl"></label>
+                            <div class="s-field__wrap">
+                                <svg class="s-field__ico" width="15" height="15" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <polyline points="2,4 12,13 22,4" />
+                                </svg>
+                                <input asp-for="Profile.Email" type="email" class="s-field__input"
+                                       placeholder="admin@example.com" autocomplete="email" />
+                            </div>
+                            <span asp-validation-for="Profile.Email" class="s-field__err"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="s-actions">
+                        <button type="submit" class="s-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            }
+
+            @if (isPassword)
+            {
+                <div class="s-card__head">
+                    <h2 class="s-card__title">Change Password</h2>
+                    <p class="s-card__desc">
+                        At least 8 characters — include an uppercase letter,
+                        a number, and a special character.
+                    </p>
+                </div>
+
+                <form asp-action="ChangePassword" method="post" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="s-errors"></div>
+
+                    <div class="s-fields">
+
+                        <div class="s-field">
+                            <label asp-for="Password.CurrentPassword" class="s-field__lbl"></label>
+                            <div class="s-field__wrap">
+                                <svg class="s-field__ico" width="15" height="15" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                <input asp-for="Password.CurrentPassword" type="password"
+                                       class="s-field__input" placeholder="••••••••"
+                                       autocomplete="current-password" />
+                                <button type="button" class="s-field__eye"
+                                        onclick="togglePwd(this)" aria-label="Show password">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password.CurrentPassword" class="s-field__err"></span>
+                        </div>
+
+                        <div class="s-field">
+                            <label asp-for="Password.NewPassword" class="s-field__lbl"></label>
+                            <div class="s-field__wrap">
+                                <svg class="s-field__ico" width="15" height="15" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                                <input asp-for="Password.NewPassword" type="password"
+                                       class="s-field__input" placeholder="••••••••"
+                                       autocomplete="new-password"
+                                       oninput="checkStrength(this.value)" />
+                                <button type="button" class="s-field__eye"
+                                        onclick="togglePwd(this)" aria-label="Show password">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                                         stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password.NewPassword" class="s-field__err"></span>
+
+                            <div class="s-strength" id="strengthMeter" hidden>
+                                <div class="s-strength__track">
+                                    <div class="s-strength__fill" id="strengthFill"></div>
+                                </div>
+                                <span class="s-strength__lbl" id="strengthLabel">Weak</span>
+                            </div>
+                        </div>
+
+                        <div class="s-field">
+                            <label asp-for="Password.ConfirmPassword" class="s-field__lbl"></label>
+                            <div class="s-field__wrap">
+                                <svg class="s-field__ico" width="15" height="15" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                <input asp-for="Password.ConfirmPassword" type="password"
+                                       class="s-field__input" placeholder="••••••••"
+                                       autocomplete="new-password" />
+                            </div>
+                            <span asp-validation-for="Password.ConfirmPassword" class="s-field__err"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="s-actions">
+                        <button type="submit" class="s-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function togglePwd(btn) {
+            const input = btn.closest('.s-field__wrap').querySelector('input');
+            const hide  = input.type === 'text';
+            input.type  = hide ? 'password' : 'text';
+            btn.setAttribute('aria-label', hide ? 'Show password' : 'Hide password');
+        }
+
+        function checkStrength(val) {
+            const meter = document.getElementById('strengthMeter');
+            const fill  = document.getElementById('strengthFill');
+            const lbl   = document.getElementById('strengthLabel');
+            meter.hidden = val.length === 0;
+            if (!val.length) return;
+
+            let score = 0;
+            if (val.length >= 8)   score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/\d/.test(val))    score++;
+            if (/[\W_]/.test(val)) score++;
+            if (val.length >= 14)  score++;
+
+            const levels = [
+                { w:'20%',  cls:'weak',   txt:'Weak'   },
+                { w:'40%',  cls:'weak',   txt:'Weak'   },
+                { w:'60%',  cls:'fair',   txt:'Fair'   },
+                { w:'80%',  cls:'good',   txt:'Good'   },
+                { w:'100%', cls:'strong', txt:'Strong' },
+            ];
+            const l = levels[Math.min(score, 4)];
+            fill.style.width = l.w;
+            fill.className   = `s-strength__fill s-strength__fill--${l.cls}`;
+            lbl.textContent  = l.txt;
+        }
+    </script>
+}

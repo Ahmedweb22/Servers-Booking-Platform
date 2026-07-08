@@ -39,16 +39,19 @@
                     <input class="form-control" placeholder="Enter Email" asp-for="Email">
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label">Password (leave blank to keep current)</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" placeholder="Enter New Password (Optional)" asp-for="Password" id="passwordField" value="@Model.Password">
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                        </button>
+                @if (Model.RoleName != Shatbly.Utilities.SD.ROLE_WORKER)
+                {
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password (leave blank to keep current)</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" placeholder="Enter New Password (Optional)" asp-for="Password" id="passwordField" value="@Model.Password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
+                }
 
                 <div class="mb-3">
                     <label asp-for="RoleName" class="form-label">Role</label>
@@ -83,33 +86,35 @@
     const toggleIcon = document.getElementById('togglePasswordIcon');
     const toggleBtn = document.getElementById('togglePassword');
 
-    // Restore value
-    const savedPasswordValue = @Html.Raw(Json.Serialize(Model?.Password));
-    if (savedPasswordValue) {
-        passwordField.value = savedPasswordValue;
-    }
+    if (passwordField) {
+        // Restore value
+        const savedPasswordValue = @Html.Raw(Json.Serialize(Model?.Password));
+        if (savedPasswordValue) {
+            passwordField.value = savedPasswordValue;
+        }
 
-    // Restore state from sessionStorage
-    const isPasswordVisible = sessionStorage.getItem('passwordVisible') === 'true';
-    if (isPasswordVisible) {
-        passwordField.type = 'text';
-        toggleIcon.classList.remove('bi-eye');
-        toggleIcon.classList.add('bi-eye-slash');
-    }
-
-    toggleBtn.addEventListener('click', function () {
-        if (passwordField.type === 'password') {
+        // Restore state from sessionStorage
+        const isPasswordVisible = sessionStorage.getItem('passwordVisible') === 'true';
+        if (isPasswordVisible) {
             passwordField.type = 'text';
             toggleIcon.classList.remove('bi-eye');
             toggleIcon.classList.add('bi-eye-slash');
-            sessionStorage.setItem('passwordVisible', 'true');
-        } else {
-            passwordField.type = 'password';
-            toggleIcon.classList.remove('bi-eye-slash');
-            toggleIcon.classList.add('bi-eye');
-            sessionStorage.setItem('passwordVisible', 'false');
         }
-    });
+
+        toggleBtn.addEventListener('click', function () {
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+                sessionStorage.setItem('passwordVisible', 'true');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+                sessionStorage.setItem('passwordVisible', 'false');
+            }
+        });
+    }
 </script>
 @section Scripts {
     <partial name="~/Views/Shared/_NotificationPartial.cshtml" />

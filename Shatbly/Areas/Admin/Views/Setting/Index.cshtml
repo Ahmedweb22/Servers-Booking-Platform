@@ -1,0 +1,302 @@
+@model Shatbly.ViewModels.EditUserVM
+@{
+    ViewBag.Title = Localizer["Settings"]?.Value ?? "Account Settings";
+    var firstLetter = !string.IsNullOrEmpty(Model.FName) ? Model.FName[0].ToString().ToUpper() : "A";
+}
+
+<style>
+    .settings-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    
+    .settings-sidebar-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        padding: 30px 20px;
+    }
+
+    .settings-main-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        padding: 35px;
+        min-height: 500px;
+    }
+
+    .avatar-container {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: white;
+        margin: 0 auto 15px;
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
+        border: 4px solid #fff;
+    }
+
+    .settings-pill {
+        border-radius: 14px;
+        font-weight: 700;
+        padding: 14px 20px;
+        color: #475569;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        background-color: #f8fafc;
+        width: 100%;
+        text-align: start;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .settings-pill.active {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+        color: white !important;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+    }
+
+    .settings-pill:hover:not(.active) {
+        background-color: #f1f5f9;
+        color: #0f172a;
+        transform: translateX(4px);
+    }
+
+    html[dir="rtl"] .settings-pill:hover:not(.active) {
+        transform: translateX(-4px);
+    }
+
+    .form-control-premium {
+        border-radius: 14px;
+        border: 1.5px solid #e2e8f0;
+        padding: 14px 18px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background-color: #f8fafc;
+    }
+
+    .form-control-premium:focus {
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+
+    .form-label-premium {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    .btn-gradient-primary {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-weight: 700;
+        padding: 14px 28px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.35);
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+    }
+
+    .btn-gradient-primary:active {
+        transform: translateY(0);
+    }
+
+    .input-group-premium {
+        position: relative;
+    }
+    
+    .password-toggle-btn {
+        background: none;
+        border: none;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        cursor: pointer;
+        z-index: 10;
+        padding: 5px;
+    }
+
+    html[dir="rtl"] .password-toggle-btn {
+        right: auto;
+        left: 15px;
+    }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="settings-wrapper">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="fw-900 text-dark mb-1">@ViewBag.Title</h3>
+                <p class="text-muted mb-0">@(Localizer["ManageAccountDetails"]?.Value ?? "Update your personal profile details and security settings.")</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Sidebar: User Summary & Tab Navigation -->
+            <div class="col-lg-3">
+                <div class="settings-sidebar-card text-center mb-4">
+                    <div class="avatar-container">
+                        @firstLetter
+                    </div>
+                    <h5 class="fw-800 text-dark mb-1">@Model.FName @Model.LName</h5>
+                    <span class="badge bg-primary-subtle text-primary fw-700 px-3 py-2 rounded-pill mb-4">
+                        @Model.RoleName
+                    </span>
+
+                    <div class="nav flex-column nav-pills gap-2 text-start" id="settings-tabs" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link settings-pill active" id="profile-tab" data-bs-toggle="pill" data-bs-target="#profile-panel" type="button" role="tab" aria-controls="profile-panel" aria-selected="true">
+                            <i class="fa-regular fa-user"></i>
+                            <span>@(Localizer["PersonalInfo"]?.Value ?? "Personal Info")</span>
+                        </button>
+                        <button class="nav-link settings-pill" id="security-tab" data-bs-toggle="pill" data-bs-target="#security-panel" type="button" role="tab" aria-controls="security-panel" aria-selected="false">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>@(Localizer["Security"]?.Value ?? "Password & Security")</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area: Forms -->
+            <div class="col-lg-9">
+                <div class="settings-main-card">
+                    <form method="post" id="settingsForm" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="tab-content" id="settings-tab-content">
+                            <!-- TAB 1: Personal Info -->
+                            <div class="tab-pane fade show active" id="profile-panel" role="tabpanel" aria-labelledby="profile-tab">
+                                <h4 class="fw-800 text-dark mb-4 pb-2 border-bottom">
+                                    @(Localizer["PersonalInfo"]?.Value ?? "Personal Information")
+                                </h4>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="FName" class="form-label-premium">@(Localizer["FirstName"]?.Value ?? "First Name")</label>
+                                        <input asp-for="FName" class="form-control form-control-premium" placeholder="e.g. John" required />
+                                        <span asp-validation-for="FName" class="text-danger small"></span>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label asp-for="LName" class="form-label-premium">@(Localizer["LastName"]?.Value ?? "Last Name")</label>
+                                        <input asp-for="LName" class="form-control form-control-premium" placeholder="e.g. Doe" required />
+                                        <span asp-validation-for="LName" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label asp-for="UserName" class="form-label-premium">@(Localizer["Username"]?.Value ?? "Username")</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0 rounded-start-4 px-3" style="border: 1.5px solid #e2e8f0;"><i class="fa-regular fa-at text-muted"></i></span>
+                                            <input asp-for="UserName" class="form-control form-control-premium rounded-start-0" placeholder="username" required style="border-left: none;" />
+                                        </div>
+                                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="Email" class="form-label-premium">@(Localizer["Email"]?.Value ?? "Email Address")</label>
+                                        <input asp-for="Email" type="email" class="form-control form-control-premium" placeholder="name@example.com" required />
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label asp-for="Phone" class="form-label-premium">@(Localizer["Phone"]?.Value ?? "Phone Number")</label>
+                                        <input asp-for="Phone" type="tel" class="form-control form-control-premium" placeholder="01xxxxxxxxx" required pattern="^(01)[0-9]{9}$" />
+                                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 2: Security & Password -->
+                            <div class="tab-pane fade" id="security-panel" role="tabpanel" aria-labelledby="security-tab">
+                                <h4 class="fw-800 text-dark mb-4 pb-2 border-bottom">
+                                    @(Localizer["Security"]?.Value ?? "Security Settings")
+                                </h4>
+                                <p class="text-muted mb-4">
+                                    @(Localizer["SecurityDescription"]?.Value ?? "If you wish to change your password, enter a new one below. Otherwise, leave this section blank.")
+                                </p>
+
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label asp-for="Password" class="form-label-premium">@(Localizer["NewPassword"]?.Value ?? "New Password")</label>
+                                        <div class="input-group-premium">
+                                            <input asp-for="Password" type="password" class="form-control form-control-premium w-100" id="passwordField" placeholder="@(Localizer["NewPasswordPlaceholder"]?.Value ?? "Enter new password (optional)")" minlength="6" autocomplete="new-password" />
+                                            <button type="button" class="password-toggle-btn" id="togglePasswordBtn">
+                                                <i class="fa-regular fa-eye" id="passwordToggleIcon"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4 pt-3 border-top">
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn-gradient-primary">
+                                    <i class="fa-regular fa-floppy-disk me-2"></i>
+                                    <span>@(Localizer["SaveSettings"]?.Value ?? "Save Settings")</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="~/Areas/Admin/Views/Shared/_NotificationPartial.cshtml" />
+    <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Password Show/Hide Toggle
+            const toggleBtn = document.getElementById("togglePasswordBtn");
+            const passwordField = document.getElementById("passwordField");
+            const toggleIcon = document.getElementById("passwordToggleIcon");
+
+            if (toggleBtn && passwordField && toggleIcon) {
+                toggleBtn.addEventListener("click", function () {
+                    if (passwordField.type === "password") {
+                        passwordField.type = "text";
+                        toggleIcon.classList.remove("fa-eye");
+                        toggleIcon.classList.add("fa-eye-slash");
+                    } else {
+                        passwordField.type = "password";
+                        toggleIcon.classList.remove("fa-eye-slash");
+                        toggleIcon.classList.add("fa-eye");
+                    }
+                });
+            }
+
+            // Sync tab switching active state in sidebar UI
+            const tabButtons = document.querySelectorAll('#settings-tabs button');
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function (event) {
+                    // event.target refers to the newly activated tab button
+                    // event.relatedTarget refers to the previous active tab button
+                });
+            });
+        });
+    </script>
+}

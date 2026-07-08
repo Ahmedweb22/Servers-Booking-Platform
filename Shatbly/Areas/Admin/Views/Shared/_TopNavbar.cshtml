@@ -1,9 +1,4 @@
 <header class="topbar-panel">
-    <div class="topbar-search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
-    </div>
-    
     <div class="topbar-actions">
         @await Html.PartialAsync("_LanguageSwitcher")
 
@@ -15,7 +10,7 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-0" aria-labelledby="notificationsDropdown" style="width: 340px; max-height: 450px; overflow-y: auto;">
                 <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light rounded-top-4">
                     <h6 class="mb-0 fw-bold">@Localizer["Notifications"]</h6>
-                    <a href="/Customer/Notification/MyNotification" class="text-decoration-none small fw-semibold text-primary">@Localizer["ViewAll"]</a>
+                    <a href="/Admin/Messages" class="text-decoration-none small fw-semibold text-primary">@Localizer["ViewAll"]</a>
                 </li>
                 <div id="notifications-list" style="max-height: 350px; overflow-y: auto;">
                     <div class="p-4 text-center text-muted">
@@ -26,21 +21,12 @@
             </ul>
         </div>
 
-        <div class="dropdown">
-            <button class="profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <div class="profile-avatar">A</div>
-                <div class="profile-meta">
-                    <strong>@Localizer["AdminUser"]</strong>
-                    <small>@Localizer["SuperAdmin"]</small>
-                </div>
-            </button>
-
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
-                <li><a class="dropdown-item" href="#"><i class="fa-regular fa-user me-2"></i>@Localizer["Profile"]</a></li>
-                <li><a class="dropdown-item" href="#"><i class="fa-solid fa-gear me-2"></i>@Localizer["Settings"]</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item text-danger" href="/Identity/Account/Logout"><i class="fa-solid fa-right-from-bracket me-2"></i>@Localizer["Logout"]</a></li>
-            </ul>
+        <div class="profile-display">
+            <div class="profile-avatar">A</div>
+            <div class="profile-meta">
+                <strong>@Localizer["AdminUser"]</strong>
+                <small>@Localizer["SuperAdmin"]</small>
+            </div>
         </div>
     </div>
 </header>
@@ -97,34 +83,24 @@
                             item.className = `p-3 border-bottom d-flex align-items-start gap-2 hover-bg-light ${notification.isRead ? '' : 'unread-notification'}`;
                             item.style.cursor = 'pointer';
                             
-                            // Handle click to mark read
+                            // Handle click to mark read and navigate
                             item.addEventListener('click', function (e) {
                                 e.stopPropagation();
-                                fetch(`/Customer/Notification/MarkAsReadApi/${notification.id}`, {
-                                    method: 'POST'
-                                }).then(res => {
-                                    if (res.ok) {
-                                        // Visually mark as read
-                                        item.classList.remove('unread-notification');
-                                        const badge = item.querySelector('.badge');
-                                        if (badge) badge.remove();
-                                        
-                                        // Decrement badge count in navbar
-                                        const mainBadge = notificationsDropdownBtn.querySelector('.badge');
-                                        if (mainBadge) {
-                                            let count = parseInt(mainBadge.textContent.trim());
-                                            if (!isNaN(count) && count > 0) {
-                                                count--;
-                                                if (count === 0) {
-                                                    mainBadge.remove();
-                                                } else {
-                                                    mainBadge.textContent = count;
-                                                }
-                                            }
-                                        }
-                                        notification.isRead = true;
-                                    }
-                                });
+                                const navigate = () => {
+                                    window.location.href = '/Admin/Messages';
+                                };
+                                
+                                if (!notification.isRead) {
+                                    fetch(`/Customer/Notification/MarkAsReadApi/${notification.id}`, {
+                                        method: 'POST'
+                                    }).then(() => {
+                                        navigate();
+                                    }).catch(() => {
+                                        navigate();
+                                    });
+                                } else {
+                                    navigate();
+                                }
                             });
                             
                             item.innerHTML = `

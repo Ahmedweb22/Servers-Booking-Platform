@@ -201,7 +201,7 @@ namespace Shatbly.Areas.Admin.Controllers
                 Roles = roles.AsEnumerable()
             };
 
-            if (TempData.TryGetValue("SavedPassword", out var savedPassword))
+            if (model.RoleName != SD.ROLE_WORKER && TempData.TryGetValue("SavedPassword", out var savedPassword))
             {
                 model.Password = savedPassword as string;
             }
@@ -285,6 +285,16 @@ namespace Shatbly.Areas.Admin.Controllers
             // Update Password if provided
             if (!string.IsNullOrEmpty(editUserVM.Password))
             {
+                var isUserWorker = await _userManager.IsInRoleAsync(user, SD.ROLE_WORKER) || editUserVM.RoleName == SD.ROLE_WORKER;
+                if (isUserWorker)
+                {
+                    ModelState.AddModelError("Password", "Admin cannot change the password for workers.");
+                    TempData["error-notification"] = "Admin cannot change the password for workers.";
+                    var roles = _roleManager.Roles.AsNoTracking().AsQueryable();
+                    editUserVM.Roles = roles.AsEnumerable();
+                    return View(editUserVM);
+                }
+
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var passwordResult = await _userManager.ResetPasswordAsync(user, token, editUserVM.Password);
                 if (!passwordResult.Succeeded)
