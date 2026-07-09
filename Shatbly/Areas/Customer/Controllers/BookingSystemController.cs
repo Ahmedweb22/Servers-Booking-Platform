@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.Services.BookingSystem;
-using Stripe.Checkout;
 using Shatbly.DataAccess;
 using Shatbly.Models;
+using Shatbly.Services.BookingSystem;
+using Shatbly.Services.Hangfire;
+using Shatbly.UnitOfWork;
 using Shatbly.ViewModels;
+using Stripe.Checkout;
 
 namespace Shatbly.Areas.Customer.Controllers
 {
@@ -412,5 +414,38 @@ namespace Shatbly.Areas.Customer.Controllers
             var orders = await _bookingSystemService.GetCustomerOrdersAsync(user.Id);
             return View(orders);
         }
+        //[HttpPost]
+        //public async Task<IActionResult> Confirm(CreateBookingViewModel model)
+        //{
+        //    // ... ≈‰‘«¡ «·‹ Booking “Ì „« ÂÊ ⁄‰œﬂ
+
+        //    var deadline = DateTime.UtcNow.AddMinutes(15);
+
+        //    var order = new Order
+        //    {
+        //        UserId = model.UserId,
+        //        ServiceId = model.ServiceId,
+        //        WorkerId = model.WorkerId,
+        //        BookingId = booking.Id,
+        //        ScheduledAt = model.ScheduledAt,
+        //        DurationHours = model.DurationHours,
+        //        AddressLine = model.AddressLine,
+        //        AddressLabel = model.AddressLabel,
+        //        WorkerResponseDeadlineUtc = deadline,
+        //        // ... »«ﬁÌ «·ÕﬁÊ· (PaymentMethod, ServicePrice, TotalPrice, etc.)
+        //    };
+
+        //    await unitOfWork.Orders.CreateAsync(order);
+        //    await unitOfWork.CommitAsync();
+
+        //    var jobId = jobScheduler.Schedule<CancelUnconfirmedOrderJob>(
+        //        job => job.ExecuteAsync(order.Id),
+        //        TimeSpan.FromMinutes(15));
+
+        //    // „Õ «Ã  Œ“‰ «·‹ jobId - Order „›ÌÂÊ‘ property » «⁄ Â« Õ«·Ì«
+        //    // (‘Ê› «·„·«ÕŸ…  Õ )
+
+        //    return RedirectToAction("Details", new { id = order.Id });
+        //}
     }
 }

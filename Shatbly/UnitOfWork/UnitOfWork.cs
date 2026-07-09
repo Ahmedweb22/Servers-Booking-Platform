@@ -13,7 +13,7 @@ namespace Shatbly.UnitOfWork
         public IRepository<UnAvalability> UnAvailabilities { get; private set; }
         public IRepository<PortfolioMedia> PortfolioMedia { get; private set; }
         public IRepository<ChatMessage> ChatMessages { get; private set; }
-
+        public IRepository<Order> Orders { get;  set; }
         public IRepository<Notification> Notifications { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
@@ -28,6 +28,7 @@ namespace Shatbly.UnitOfWork
             PortfolioMedia = new Repository<PortfolioMedia>(_context);
             Notifications = new Repository<Notification>(_context);
             ChatMessages = new Repository<ChatMessage>(_context);
+            Orders = new Repository<Order>(_context);
         }
 
         public async Task<int> CommitAsync()

@@ -1,7 +1,9 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
 using NuGet.Packaging;
+using QuestPDF.Infrastructure;
 using Shatbly.HealthCheck;
 using Shatbly.Hubs;
 using Shatbly.Services.AI;
@@ -10,6 +12,7 @@ using Shatbly.Services.BookingSystem;
 using Shatbly.Services.Chat;
 using Shatbly.Services.CurrentWorkerService1;
 using Shatbly.Services.File_Service;
+using Shatbly.Services.Hangfire.TestJob;
 using Shatbly.Services.Notification;
 using Shatbly.Services.Portfolio;
 using Shatbly.Services.TokenServices;
@@ -22,6 +25,7 @@ using System.Text;
 using Address = Shatbly.Models.Address;
 using Coupon = Shatbly.Models.Coupon;
 using FileService = Shatbly.Services.File_Service.FileService;
+using LicenseType = QuestPDF.Infrastructure.LicenseType;
 using PromotionCode = Shatbly.Models.PromotionCode;
 using Review = Shatbly.Models.Review;
 using TokenService = Shatbly.Services.TokenServices.TokenService;
@@ -51,6 +55,12 @@ namespace Shatbly
                 .AddCheck<StripeHealthCheck>("Stripe Integration")
                 .AddCheck<GroqAiHealthCheck>("Groq AI Service")
                 .AddCheck<SmsServiceHealthCheck>("SMS Service");
+
+            //hangfire
+            builder.Services.AddHangfire(config => config
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
 
             builder.Services.AddHealthChecksUI(options =>
             {
@@ -157,6 +167,8 @@ namespace Shatbly
             builder.Services.AddScoped<ICurrentWorkerService, CurrentWorkerService>();
             builder.Services.AddScoped<IEarningsService, EarningsService>();
             builder.Services.AddScoped<IWithdrawalService, WithdrawalService>();
+            //hangfire
+            builder.Services.AddScoped<TestJob>();
             //Notefication
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
             builder.Services.AddScoped<INotificationRepository, SqlNotificationRepository>();
@@ -196,6 +208,7 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseHangfireDashboard("/Hangfire");
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>

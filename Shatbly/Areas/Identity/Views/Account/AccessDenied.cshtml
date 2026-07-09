@@ -1,0 +1,211 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "غير مصرح لك بالدخول";
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Shatbly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #10101a;
+            --bg-panel: #17171f;
+            --border-soft: #262631;
+            --amber: #e8935a;
+            --amber-dim: #8a5a3a;
+            --alert: #ef5b5b;
+            --text-main: #f2efe9;
+            --text-mute: #8f8d9a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-deep);
+            background-image:
+                radial-gradient(circle at 85% 8%, rgba(232,147,90,0.10), transparent 45%),
+                radial-gradient(circle at 10% 95%, rgba(239,91,91,0.06), transparent 40%);
+            font-family: 'Tajawal', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 460px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 20px;
+            padding: 48px 36px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            right: -30%;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(232,147,90,0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        /* الباب المغلق - العنصر المميز */
+        .door-wrap {
+            width: 96px;
+            height: 96px;
+            margin: 0 auto 28px;
+            position: relative;
+        }
+
+        .door-wrap svg { width: 100%; height: 100%; }
+
+        .door-frame { stroke: var(--amber-dim); }
+        .door-panel {
+            fill: rgba(232,147,90,0.08);
+            stroke: var(--amber);
+            stroke-width: 2;
+            transform-origin: 6px 60px;
+            animation: doorShake 2.6s ease-in-out infinite;
+        }
+        .lock-body { fill: var(--alert); }
+        .lock-shackle { stroke: var(--alert); stroke-width: 3; fill: none; }
+
+        @@keyframes doorShake {
+            0%, 100% { transform: rotate(0deg); }
+            4%  { transform: rotate(-4deg); }
+            8%  { transform: rotate(3deg); }
+            12% { transform: rotate(0deg); }
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--alert);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-family: 'Cairo', sans-serif;
+            font-weight: 900;
+            font-size: 26px;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        p.desc {
+            font-size: 14.5px;
+            line-height: 1.8;
+            color: var(--text-mute);
+            margin-bottom: 8px;
+        }
+
+        .path-box {
+            display: inline-block;
+            margin: 16px 0 28px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-soft);
+            font-family: monospace;
+            font-size: 12.5px;
+            color: var(--amber);
+            direction: ltr;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            transition: transform 0.15s ease, filter 0.15s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--amber), #d97a3d);
+            color: #1a1208;
+        }
+        .btn-primary:hover { filter: brightness(1.08); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-mute);
+            border: 1px solid var(--border-soft);
+        }
+        .btn-ghost:hover { color: var(--text-main); border-color: var(--amber-dim); }
+
+        .foot-note {
+            margin-top: 26px;
+            font-size: 12px;
+            color: #55535f;
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .door-panel { animation: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="door-wrap">
+            <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect class="door-frame" x="20" y="10" width="56" height="76" rx="4" stroke-width="2" />
+                <rect class="door-panel" x="24" y="14" width="48" height="68" rx="3" />
+                <circle class="lock-body" cx="52" cy="50" r="7" />
+                <path class="lock-shackle" d="M48 44 v-6 a4 4 0 0 1 8 0 v6" stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <div class="eyebrow">تنبيه صلاحيات</div>
+        <h1>معذرة، الوصول غير مسموح</h1>
+        <p class="desc">
+            حسابك الحالي غير مصرح له بفتح هذه الصفحة.<br />
+            كل نوع حساب في شطبلي له صلاحياته الخاصة، وممكن تكون حاولت الدخول
+            على صفحة تخص نوع حساب مختلف.
+        </p>
+
+        @* <div class="path-box">@Context.Request.Path</div> *@
+
+        <div class="actions">
+            <a href="/Identity/Account/Login" class="btn btn-primary">
+                الرجوع لتسجيل الدخول
+            </a>
+            <a href="/" class="btn btn-ghost">
+                العودة للصفحة الرئيسية
+            </a>
+        </div>
+
+        <div class="foot-note">لو الأمر ده حصل بالغلط، تواصل مع الدعم الفني</div>
+    </div>
+</body>
+</html>
