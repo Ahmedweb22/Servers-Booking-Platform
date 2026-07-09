@@ -34,4 +34,8 @@
   <data name="Messages" xml:space="preserve"><value>Messages &amp; Applications</value></data>
   <data name="Logout" xml:space="preserve"><value>Logout</value></data>
   <data name="Disputes" xml:space="preserve"><value>Disputes / Tickets</value></data>
+  <data name="SystemHealth" xml:space="preserve"><value>System Health</value></data>
+  <data name="Alert" xml:space="preserve"><value>Alert</value></data>
+  <data name="HealthAlarmTitle" xml:space="preserve"><value>System Health Alert</value></data>
+  <data name="HealthAlarmMessage" xml:space="preserve"><value>One or more features or services are unhealthy! Click System Health for details.</value></data>
 </root>

@@ -161,9 +161,29 @@
                         <span asp-validation-for="Phone" class="text-danger d-block mt-1 small"></span>
                     </div>
 
+                    <!-- City & District Fields -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "المدينة" : "City")</label>
+                            <div class="input-group">
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-building"></i></span>
+                                <input asp-for="City" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "مثال: القاهرة" : "e.g. Cairo")" required>
+                            </div>
+                            <span asp-validation-for="City" class="text-danger d-block mt-1 small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="District" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "المنطقة / الحي" : "District")</label>
+                            <div class="input-group">
+                                <span class="input-group-text input-group-worker-text"><i class="bi bi-geo"></i></span>
+                                <input asp-for="District" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "مثال: المعادي" : "e.g. Maadi")">
+                            </div>
+                            <span asp-validation-for="District" class="text-danger d-block mt-1 small"></span>
+                        </div>
+                    </div>
+
                     <!-- Address Field -->
                     <div class="mb-4">
-                        <label asp-for="Address" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "العنوان" : "Address")</label>
+                        <label asp-for="Address" class="form-label text-light opacity-75 fw-semibold mb-2">@(isRtl ? "العنوان بالتفصيل" : "Address")</label>
                         <div class="input-group">
                             <span class="input-group-text input-group-worker-text"><i class="bi bi-geo-alt"></i></span>
                             <input asp-for="Address" class="form-control form-control-worker input-group-worker-input" placeholder="@(isRtl ? "أدخل عنوانك بالتفصيل" : "Enter your detailed address")" required>

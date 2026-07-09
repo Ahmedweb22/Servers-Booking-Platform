@@ -80,6 +80,7 @@ namespace Shatbly.Areas.Worker.Controllers
                 Name = model.FName + " " + model.LName,
                 Email = model.Email,
                 Phone = model.Phone,
+                Address = string.IsNullOrEmpty(model.District) ? $"{model.City}, {model.Address}" : $"{model.City}, {model.District}, {model.Address}"
             };
             var result = await _userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded)
@@ -123,8 +124,8 @@ namespace Shatbly.Areas.Worker.Controllers
             // Create and save worker's address
             var address = new Shatbly.Models.Address
             {
-                City = "القاهرة",
-                District = "وسط البلد",
+                City = model.City,
+                District = model.District ?? string.Empty,
                 Street = model.Address ?? string.Empty,
                 Lat = model.Lat,
                 Lng = model.Lng,

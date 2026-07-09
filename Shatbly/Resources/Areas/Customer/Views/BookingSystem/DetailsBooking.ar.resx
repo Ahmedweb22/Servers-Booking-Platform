@@ -84,4 +84,7 @@
   <data name="Disputed" xml:space="preserve"><value>متنازع عليه</value></data>
   <data name="AppliedPromoCodeLabel" xml:space="preserve"><value>كود الخصم المطبق</value></data>
   <data name="AppliedCouponLabel" xml:space="preserve"><value>الكوبون المطبق</value></data>
+  <data name="SecurePaymentRequired" xml:space="preserve"><value>الدفع الآمن مطلوب</value></data>
+  <data name="SecurePaymentPromptMessage" xml:space="preserve"><value>يرجى إكمال عملية الدفع عبر الإنترنت باستخدام Stripe لتأكيد حجزك.</value></data>
+  <data name="PayNowBtn" xml:space="preserve"><value>ادفع الآن بالبطاقة</value></data>
 </root>

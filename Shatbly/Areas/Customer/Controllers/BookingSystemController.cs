@@ -108,6 +108,10 @@ namespace Shatbly.Areas.Customer.Controllers
             }
 
             TempData["Success"] = result.SuccessMessage;
+            if (model.PaymentMethod == Shatbly.Models.PaymentMethods.Card)
+            {
+                return RedirectToAction(nameof(Pay), new { id = result.BookingId });
+            }
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
 
@@ -250,7 +254,7 @@ namespace Shatbly.Areas.Customer.Controllers
                     PriceData = new SessionLineItemPriceDataOptions
                     {
                         UnitAmount = (long)(booking.Booking.TotalPrice * 100),
-                        Currency = "usd",
+                        Currency = "egp",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = string.Format(_localizer["TechnicalServiceFrom"].Value, booking.Booking.User?.Name ?? "Customer"),

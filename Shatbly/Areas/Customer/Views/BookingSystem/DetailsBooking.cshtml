@@ -355,6 +355,29 @@
                 </div>
             }
 
+            @if (Model.Booking.PaymentMethod == PaymentMethods.Card 
+                 && (Model.Booking.PaymentStatus == PaymentStatuses.Pending || Model.Booking.PaymentStatus == PaymentStatuses.Failed)
+                 && Model.Booking.Status != OrderStatuses.Cancelled 
+                 && Model.Booking.Status != OrderStatuses.Rejected)
+            {
+                <div class="card text-center mb-3" style="border: 2px solid #93c5fd; background: #eff6ff; border-radius: 20px; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.08); padding: 25px;">
+                    <h3 style="margin-top:0; color: #1e3a8a; font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="bi bi-credit-card-2-front-fill text-primary"></i> @Localizer["SecurePaymentRequired"]
+                    </h3>
+                    <p class="muted" style="font-size: 0.9rem; margin-bottom: 15px; line-height: 1.5;">
+                        @Localizer["SecurePaymentPromptMessage"]
+                    </p>
+                    <a href="/Customer/BookingSystem/Pay?id=@Model.Booking.Id" 
+                       class="btn w-100 d-flex align-items-center justify-content-center gap-2" 
+                       style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 12px; font-weight: 700; padding: 12px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 16px rgba(37, 99, 235, 0.15);"
+                       onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 10px 20px rgba(37, 99, 235, 0.25)';"
+                       onmouseout="this.style.transform='none'; this.style.boxShadow='0 8px 16px rgba(37, 99, 235, 0.15)';">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span>@Localizer["PayNowBtn"]</span>
+                    </a>
+                </div>
+            }
+
             <div class="card">
                 <h3 style="margin-top:0;">@Localizer["RescheduleHeader"]</h3>
                 <p class="muted">@Localizer["RescheduleSubtitle"]</p>

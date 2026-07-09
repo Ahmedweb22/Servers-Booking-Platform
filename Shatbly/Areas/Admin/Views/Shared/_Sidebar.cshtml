@@ -117,9 +117,95 @@
             <span>@Localizer["Settings"]</span>
         </a>
 
+        <a href="/health-ui" target="_blank" class="nav-item" id="nav-system-health">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>@Localizer["SystemHealth"]</span>
+            <span id="health-alarm-badge" class="badge bg-danger ms-auto d-none pulse-alarm">
+                <i class="fa-solid fa-triangle-exclamation"></i> @Localizer["Alert"]
+            </span>
+        </a>
+
         <a href="/Identity/Account/Logout" class="nav-item text-danger">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>@Localizer["Logout"]</span>
         </a>
     </nav>
 </aside>
+
+<style>
+    @@keyframes healthPulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+    }
+    .pulse-alarm {
+        animation: healthPulse 2s infinite;
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        border-radius: 50rem;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const badge = document.getElementById('health-alarm-badge');
+        const navLink = document.getElementById('nav-system-health');
+
+        function checkSystemHealth() {
+            fetch('/health')
+                .then(response => {
+                    if (!response.ok && response.status !== 503) {
+                        throw new Error('Failed to load health status');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.status !== 'Healthy') {
+                        if (badge) {
+                            badge.classList.remove('d-none');
+                            badge.classList.add('d-inline-block');
+                        }
+                        if (navLink) {
+                            navLink.classList.add('text-danger');
+                        }
+                        
+                        // Notify the admin via Toastr if toastr is loaded
+                        if (typeof toastr !== 'undefined') {
+                            toastr.clear(); // Clear existing toasts to prevent spam
+                            toastr.error('@Localizer["HealthAlarmMessage"]', '@Localizer["HealthAlarmTitle"]', {
+                                timeOut: 15000,
+                                closeButton: true,
+                                progressBar: true
+                            });
+                        }
+                    } else {
+                        if (badge) {
+                            badge.classList.add('d-none');
+                            badge.classList.remove('d-inline-block');
+                        }
+                        if (navLink) {
+                            navLink.classList.remove('text-danger');
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.warn('System health check failed:', err);
+                });
+        }
+
+        // Run health check initially
+        checkSystemHealth();
+
+        // Check health every 30 seconds
+        setInterval(checkSystemHealth, 30000);
+    });
+</script>
