@@ -84,4 +84,7 @@
   <data name="Disputed" xml:space="preserve"><value>Disputed</value></data>
   <data name="AppliedPromoCodeLabel" xml:space="preserve"><value>Applied Promo Code</value></data>
   <data name="AppliedCouponLabel" xml:space="preserve"><value>Applied Coupon</value></data>
+  <data name="SecurePaymentRequired" xml:space="preserve"><value>Secure Payment Required</value></data>
+  <data name="SecurePaymentPromptMessage" xml:space="preserve"><value>Please complete your payment online using Stripe to secure your booking.</value></data>
+  <data name="PayNowBtn" xml:space="preserve"><value>Pay Now with Card</value></data>
 </root>

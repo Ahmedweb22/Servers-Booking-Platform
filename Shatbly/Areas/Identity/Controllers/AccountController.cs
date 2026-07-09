@@ -81,12 +81,11 @@ namespace Shatbly.Areas.Identity.Controllers
             {
                 UserName = model.UserName,
                 Email = model.Email,
-               FName = model.FName,
-               LName = model.LName,
-               Name = model.FName + model.LName,
-               Phone = model.Phone
-               
-
+                FName = model.FName,
+                LName = model.LName,
+                Name = model.FName + " " + model.LName,
+                Phone = model.Phone,
+                Address = string.IsNullOrEmpty(model.District) ? $"{model.City}, {model.Street}" : $"{model.City}, {model.District}, {model.Street}"
             };
             var result = await _userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded)

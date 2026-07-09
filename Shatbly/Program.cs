@@ -29,6 +29,9 @@ using LicenseType = QuestPDF.Infrastructure.LicenseType;
 using PromotionCode = Shatbly.Models.PromotionCode;
 using Review = Shatbly.Models.Review;
 using TokenService = Shatbly.Services.TokenServices.TokenService;
+using QuestPDF.Infrastructure;
+using LicenseType = QuestPDF.Infrastructure.LicenseType;
+using Hangfire;
 
 namespace Shatbly
 {
@@ -43,10 +46,15 @@ namespace Shatbly
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
             builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
-    .AddCheck<WorkerHealthCheck>("Worker Service")
-    .AddCheck<CouponHealthChack>("Coupon Repository")
-    .AddCheck<BookingHealthChack>("Booking Repository");
+                .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
+                .AddCheck<WorkerHealthCheck>("Worker Service")
+                .AddCheck<CouponHealthChack>("Coupon Repository")
+                .AddCheck<BookingHealthChack>("Booking Repository")
+                .AddCheck<DatabaseQueriesHealthCheck>("Database Queries")
+                .AddCheck<EmailServiceHealthCheck>("Email Service")
+                .AddCheck<StripeHealthCheck>("Stripe Integration")
+                .AddCheck<GroqAiHealthCheck>("Groq AI Service")
+                .AddCheck<SmsServiceHealthCheck>("SMS Service");
 
             //hangfire
             builder.Services.AddHangfire(config => config
@@ -182,6 +190,15 @@ namespace Shatbly
             builder.Services.AddScoped<IIdValidationService, IdValidationService>();
             QuestPDF.Settings.License = LicenseType.Community;
 
+            // Add Hangfire services.
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -240,6 +257,7 @@ namespace Shatbly
             Service.Intializer().GetAwaiter().GetResult();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHangfireDashboard();
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",

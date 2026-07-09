@@ -34,4 +34,8 @@
   <data name="Messages" xml:space="preserve"><value>الرسائل والطلبات</value></data>
   <data name="Logout" xml:space="preserve"><value>تسجيل الخروج</value></data>
   <data name="Disputes" xml:space="preserve"><value>الشكاوى والنزاعات</value></data>
+  <data name="SystemHealth" xml:space="preserve"><value>حالة النظام</value></data>
+  <data name="Alert" xml:space="preserve"><value>تنبيه</value></data>
+  <data name="HealthAlarmTitle" xml:space="preserve"><value>تنبيه صحة النظام</value></data>
+  <data name="HealthAlarmMessage" xml:space="preserve"><value>واحدة أو أكثر من الخدمات أو الميزات غير سليمة! انقر فوق حالة النظام لمزيد من التفاصيل.</value></data>
 </root>

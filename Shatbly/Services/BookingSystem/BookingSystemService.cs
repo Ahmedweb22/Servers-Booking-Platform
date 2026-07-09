@@ -485,7 +485,7 @@ public class BookingSystemService : IBookingSystemService
             Notes = model.Notes,
             BookingId = parentBooking.Id,
             PaymentMethod = model.PaymentMethod,
-            PaymentStatus = model.PaymentMethod is (Models.PaymentMethods)PaymentMethods.Cash
+            PaymentStatus = (model.PaymentMethod is Models.PaymentMethods.Cash || model.PaymentMethod is Models.PaymentMethods.Card)
                 ? PaymentStatuses.Pending
                 : PaymentStatuses.Paid,
             RecurrencePattern = model.RecurrencePattern,
@@ -701,7 +701,8 @@ public class BookingSystemService : IBookingSystemService
                 PhoneNumber = phoneVal,
                 FName = firstName,
                 LName = lastName,
-                Phone = phoneVal
+                Phone = phoneVal,
+                Address = model.AddressLine
              };
 
             var createResult = await _userManager.CreateAsync(customer);
