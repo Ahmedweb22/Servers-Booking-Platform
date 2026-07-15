@@ -10,6 +10,8 @@ using Shatbly.Services.TokenServices;
 using Shatbly.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
+
 
 namespace Shatbly.Areas.Identity.Controllers
 {
@@ -393,7 +395,10 @@ namespace Shatbly.Areas.Identity.Controllers
             }
             if (userOtpsCount < 5)
             {
-                string otp = new Random().Next(1000, 9999).ToString();
+                //Bug : the OTP creted a system,random (ZENA) why? عشان ده لما اجي اشفرو في الباك جراود مش هيتفر ولو اتشفر مش هيقرق عن الرقم اللي اتولد
+                //string otp = new Random().Next(1000, 9999).ToString();
+                // random : 1234 => 1#$%2@#$3@#$4!@# , Generator : 1234 => 1"rdftvbgyhnjimko,ll784652148465" 2 "trdfygbuhnijmko,l87451"
+                string otp = RandomNumberGenerator.GetInt32(1000, 10000).ToString();
                 string msg = string.Format(_localizer["OtpEmailBody"].Value, otp);
                 await _accountService.SendEmailAsync(EmailType.ForgetPassword, msg, user);
                 await _otpRepository.CreateAsync(new()
@@ -436,9 +441,12 @@ namespace Shatbly.Areas.Identity.Controllers
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
+            //Bug : Extera Rows && returna big table and convert this before access
+            //var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
+            var otps = await _otpRepository.GetAsync(e => e.UserId == user.Id && !e.IsUsed);
+            var otp = otps.OrderByDescending(e => e.Id).FirstOrDefault();
 
-            var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
-            if (otp == null || otp.ExpiresAt < DateTime.UtcNow)
+            if (otp is null || otp.ExpiresAt < DateTime.UtcNow)
             {
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);

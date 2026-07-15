@@ -106,38 +106,32 @@
     </div>
 </section>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Populate userId from URL
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('userId')) document.getElementById('userId').value = params.get('userId');
-
-    // OTP input navigation
     const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
     otpInputs.forEach((inp, i) => {
-        inp.addEventListener('input', function() {
-            this.value = this.value.replace(/[^0-9]/g,'').slice(-1);
+        inp.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
             this.classList.remove('is-invalid');
-            if (this.value && i < 3) otpInputs[i+1].focus();
+            if (this.value && i < otpInputs.length - 1) otpInputs[i + 1].focus();
             updateHiddenCode();
         });
-        inp.addEventListener('keydown', function(e) {
+        inp.addEventListener('keydown', function (e) {
             if (e.key === 'Backspace' && !this.value && i > 0) {
-                otpInputs[i-1].focus();
-                otpInputs[i-1].value = '';
+                otpInputs[i - 1].focus();
+                otpInputs[i - 1].value = '';
                 updateHiddenCode();
             }
-            if (e.key === 'ArrowLeft'  && i > 0) { e.preventDefault(); otpInputs[i-1].focus(); }
-            if (e.key === 'ArrowRight' && i < 3) { e.preventDefault(); otpInputs[i+1].focus(); }
+            if (e.key === 'ArrowLeft' && i > 0) { e.preventDefault(); otpInputs[i - 1].focus(); }
+            if (e.key === 'ArrowRight' && i < otpInputs.length - 1) { e.preventDefault(); otpInputs[i + 1].focus(); }
         });
-        inp.addEventListener('paste', function(e) {
+        inp.addEventListener('paste', function (e) {
             e.preventDefault();
-            const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'');
-            pasted.split('').slice(0,4).forEach((ch, j) => {
-                if (otpInputs[i+j]) { otpInputs[i+j].value = ch; otpInputs[i+j].classList.remove('is-invalid'); }
+            const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            pasted.split('').slice(0, otpInputs.length - i).forEach((ch, j) => {
+                if (otpInputs[i + j]) { otpInputs[i + j].value = ch; otpInputs[i + j].classList.remove('is-invalid'); }
             });
-            const next = Math.min(i + pasted.length, 3);
+            const next = Math.min(i + pasted.length, otpInputs.length - 1);
             otpInputs[next].focus();
             updateHiddenCode();
         });
@@ -145,58 +139,116 @@
 
     function updateHiddenCode() {
         const otpInput = document.getElementById('OTP');
-        if (otpInput) {
-            otpInput.value = otpInputs.map(i=>i.value).join('');
-        }
+        if (otpInput) otpInput.value = otpInputs.map(i => i.value).join('');
     }
 
-    // Countdown timer (5 min)
     let seconds = 300;
     const countdownEl = document.getElementById('countdown');
     const timerSection = document.getElementById('timerSection');
     const expiredSection = document.getElementById('expiredSection');
-    const timer = setInterval(() => {
-        seconds--;
-        if (seconds <= 0) {
-            clearInterval(timer);
-            timerSection.classList.add('d-none');
-            expiredSection.classList.remove('d-none');
-            document.getElementById('submitBtn').disabled = true;
-            return;
-        }
-        const m = String(Math.floor(seconds/60)).padStart(2,'0');
-        const s = String(seconds%60).padStart(2,'0');
-        countdownEl.textContent = m+':'+s;
-        if (seconds <= 60) countdownEl.classList.replace('bg-primary','bg-danger');
-    }, 1000);
+    const submitBtn = document.getElementById('submitBtn');
+    let timer = null;
 
-    // Resend
-    document.getElementById('resendBtn').addEventListener('click', function() {
-        seconds = 300;
-        countdownEl.textContent = '05:00';
-        countdownEl.classList.replace('bg-danger','bg-primary');
+    function startTimer() {
+        clearInterval(timer);
         timerSection.classList.remove('d-none');
         expiredSection.classList.add('d-none');
-        document.getElementById('submitBtn').disabled = false;
-        otpInputs.forEach(i => { i.value=''; i.classList.remove('is-invalid','is-valid'); });
-        otpInputs[0].focus();
-        // TODO: resend API call
+        countdownEl.classList.remove('bg-danger');
+        countdownEl.classList.add('bg-primary');
+        submitBtn.disabled = false;
+
+        timer = setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                timerSection.classList.add('d-none');
+                expiredSection.classList.remove('d-none');
+                submitBtn.disabled = true;
+                return;
+            }
+            const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const s = String(seconds % 60).padStart(2, '0');
+            countdownEl.textContent = m + ':' + s;
+            if (seconds <= 60) {
+                countdownEl.classList.remove('bg-primary');
+                countdownEl.classList.add('bg-danger');
+            }
+        }, 1000);
+    }
+    startTimer();
+
+    const resendBtn = document.getElementById('resendBtn');
+    let resendCooldown = false;
+
+    resendBtn.addEventListener('click', function (e) {
+        e.preventDefault(); // «„‰⁄ «·«‰ ﬁ«· «·„»«‘— ··—«»ÿ
+        if (resendCooldown) return;
+
+        resendCooldown = true;
+        resendBtn.classList.add('disabled');
+        const originalHtml = resendBtn.innerHTML;
+        resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ã«—Ì «·≈—”«·...';
+
+        const userIdInput = document.getElementById('UserId');
+        const userId = userIdInput ? userIdInput.value : '';
+
+        fetch(this.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('resend failed');
+            return res.json().catch(() => ({}));
+        })
+        .then(() => {
+            seconds = 300;
+            startTimer();
+            otpInputs.forEach(i => { i.value = ''; i.classList.remove('is-invalid', 'is-valid'); });
+            updateHiddenCode();
+            otpInputs[0].focus();
+        })
+        .catch(() => {
+            alert('Õ’· Œÿ√ √À‰«¡ ≈⁄«œ… «·≈—”«·° Õ«Ê·  «‰Ì.');
+        })
+        .finally(() => {
+            resendBtn.innerHTML = originalHtml;
+            // ﬂÊ·œ«Ê‰ 15 À«‰Ì… ﬁ»· „«  ”„Õ »«·÷€ÿ  «‰Ì
+            setTimeout(() => {
+                resendCooldown = false;
+                resendBtn.classList.remove('disabled');
+            }, 15000);
+        });
     });
 
-    // Form submit
-    document.getElementById('verifyForm').addEventListener('submit', function(e) {
+    // ===== 4) Form submit („⁄ „‰⁄ «·≈—”«· «·„“œÊÃ + Loading state) =====
+    const verifyForm = document.getElementById('verifyForm');
+    let isSubmitting = false;
+
+    verifyForm.addEventListener('submit', function (e) {
         updateHiddenCode();
         const otpInput = document.getElementById('OTP');
         const otpVal = otpInput ? otpInput.value : '';
         const errEl = document.getElementById('otpError');
-        if (otpVal.length < 4) {
-            e.preventDefault(); // Block submit
-            otpInputs.forEach(i => { if(!i.value) i.classList.add('is-invalid'); });
+
+        if (otpVal.length < otpInputs.length) {
+            e.preventDefault();
+            otpInputs.forEach(i => { if (!i.value) i.classList.add('is-invalid'); });
             errEl.classList.remove('d-none');
             return;
         }
+
+        if (isSubmitting) {
+            e.preventDefault();
+            return;
+        }
+
+        isSubmitting = true;
         errEl.classList.add('d-none');
         otpInputs.forEach(i => i.classList.add('is-valid'));
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ã«—Ì «· Õﬁﬁ...';
     });
 </script>
 @section Scripts {
