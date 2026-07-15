@@ -21,14 +21,12 @@
   <data name="VerifySubtitle" xml:space="preserve"><value>أدخل الرمز المكوّن من 6 أرقام الذي أُرسل إليك.</value></data>
   <data name="SentToEmail" xml:space="preserve"><value>تم الإرسال إلى بريدك الإلكتروني المسجّل.</value></data>
   <data name="OtpLabel" xml:space="preserve"><value>رمز التحقق (OTP)</value></data>
-  <data name="OtpAriaLabel" xml:space="preserve"><value>رمز التحقق المكون من 6 أرقام</value></data>
+  <data name="OtpAriaLabel" xml:space="preserve"><value>رمز التحقق المكون من 4 أرقام</value></data>
   <data name="Digit1" xml:space="preserve"><value>الرقم 1</value></data>
   <data name="Digit2" xml:space="preserve"><value>الرقم 2</value></data>
   <data name="Digit3" xml:space="preserve"><value>الرقم 3</value></data>
   <data name="Digit4" xml:space="preserve"><value>الرقم 4</value></data>
-  <data name="Digit5" xml:space="preserve"><value>الرقم 5</value></data>
-  <data name="Digit6" xml:space="preserve"><value>الرقم 6</value></data>
-  <data name="OtpLengthError" xml:space="preserve"><value>يرجى إدخال الرمز المكوّن من 6 أرقام كاملاً.</value></data>
+  <data name="OtpLengthError" xml:space="preserve"><value>يرجى إدخال الرمز المكوّن من 4 أرقام كاملاً.</value></data>
   <data name="TimerLabel" xml:space="preserve"><value>ينتهي الرمز خلال:</value></data>
   <data name="CodeExpired" xml:space="preserve"><value>انتهت صلاحية الرمز.</value></data>
   <data name="ResendButton" xml:space="preserve"><value>إعادة الإرسال</value></data>
