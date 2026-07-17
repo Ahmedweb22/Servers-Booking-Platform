@@ -1,14 +1,14 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Models;
-using Shatbly.Services.BookingSystem;
+using Shtbly.Models;
+using Shtbly.Services.BookingSystem;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Shatbly.Controllers
+namespace Shtbly.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -143,6 +143,7 @@ namespace Shatbly.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleFavorite(int workerId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

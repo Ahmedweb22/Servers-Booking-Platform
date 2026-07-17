@@ -168,7 +168,18 @@
                     cancelButtonText: isRtl ? "إلغاء" : "Cancel"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = url;
+                        fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                Swal.fire({ title: "Error!", text: "Unable to delete the promotion code.", icon: "error" });
+                            }
+                        });
                     }
                 });
             });

@@ -1,18 +1,24 @@
-using Microsoft.IdentityModel.Tokens;
-namespace Shatbly.Utilities.Dbintializes
+﻿using Microsoft.IdentityModel.Tokens;
+namespace Shtbly.Utilities.Dbintializes
 {
     public class Dbintialize : IDbintialize
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
         public Dbintialize(RoleManager<IdentityRole> roleManager ,UserManager<User> userManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IConfiguration configuration,
+            IWebHostEnvironment environment)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _context = context;
+            _configuration = configuration;
+            _environment = environment;
         }
     public async Task Intializer()
         {
@@ -27,6 +33,13 @@ namespace Shatbly.Utilities.Dbintializes
                 await _roleManager.CreateAsync(new(SD.ROLE_WORKER));
                 await _roleManager.CreateAsync(new(SD.ROLE_CUSTOMER));
 
+                if (!ShouldSeedDemoUsers())
+                {
+                    return;
+                }
+
+                var demoPassword = GetDemoPassword();
+
                 await _userManager.CreateAsync(new()
                 {
                     FName = "Super",
@@ -36,7 +49,7 @@ namespace Shatbly.Utilities.Dbintializes
                     EmailConfirmed = true,
                     Phone = "01222222222",
                     UserName = "SuperAdmin"
-                }, "Super123@");
+                }, demoPassword);
                 await _userManager.CreateAsync(new()
                 {
                     FName = "Admin",
@@ -46,7 +59,7 @@ namespace Shatbly.Utilities.Dbintializes
                     EmailConfirmed = true,
                     Phone = "01555555555",  
                     UserName = "Admin"
-                }, "Admin123@");
+                }, demoPassword);
                 await _userManager.CreateAsync(new()
                 {
                     FName = "Worker",
@@ -56,7 +69,7 @@ namespace Shatbly.Utilities.Dbintializes
                     EmailConfirmed = true,
                     Phone = "01111111111",
                     UserName = "Worker"
-                }, "Worker123@");
+                }, demoPassword);
                 await _userManager.CreateAsync(new()
                 {
                     FName = "Customer",
@@ -66,7 +79,7 @@ namespace Shatbly.Utilities.Dbintializes
                     EmailConfirmed = true,
                     Phone = "01000000000",
                     UserName = "Customer"
-                },"Customer123@");
+                }, demoPassword);
                 var user = await _userManager.FindByNameAsync("SuperAdmin");
                 var user2 = await _userManager.FindByNameAsync("Admin");
                 var user3 = await _userManager.FindByNameAsync("Worker");
@@ -88,7 +101,7 @@ namespace Shatbly.Utilities.Dbintializes
                         Phone = "01234567891",
                         UserName = "worker2"
                     };
-                    await _userManager.CreateAsync(worker2, "Worker123@");
+                    await _userManager.CreateAsync(worker2, demoPassword);
                     await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
 
                     var worker3 = new User
@@ -100,7 +113,7 @@ namespace Shatbly.Utilities.Dbintializes
                         Phone = "01234567892",
                         UserName = "worker3"
                     };
-                    await _userManager.CreateAsync(worker3, "Worker123@");
+                    await _userManager.CreateAsync(worker3, demoPassword);
                     await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
 
                     _context.Addresses.AddRange(
@@ -124,9 +137,7 @@ namespace Shatbly.Utilities.Dbintializes
                                 IsAvailable = true,
                                 IsVerified = true,
                                 RatingAvg = 4.5m,
-                                RatingCount = 10,
-                                CreatedAt = DateTime.UtcNow
-                            });
+                                RatingCount = 10, CreatedAt = DateTime.UtcNow, WorkerServices = new WorkerService { CategoryId = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1, HourlyRate = 50 } });
                         }
                     }
                     
@@ -135,7 +146,7 @@ namespace Shatbly.Utilities.Dbintializes
             }
 
             // Seed addresses and worker profiles if they don't exist
-            if (!_context.Addresses.Any())
+            if (ShouldSeedDemoUsers() && !_context.Addresses.Any())
             {
                 var user3 = await _userManager.FindByNameAsync("Worker");
                 var user4 = await _userManager.FindByNameAsync("Customer");
@@ -156,7 +167,7 @@ namespace Shatbly.Utilities.Dbintializes
                             Phone = "01234567891",
                             UserName = "worker2"
                         };
-                        await _userManager.CreateAsync(worker2, "Worker123@");
+                        await _userManager.CreateAsync(worker2, GetDemoPassword());
                         await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
                     }
 
@@ -173,7 +184,7 @@ namespace Shatbly.Utilities.Dbintializes
                             Phone = "01234567892",
                             UserName = "worker3"
                         };
-                        await _userManager.CreateAsync(worker3, "Worker123@");
+                        await _userManager.CreateAsync(worker3, GetDemoPassword());
                         await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
                     }
 
@@ -198,9 +209,7 @@ namespace Shatbly.Utilities.Dbintializes
                                 IsAvailable = true,
                                 IsVerified = true,
                                 RatingAvg = 4.5m,
-                                RatingCount = 10,
-                                CreatedAt = DateTime.UtcNow
-                            });
+                                RatingCount = 10, CreatedAt = DateTime.UtcNow, WorkerServices = new WorkerService { CategoryId = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1, HourlyRate = 50 } });
                         }
                     }
 
@@ -223,15 +232,14 @@ namespace Shatbly.Utilities.Dbintializes
                         UserId = worker.UserId,
                         IsDefault = true
                     });
-                    changesMade = true;
-                }
-            }
-            if (changesMade)
-            {
-                await _context.SaveChangesAsync();
-            }
+                    changesMade = true; } } var workersWithoutServices = _context.WorkerProfiles.Where(wp => wp.IsApproved && wp.WorkerServices == null).ToList(); if (workersWithoutServices.Any()) { var defaultCat = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1; foreach (var wp in workersWithoutServices) { _context.WorkerServices.Add(new WorkerService { WorkerProfileId = wp.Id, CategoryId = defaultCat, HourlyRate = 50 }); } changesMade = true; } if (changesMade) { await _context.SaveChangesAsync(); }
 
             // Custom balance seed for worker 1
+            if (!ShouldSeedDemoUsers())
+            {
+                return;
+            }
+
             var worker1User = await _userManager.FindByNameAsync("Worker");
             if (worker1User != null)
             {
@@ -263,5 +271,18 @@ namespace Shatbly.Utilities.Dbintializes
                 }
             }
         }
+
+        private bool ShouldSeedDemoUsers()
+        {
+            return _configuration.GetValue<bool>("Seed:CreateDemoUsers") &&
+                   !string.IsNullOrWhiteSpace(_configuration["Seed:DemoPassword"]);
+        }
+
+        private string GetDemoPassword()
+        {
+            return _configuration["Seed:DemoPassword"]!;
+        }
     }
 }
+
+

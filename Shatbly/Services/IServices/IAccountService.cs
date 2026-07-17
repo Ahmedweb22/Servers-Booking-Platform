@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.IServices
+﻿namespace Shtbly.Services.IServices
 {
     public interface IAccountService
     {

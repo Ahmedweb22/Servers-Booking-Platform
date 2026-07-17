@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.AI
+﻿namespace Shtbly.Services.AI
 {
     public class GroqChatService : IChatAiService
     {

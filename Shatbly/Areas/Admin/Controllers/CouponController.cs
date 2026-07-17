@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
@@ -115,6 +115,7 @@ namespace Shatbly.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpDelete]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var coupon = await _couponRepo.GetOneAsync(c => c.Id == id);

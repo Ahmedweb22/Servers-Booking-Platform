@@ -1,4 +1,4 @@
-@model EditUserVM
+﻿@model EditUserVM
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -39,7 +39,7 @@
                     <input class="form-control" placeholder="Enter Email" asp-for="Email">
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
-                @if (Model.RoleName != Shatbly.Utilities.SD.ROLE_WORKER)
+                @if (Model.RoleName != Shtbly.Utilities.SD.ROLE_WORKER)
                 {
                     <div class="mb-3">
                         <label asp-for="Password" class="form-label">Password (leave blank to keep current)</label>

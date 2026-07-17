@@ -1,17 +1,17 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.DataAccess;
-using Shatbly.Services.Chat;
-using Shatbly.ViewModels;
-using IChatService = Shatbly.Services.Chat.IChatService;
+using Shtbly.DataAccess;
+using Shtbly.Services.Chat;
+using Shtbly.ViewModels;
+using IChatService = Shtbly.Services.Chat.IChatService;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
-    public class ChatController(IChatService chatService, ApplicationDbContext context, Shatbly.Services.File_Service.IFileService fileService) : Controller
+    public class ChatController(IChatService chatService, Shtbly.UnitOfWork.IUnitOfWork unitOfWork, Shtbly.Services.File_Service.IFileService fileService) : Controller
     {
         [HttpGet]
         public async Task<IActionResult> Index(
@@ -26,17 +26,16 @@ namespace Shatbly.Areas.Customer.Controllers
                 return Unauthorized();
             }
 
-            var workerProfile = await context.WorkerProfiles.FirstOrDefaultAsync(wp => wp.UserId == receiverId, cancellationToken);
+            var workerProfile = await unitOfWork.WorkerProfiles.GetOneAsync(expression: wp => wp.UserId == receiverId, tracking: false);
             
             // Verify if the passed bookingId is a valid booking in the database for this specific client and worker
             var bookingExists = false;
             if (workerProfile != null)
             {
-                bookingExists = await context.Bookings.AnyAsync(b => 
-                    b.Id == bookingId && 
-                    b.ClientId == currentUserId && 
-                    b.WorkerId == workerProfile.Id, 
-                    cancellationToken);
+                var checkBookings = await unitOfWork.Bookings.GetAsync(
+                    expression: b => b.Id == bookingId && b.ClientId == currentUserId && b.WorkerId == workerProfile.Id,
+                    tracking: false);
+                bookingExists = checkBookings.Any();
             }
 
             if (!bookingExists)
@@ -45,10 +44,10 @@ namespace Shatbly.Areas.Customer.Controllers
                 // look for an existing booking between this client and this worker
                 if (workerProfile != null)
                 {
-                    var existingBooking = await context.Bookings
-                        .Where(b => b.ClientId == currentUserId && b.WorkerId == workerProfile.Id)
-                        .OrderByDescending(b => b.CreatedAt)
-                        .FirstOrDefaultAsync(cancellationToken);
+                    var existingBookingsList = await unitOfWork.Bookings.GetAsync(
+                        expression: b => b.ClientId == currentUserId && b.WorkerId == workerProfile.Id,
+                        tracking: false);
+                    var existingBooking = existingBookingsList.OrderByDescending(b => b.CreatedAt).FirstOrDefault();
 
                     if (existingBooking != null)
                     {

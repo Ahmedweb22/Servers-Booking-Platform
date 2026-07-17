@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Models
+﻿namespace Shtbly.Models
 {
     public enum OrderStatuses
     {

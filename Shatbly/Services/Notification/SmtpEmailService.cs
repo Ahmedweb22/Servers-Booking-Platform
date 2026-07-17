@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Mail;
 
-namespace Shatbly.Services.Notification
+namespace Shtbly.Services.Notification
 {
     public class SmtpEmailService(IOptions<SmtpOptions> options, ILogger<SmtpEmailService> logger) : IEmailService
     {

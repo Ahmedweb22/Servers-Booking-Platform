@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.Notification
+﻿namespace Shtbly.Services.Notification
 {
     public class MockSmsService(ILogger<MockSmsService> logger) : ISmsService
     {

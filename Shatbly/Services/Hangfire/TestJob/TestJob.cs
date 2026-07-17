@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.Hangfire.TestJob
+﻿namespace Shtbly.Services.Hangfire.TestJob
 {
     public class TestJob
     {

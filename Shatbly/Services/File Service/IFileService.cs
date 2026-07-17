@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.File_Service
+﻿namespace Shtbly.Services.File_Service
 {
     public interface IFileService
     {

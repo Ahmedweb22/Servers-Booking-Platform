@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
@@ -82,13 +82,14 @@ namespace Shatbly.Areas.Admin.Controllers
                 b => b.Id == id,
                 includes: new Expression<Func<Booking, object>>[]
                 {
-            b => b.Address,
-            b => b.Client,
-            b => b.Worker,
-            b => b.Coupon,
-            b => b.PromoCode,
-            b => b.BookingItems,
-            b => b.Disputes
+                    b => b.Address,
+                    b => b.Client,
+                    b => b.Worker,
+                    b => b.Coupon,
+                    b => b.PromoCode,
+                    b => b.BookingItems,
+                    b => b.Disputes,
+                    b => b.Payment
                 },
                 tracking: false);
 
@@ -102,7 +103,6 @@ namespace Shatbly.Areas.Admin.Controllers
                 ItemsTotal = booking.BookingItems?.Sum(i => i.Quantity * i.UnitPrice) ?? 0
             });
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -184,6 +184,7 @@ namespace Shatbly.Areas.Admin.Controllers
         }
 
         [HttpDelete]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var booking = await _bookingRepo.GetOneAsync(b => b.Id == id);

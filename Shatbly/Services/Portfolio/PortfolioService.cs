@@ -1,7 +1,7 @@
 ﻿
-using IFileService = Shatbly.Services.Portfolio.IFilePortfolioService;
-using Shatbly.Services.Portfolio;
-namespace Shatbly.Services.Portfolio
+using IFileService = Shtbly.Services.Portfolio.IFilePortfolioService;
+using Shtbly.Services.Portfolio;
+namespace Shtbly.Services.Portfolio
 {
     public class PortfolioService : IPortfolioService
     {

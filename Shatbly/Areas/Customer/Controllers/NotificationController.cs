@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.Notification;
+using Shtbly.Services.Notification;
 using System.Security.Claims;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -83,7 +83,7 @@ namespace Shatbly.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAsReadApi(int id, CancellationToken cancellationToken)
         {
             await notificationService.MarkAsReadAsync(id, cancellationToken);

@@ -27,4 +27,6 @@
   <data name="LoadingNotifications" xml:space="preserve"><value>جاري تحميل الإشعارات...</value></data>
   <data name="NoNotifications" xml:space="preserve"><value>لا توجد إشعارات حالياً</value></data>
   <data name="ErrorLoadingNotifications" xml:space="preserve"><value>حدث خطأ أثناء تحميل الإشعارات.</value></data>
+  <data name="HealthWarningTitle" xml:space="preserve"><value>تنبيه حالة النظام</value></data>
+  <data name="HealthWarningMessage" xml:space="preserve"><value>تواجه خدمة واحدة أو أكثر من خدمات النظام مشكلات حالياً. اضغط للفحص.</value></data>
 </root>

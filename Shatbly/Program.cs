@@ -1,36 +1,38 @@
+﻿using System.Security.Claims;
+using System.Text;
 using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NuGet.Packaging;
 using QuestPDF.Infrastructure;
-using Shatbly.HealthCheck;
-using Shatbly.Hubs;
-using Shatbly.Services.AI;
-using Shatbly.Services.AvailabilityService;
-using Shatbly.Services.BookingSystem;
-using Shatbly.Services.Chat;
-using Shatbly.Services.CurrentWorkerService1;
-using Shatbly.Services.File_Service;
-using Shatbly.Services.Hangfire.TestJob;
-using Shatbly.Services.Notification;
-using Shatbly.Services.Portfolio;
-using Shatbly.Services.TokenServices;
-using Shatbly.Services.WorkerProfileService;
-using Shatbly.UnitOfWork;
-using Shatbly.Utilities.Dbintializes;
+using Shtbly.HealthCheck;
+using Shtbly.Hubs;
+using Shtbly.Services.AI;
+using Shtbly.Services.AvailabilityService;
+using Shtbly.Services.BookingSystem;
+using Shtbly.Services.Chat;
+using Shtbly.Services.CurrentWorkerService1;
+using Shtbly.Services.File_Service;
+using Shtbly.Services.Hangfire.TestJob;
+using Shtbly.Services.Notification;
+using Shtbly.Services.Portfolio;
+using Shtbly.Services.TokenServices;
+using Shtbly.Services.WorkerProfileService;
+using Shtbly.UnitOfWork;
+using Shtbly.Utilities.Dbintializes;
 using Stripe;
-using System.Security.Claims;
-using System.Text;
-using Address = Shatbly.Models.Address;
-using Coupon = Shatbly.Models.Coupon;
-using FileService = Shatbly.Services.File_Service.FileService;
+using Address = Shtbly.Models.Address;
+using Coupon = Shtbly.Models.Coupon;
+using FileService = Shtbly.Services.File_Service.FileService;
 using LicenseType = QuestPDF.Infrastructure.LicenseType;
-using PromotionCode = Shatbly.Models.PromotionCode;
-using Review = Shatbly.Models.Review;
-using TokenService = Shatbly.Services.TokenServices.TokenService;
-
-namespace Shatbly
+using PromotionCode = Shtbly.Models.PromotionCode;
+using Review = Shtbly.Models.Review;
+using TokenService = Shtbly.Services.TokenServices.TokenService;
+namespace Shtbly
 {
     public class Program
     {
@@ -42,15 +44,20 @@ namespace Shatbly
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
             builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
-    .AddCheck<WorkerHealthCheck>("Worker Service")
-    .AddCheck<CouponHealthChack>("Coupon Repository")
-    .AddCheck<BookingHealthChack>("Booking Repository");
+                .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server Connection")
+                .AddCheck<DatabaseCrudHealthCheck>("Database CRUD Operations")
+                .AddCheck<DependencyInjectionHealthCheck>("Dependency Injection & Services")
+                .AddCheck<ExternalServicesHealthCheck>("External APIs (Stripe & Groq)")
+                .AddCheck<HangfireHealthCheck>("Hangfire Background Processing")
+                .AddCheck<WorkerHealthCheck>("Worker Service")
+                .AddCheck<CouponHealthChack>("Coupon Repository")
+                .AddCheck<BookingHealthChack>("Booking Repository");
 
             //hangfire
             builder.Services.AddHangfire(config => config
-    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddHangfireServer();
 
@@ -82,54 +89,64 @@ namespace Shatbly
                 options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 options.SlidingExpiration = true;
             });
-            //        builder.Services.AddAuthentication(opt =>
-            //        {
-            //            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //        })
-            //.AddJwtBearer(options =>
-            //{
-            //    options.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ClockSkew = TimeSpan.Zero,
-            //        ValidateIssuer = true,
-            //        ValidIssuer = "https://localhost:7282",
-            //        ValidateAudience = true,
-            //        ValidAudience = "https://localhost:7282",
-            //        ValidateLifetime = true,
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ=")),
-            //        RoleClaimType = ClaimTypes.Role
-            //    };
-            //});
-            builder.Services
-            .AddAuthentication()
-            .AddGoogle(options =>
+            builder.Services.AddAuthorization(options =>
             {
-                options.ClientId =
-                    builder.Configuration["Authentication:Google:ClientId"];
-
-                options.ClientSecret =
-                    builder.Configuration["Authentication:Google:ClientSecret"];
-
-                options.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
-                options.CorrelationCookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
-
-                options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+                options.AddPolicy("AdminOrLocal", policy =>
                 {
-                    OnRemoteFailure = context =>
+                    policy.RequireAssertion(context =>
                     {
-                        var failureMessage = context.Failure?.Message ?? "Remote authentication failed.";
-                        context.Response.Redirect(context.Request.PathBase + "/Identity/Account/Login?remoteError=" + System.Net.WebUtility.UrlEncode(failureMessage));
-                        context.HandleResponse();
-                        return Task.CompletedTask;
-                    }
-                };
+                        if (context.Resource is HttpContext httpContext)
+                        {
+                            if (httpContext.User.Identity?.IsAuthenticated == true &&
+                                (httpContext.User.IsInRole(SD.ROLE_ADMIN) || httpContext.User.IsInRole(SD.ROLE_SUPER_ADMIN)))
+                            {
+                                return true;
+                            }
+
+                            var remoteIp = httpContext.Connection.RemoteIpAddress;
+                            if (remoteIp != null)
+                            {
+                                return System.Net.IPAddress.IsLoopback(remoteIp);
+                            }
+                        }
+                        return false;
+                    });
+                });
             });
+            var authenticationBuilder = builder.Services.AddAuthentication();
+            var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+            var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+            if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+            {
+                authenticationBuilder.AddGoogle(options =>
+                {
+                    options.ClientId = googleClientId;
+
+                    options.ClientSecret = googleClientSecret;
+
+                    options.CorrelationCookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+                    options.CorrelationCookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
+
+                    options.Events = new Microsoft.AspNetCore.Authentication.OAuth.OAuthEvents
+                    {
+                        OnRemoteFailure = context =>
+                        {
+                            var failureMessage = context.Failure?.Message ?? "Remote authentication failed.";
+                            context.Response.Redirect(context.Request.PathBase + "/Identity/Account/Login?remoteError=" + System.Net.WebUtility.UrlEncode(failureMessage));
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+            }
             builder.Services.AddScoped<IRepository<OTP_Verification>, Repository<OTP_Verification>>();
             // Add services to the container.
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-            builder.Services.AddControllersWithViews()
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                options.ModelBinderProviders.Insert(0, new Shtbly.Utilities.EncryptedIdModelBinderProvider());
+            })
                 .AddDataAnnotationsLocalization()
                 .AddViewLocalization();
             builder.Services.AddScoped<IDbintialize, Dbintialize>();
@@ -148,7 +165,8 @@ namespace Shatbly
             builder.Services.AddScoped<IRepository<Notification>, Repository<Notification>>();
             builder.Services.AddScoped<IRepository<Review>, Repository<Review>>();
             builder.Services.AddScoped<IAccountService, Services.AccountService>();
-            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddTransient<Shtbly.Utilities.IEmailSenderWithAttachment, Shtbly.Utilities.EmailSender>();
+            builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender>(provider => provider.GetRequiredService<Shtbly.Utilities.IEmailSenderWithAttachment>());
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
             builder.Services.AddScoped<IWorkerProfileService, WorkerProfileService>();
@@ -164,15 +182,15 @@ namespace Shatbly
             //Notefication
             builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
             builder.Services.AddScoped<INotificationRepository, SqlNotificationRepository>();
-            builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
+            builder.Services.AddScoped<Shtbly.UnitOfWork.IUnitOfWork, Shtbly.UnitOfWork.UnitOfWork>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IEmailService, SmtpEmailService>();
             builder.Services.AddScoped<ISmsService, MockSmsService>();
             builder.Services.AddScoped<IBookingNotificationService, BookingNotificationService>();
-            builder.Services.AddScoped<Shatbly.UnitOfWork.IUnitOfWork, Shatbly.UnitOfWork.UnitOfWork>();
+            builder.Services.AddScoped<Shtbly.UnitOfWork.IUnitOfWork, Shtbly.UnitOfWork.UnitOfWork>();
             builder.Services.AddSignalR();
             //Chat
-            builder.Services.AddScoped<Shatbly.Services.Chat.IChatService, ChatService>();
+            builder.Services.AddScoped<Shtbly.Services.Chat.IChatService, ChatService>();
             //builder.Services.AddScoped<IRepository<ChatMessage>, Repository<ChatMessage>>();
 
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe")["SecretKey"];
@@ -180,9 +198,11 @@ namespace Shatbly
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IChatAiService, GroqChatService>();
             builder.Services.AddScoped<IIdValidationService, IdValidationService>();
+            builder.Services.AddScoped<Shtbly.Services.Receipt.IReceiptService, Shtbly.Services.Receipt.ReceiptService>();
             QuestPDF.Settings.License = LicenseType.Community;
 
             var app = builder.Build();
+            var adminOnly = new AuthorizeAttribute { Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}" };
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -191,33 +211,25 @@ namespace Shatbly
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseHangfireDashboard("/Hangfire");
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>
                 {
                     context.Response.ContentType = "application/json";
-                    var result = JsonSerializer.Serialize(new
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(new
                     {
-                        status = report.Status.ToString(),
-                        checks = report.Entries.Select(e => new
-                        {
-                            name = e.Key,
-                            status = e.Value.Status.ToString(),
-                            error = e.Value.Exception?.Message
-                        })
-                    });
-                    await context.Response.WriteAsync(result);
+                        status = report.Status.ToString()
+                    }));
                 }
-            });
+            }).RequireAuthorization("AdminOrLocal");
             app.MapHealthChecks("/health-api-json", new HealthCheckOptions
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
+            }).RequireAuthorization("AdminOrLocal");
             app.MapHealthChecksUI(options =>
             {
                 options.UIPath = "/health-ui";
-            });
+            }).RequireAuthorization(adminOnly);
             app.MapHub<NotificationHub>("/hubs/notifications");
             app.MapHub<ChatHub>("/chatHub");
             app.MapHub<TrackingHub>("/trackingHub");
@@ -240,10 +252,20 @@ namespace Shatbly
             Service.Intializer().GetAwaiter().GetResult();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHangfireDashboard("/Hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+            });
             app.MapStaticAssets();
             app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}",
+                constraints: new { id = new Shtbly.Utilities.HashidOutboundParameterTransformer() });
+
+            app.MapControllerRoute(
                 name: "default",
-                pattern: "{area=Identity}/{controller=Account}/{action=Index}/{id?}")
+                pattern: "{area=Identity}/{controller=Account}/{action=Index}/{id?}",
+                constraints: new { id = new Shtbly.Utilities.HashidOutboundParameterTransformer() })
                 .WithStaticAssets();
             app.Run();
         }

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shatbly.DataAccess;
+using Shtbly.DataAccess;
 
 #nullable disable
 
-namespace Shatbly.DataAccess.Migrations
+namespace Shtbly.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260625200830_Add Admin Setting")]
@@ -158,7 +158,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Address", b =>
+            modelBuilder.Entity("Shtbly.Models.Address", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -201,7 +201,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Avalability", b =>
+            modelBuilder.Entity("Shtbly.Models.Avalability", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -228,7 +228,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Availabilities");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Banner", b =>
+            modelBuilder.Entity("Shtbly.Models.Banner", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -277,7 +277,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Banners");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Booking", b =>
+            modelBuilder.Entity("Shtbly.Models.Booking", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -334,7 +334,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.BookingItem", b =>
+            modelBuilder.Entity("Shtbly.Models.BookingItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -368,7 +368,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("BookingItems");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.ChatMessage", b =>
+            modelBuilder.Entity("Shtbly.Models.ChatMessage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -413,7 +413,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("ChatMessages");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Coupon", b =>
+            modelBuilder.Entity("Shtbly.Models.Coupon", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -460,7 +460,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Coupons");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.DeviceToken", b =>
+            modelBuilder.Entity("Shtbly.Models.DeviceToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -496,7 +496,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("DeviceTokens");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Dipuste", b =>
+            modelBuilder.Entity("Shtbly.Models.Dipuste", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -545,7 +545,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Disputes");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Favorite", b =>
+            modelBuilder.Entity("Shtbly.Models.Favorite", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -578,7 +578,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Favorites");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.LogActivity", b =>
+            modelBuilder.Entity("Shtbly.Models.LogActivity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -614,7 +614,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("LogActivities");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Notification", b =>
+            modelBuilder.Entity("Shtbly.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -656,7 +656,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.OTP_Verification", b =>
+            modelBuilder.Entity("Shtbly.Models.OTP_Verification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -697,7 +697,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("OtpVerifications");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Order", b =>
+            modelBuilder.Entity("Shtbly.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -801,7 +801,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Payment", b =>
+            modelBuilder.Entity("Shtbly.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -851,7 +851,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.PortfolioMedia", b =>
+            modelBuilder.Entity("Shtbly.Models.PortfolioMedia", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -885,7 +885,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("PortfolioMediaItems");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Promotion", b =>
+            modelBuilder.Entity("Shtbly.Models.Promotion", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -930,7 +930,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Promotions");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.PromotionCode", b =>
+            modelBuilder.Entity("Shtbly.Models.PromotionCode", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -965,7 +965,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("PromotionCodes");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.RefereshToken", b =>
+            modelBuilder.Entity("Shtbly.Models.RefereshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1006,7 +1006,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Referral", b =>
+            modelBuilder.Entity("Shtbly.Models.Referral", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1048,7 +1048,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Referrals");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Review", b =>
+            modelBuilder.Entity("Shtbly.Models.Review", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1115,7 +1115,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.ServiceCategory", b =>
+            modelBuilder.Entity("Shtbly.Models.ServiceCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1149,7 +1149,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("ServiceCategories");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.SupportTicket", b =>
+            modelBuilder.Entity("Shtbly.Models.SupportTicket", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1191,7 +1191,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("SupportTickets");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.UnAvalability", b =>
+            modelBuilder.Entity("Shtbly.Models.UnAvalability", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1217,7 +1217,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Unavailabilities");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.User", b =>
+            modelBuilder.Entity("Shtbly.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -1320,7 +1320,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Wallet", b =>
+            modelBuilder.Entity("Shtbly.Models.Wallet", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1346,7 +1346,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("Wallets");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WalletTransaction", b =>
+            modelBuilder.Entity("Shtbly.Models.WalletTransaction", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1378,7 +1378,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("WalletTransactions");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WithdrawalRequest", b =>
+            modelBuilder.Entity("Shtbly.Models.WithdrawalRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1406,7 +1406,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("WithdrawalRequests");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerProfile", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerProfile", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1466,7 +1466,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.ToTable("WorkerProfiles");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerService", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerService", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1507,7 +1507,7 @@ namespace Shatbly.DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1516,7 +1516,7 @@ namespace Shatbly.DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1531,7 +1531,7 @@ namespace Shatbly.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1540,16 +1540,16 @@ namespace Shatbly.DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Address", b =>
+            modelBuilder.Entity("Shtbly.Models.Address", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("Addresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1558,9 +1558,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Avalability", b =>
+            modelBuilder.Entity("Shtbly.Models.Avalability", b =>
                 {
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany("Availabilities")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1569,9 +1569,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Banner", b =>
+            modelBuilder.Entity("Shtbly.Models.Banner", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("banners")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1580,31 +1580,31 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Booking", b =>
+            modelBuilder.Entity("Shtbly.Models.Booking", b =>
                 {
-                    b.HasOne("Shatbly.Models.Address", "Address")
+                    b.HasOne("Shtbly.Models.Address", "Address")
                         .WithMany("Bookings")
                         .HasForeignKey("AddressId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Client")
+                    b.HasOne("Shtbly.Models.User", "Client")
                         .WithMany("ClientBookings")
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.Coupon", "Coupon")
+                    b.HasOne("Shtbly.Models.Coupon", "Coupon")
                         .WithMany("Bookings")
                         .HasForeignKey("CouponId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Shatbly.Models.PromotionCode", "PromoCode")
+                    b.HasOne("Shtbly.Models.PromotionCode", "PromoCode")
                         .WithMany("Bookings")
                         .HasForeignKey("PromoCodeId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany("WorkerBookings")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1621,21 +1621,21 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.BookingItem", b =>
+            modelBuilder.Entity("Shtbly.Models.BookingItem", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("BookingItems")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Category")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Category")
                         .WithMany("BookingItems")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.WorkerService", null)
+                    b.HasOne("Shtbly.Models.WorkerService", null)
                         .WithMany("BookingItems")
                         .HasForeignKey("WorkerServiceId");
 
@@ -1644,21 +1644,21 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.ChatMessage", b =>
+            modelBuilder.Entity("Shtbly.Models.ChatMessage", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("ChatMessages")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Receiver")
+                    b.HasOne("Shtbly.Models.User", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Sender")
+                    b.HasOne("Shtbly.Models.User", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1671,18 +1671,18 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Coupon", b =>
+            modelBuilder.Entity("Shtbly.Models.Coupon", b =>
                 {
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Category")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Category")
                         .WithMany("Coupons")
                         .HasForeignKey("CategoryId");
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.DeviceToken", b =>
+            modelBuilder.Entity("Shtbly.Models.DeviceToken", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("DeviceTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1691,21 +1691,21 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Dipuste", b =>
+            modelBuilder.Entity("Shtbly.Models.Dipuste", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "Against")
+                    b.HasOne("Shtbly.Models.User", "Against")
                         .WithMany()
                         .HasForeignKey("AgainstId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("Disputes")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "RaisedBy")
+                    b.HasOne("Shtbly.Models.User", "RaisedBy")
                         .WithMany()
                         .HasForeignKey("RaisedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1718,19 +1718,19 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("RaisedBy");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Favorite", b =>
+            modelBuilder.Entity("Shtbly.Models.Favorite", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "Client")
+                    b.HasOne("Shtbly.Models.User", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany("Favorites")
                         .HasForeignKey("UserId");
 
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany()
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1741,13 +1741,13 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.LogActivity", b =>
+            modelBuilder.Entity("Shtbly.Models.LogActivity", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("LogActivities")
                         .HasForeignKey("BookingId");
 
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("LogActivities")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1758,13 +1758,13 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Notification", b =>
+            modelBuilder.Entity("Shtbly.Models.Notification", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("Notifications")
                         .HasForeignKey("BookingId");
 
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1775,9 +1775,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.OTP_Verification", b =>
+            modelBuilder.Entity("Shtbly.Models.OTP_Verification", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("OtpVerifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1786,31 +1786,31 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Order", b =>
+            modelBuilder.Entity("Shtbly.Models.Order", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("Orders")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Service")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", null)
+                    b.HasOne("Shtbly.Models.User", null)
                         .WithMany("Orders")
                         .HasForeignKey("UserId1");
 
-                    b.HasOne("Shatbly.Models.User", "Worker")
+                    b.HasOne("Shtbly.Models.User", "Worker")
                         .WithMany()
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1824,20 +1824,20 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Payment", b =>
+            modelBuilder.Entity("Shtbly.Models.Payment", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithOne("Payment")
-                        .HasForeignKey("Shatbly.Models.Payment", "BookingId")
+                        .HasForeignKey("Shtbly.Models.Payment", "BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Booking");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.PortfolioMedia", b =>
+            modelBuilder.Entity("Shtbly.Models.PortfolioMedia", b =>
                 {
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany("PortfolioMediaItems")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1846,18 +1846,18 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Promotion", b =>
+            modelBuilder.Entity("Shtbly.Models.Promotion", b =>
                 {
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Category")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Category")
                         .WithMany("Promotions")
                         .HasForeignKey("CategoryId");
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.PromotionCode", b =>
+            modelBuilder.Entity("Shtbly.Models.PromotionCode", b =>
                 {
-                    b.HasOne("Shatbly.Models.Promotion", "Promotion")
+                    b.HasOne("Shtbly.Models.Promotion", "Promotion")
                         .WithMany("PromotionCodes")
                         .HasForeignKey("PromotionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1866,9 +1866,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Promotion");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.RefereshToken", b =>
+            modelBuilder.Entity("Shtbly.Models.RefereshToken", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1877,15 +1877,15 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Referral", b =>
+            modelBuilder.Entity("Shtbly.Models.Referral", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "Referred")
+                    b.HasOne("Shtbly.Models.User", "Referred")
                         .WithMany("ReferralsReceived")
                         .HasForeignKey("ReferredId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Referrer")
+                    b.HasOne("Shtbly.Models.User", "Referrer")
                         .WithMany("ReferralsSent")
                         .HasForeignKey("ReferrerId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1896,39 +1896,39 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Referrer");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Review", b =>
+            modelBuilder.Entity("Shtbly.Models.Review", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithOne("Review")
-                        .HasForeignKey("Shatbly.Models.Review", "BookingId")
+                        .HasForeignKey("Shtbly.Models.Review", "BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.Order", "Order")
+                    b.HasOne("Shtbly.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Category")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Category")
                         .WithMany("Reviews")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Reviewee")
+                    b.HasOne("Shtbly.Models.User", "Reviewee")
                         .WithMany("ReviewsReceived")
                         .HasForeignKey("RevieweeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.User", "Reviewer")
+                    b.HasOne("Shtbly.Models.User", "Reviewer")
                         .WithMany("ReviewsGiven")
                         .HasForeignKey("ReviewerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.WorkerProfile", "WorkerProfile")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "WorkerProfile")
                         .WithMany("WorkerReviews")
                         .HasForeignKey("WorkerProfileId");
 
@@ -1945,13 +1945,13 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("WorkerProfile");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.SupportTicket", b =>
+            modelBuilder.Entity("Shtbly.Models.SupportTicket", b =>
                 {
-                    b.HasOne("Shatbly.Models.Booking", "Booking")
+                    b.HasOne("Shtbly.Models.Booking", "Booking")
                         .WithMany("SupportTickets")
                         .HasForeignKey("BookingId");
 
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithMany("SupportTickets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1962,9 +1962,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.UnAvalability", b =>
+            modelBuilder.Entity("Shtbly.Models.UnAvalability", b =>
                 {
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany("Unavailabilities")
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1973,20 +1973,20 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Wallet", b =>
+            modelBuilder.Entity("Shtbly.Models.Wallet", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithOne("Wallet")
-                        .HasForeignKey("Shatbly.Models.Wallet", "UserId")
+                        .HasForeignKey("Shtbly.Models.Wallet", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WalletTransaction", b =>
+            modelBuilder.Entity("Shtbly.Models.WalletTransaction", b =>
                 {
-                    b.HasOne("Shatbly.Models.Wallet", "Wallet")
+                    b.HasOne("Shtbly.Models.Wallet", "Wallet")
                         .WithMany("Transactions")
                         .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1995,9 +1995,9 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Wallet");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WithdrawalRequest", b =>
+            modelBuilder.Entity("Shtbly.Models.WithdrawalRequest", b =>
                 {
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithMany()
                         .HasForeignKey("WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2006,28 +2006,28 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerProfile", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerProfile", b =>
                 {
-                    b.HasOne("Shatbly.Models.User", "User")
+                    b.HasOne("Shtbly.Models.User", "User")
                         .WithOne("WorkerProfile")
-                        .HasForeignKey("Shatbly.Models.WorkerProfile", "UserId")
+                        .HasForeignKey("Shtbly.Models.WorkerProfile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerService", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerService", b =>
                 {
-                    b.HasOne("Shatbly.Models.ServiceCategory", "Category")
+                    b.HasOne("Shtbly.Models.ServiceCategory", "Category")
                         .WithMany("WorkerServices")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shatbly.Models.WorkerProfile", "Worker")
+                    b.HasOne("Shtbly.Models.WorkerProfile", "Worker")
                         .WithOne("WorkerServices")
-                        .HasForeignKey("Shatbly.Models.WorkerService", "WorkerId")
+                        .HasForeignKey("Shtbly.Models.WorkerService", "WorkerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2036,12 +2036,12 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("Worker");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Address", b =>
+            modelBuilder.Entity("Shtbly.Models.Address", b =>
                 {
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Booking", b =>
+            modelBuilder.Entity("Shtbly.Models.Booking", b =>
                 {
                     b.Navigation("BookingItems");
 
@@ -2064,22 +2064,22 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("SupportTickets");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Coupon", b =>
+            modelBuilder.Entity("Shtbly.Models.Coupon", b =>
                 {
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Promotion", b =>
+            modelBuilder.Entity("Shtbly.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionCodes");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.PromotionCode", b =>
+            modelBuilder.Entity("Shtbly.Models.PromotionCode", b =>
                 {
                     b.Navigation("Bookings");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.ServiceCategory", b =>
+            modelBuilder.Entity("Shtbly.Models.ServiceCategory", b =>
                 {
                     b.Navigation("BookingItems");
 
@@ -2092,7 +2092,7 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("WorkerServices");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.User", b =>
+            modelBuilder.Entity("Shtbly.Models.User", b =>
                 {
                     b.Navigation("Addresses");
 
@@ -2135,12 +2135,12 @@ namespace Shatbly.DataAccess.Migrations
                     b.Navigation("banners");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.Wallet", b =>
+            modelBuilder.Entity("Shtbly.Models.Wallet", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerProfile", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerProfile", b =>
                 {
                     b.Navigation("Availabilities");
 
@@ -2156,7 +2156,7 @@ namespace Shatbly.DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Shatbly.Models.WorkerService", b =>
+            modelBuilder.Entity("Shtbly.Models.WorkerService", b =>
                 {
                     b.Navigation("BookingItems");
                 });

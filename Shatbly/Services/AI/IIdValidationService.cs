@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace Shatbly.Services.AI
+namespace Shtbly.Services.AI
 {
     public interface IIdValidationService
     {

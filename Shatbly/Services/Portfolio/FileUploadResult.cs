@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.Portfolio
+﻿namespace Shtbly.Services.Portfolio
 {
     public class FileUploadResult
     {

@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.Notification;
+using Shtbly.Services.Notification;
 
-namespace Shatbly.ViewComponents
+namespace Shtbly.ViewComponents
 {
     public class UnreadNotificationsViewComponent(
         INotificationService notificationService) : ViewComponent

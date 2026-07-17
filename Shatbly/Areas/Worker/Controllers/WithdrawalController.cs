@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.CurrentWorkerService1;
-using Shatbly.Services.WithdrawalService;
+using Shtbly.Services.CurrentWorkerService1;
+using Shtbly.Services.WithdrawalService;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
 
     [Area(SD.WORKER_AREA)]

@@ -1,10 +1,12 @@
-@using Microsoft.AspNetCore.Localization
+﻿@using Microsoft.AspNetCore.Localization
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
+    var antiforgeryToken = Antiforgery.GetAndStoreTokens(Context).RequestToken ?? "";
 
     string IsActive(string controller, string? action = null)
     {
@@ -20,7 +22,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - Shatbly Worker</title>
+    <title>@ViewData["Title"] - Shtbly Worker</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
@@ -286,9 +288,10 @@
     </style>
 </head>
 <body>
+    <input type="hidden" name="__RequestVerificationToken" value="@antiforgeryToken" />
     <div class="worker-shell">
         <aside class="worker-sidebar">
-            <div class="worker-brand">Shatbly<span>.</span></div>
+            <div class="worker-brand">Shtbly<span>.</span></div>
 
             <nav class="worker-nav">
                 <a asp-area="Worker"
@@ -404,6 +407,23 @@
                     .withAutomaticReconnect()
                     .build();
 
+                const encodeHtml = function (value) {
+                    return String(value ?? "").replace(/[&<>"']/g, function (char) {
+                        return ({
+                            "&": "&amp;",
+                            "<": "&lt;",
+                            ">": "&gt;",
+                            '"': "&quot;",
+                            "'": "&#39;"
+                        })[char];
+                    });
+                };
+
+                const safePositiveInt = function (value) {
+                    const parsed = Number.parseInt(value, 10);
+                    return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0;
+                };
+
                 notificationConnection.on("ReceiveNotification", function (notification) {
                     console.log("New notification received:", notification);
 
@@ -421,7 +441,7 @@
 
                     // 2. Show Toastr notification if toastr is loaded
                     if (typeof toastr !== "undefined") {
-                        toastr.info(notification.message, notification.title, {
+                        toastr.info(encodeHtml(notification.message), encodeHtml(notification.title), {
                             timeOut: 8000,
                             closeButton: true,
                             progressBar: true
@@ -485,12 +505,14 @@
                         card.className = "notification-card unread";
                         card.setAttribute("data-type", typeVal);
                         card.setAttribute("data-group", filterGroup);
+                        const notificationId = safePositiveInt(notification.id);
+                        const bookingId = safePositiveInt(notification.bookingId);
 
                         let actionsHtml = "";
-                        if (typeVal === "Message" && notification.bookingId) {
+                        if (typeVal === "Message" && bookingId) {
                             const openChatLabel = isRtl ? "فتح المحادثة" : "Open Chat";
                             actionsHtml += `
-                                <a href="/Worker/Chat/Conversation?bookingId=${notification.bookingId}" class="action-btn btn-chat shadow-sm">
+                                <a href="/Worker/Chat/Conversation?bookingId=${bookingId}" class="action-btn btn-chat shadow-sm">
                                     <i class="bi bi-chat-dots-fill"></i>
                                     <span>${openChatLabel}</span>
                                 </a>
@@ -504,15 +526,15 @@
 
                         actionsHtml += `
                             <form action="/Worker/Messages/MarkAsRead" method="post" style="margin:0;">
-                                <input type="hidden" name="__RequestVerificationToken" value="${tokenValue}" />
-                                <input type="hidden" name="id" value="${notification.id}" />
+                                <input type="hidden" name="__RequestVerificationToken" value="${encodeHtml(tokenValue)}" />
+                                <input type="hidden" name="id" value="${notificationId}" />
                                 <button type="submit" class="action-btn btn-read shadow-sm" title="${markReadLabel}">
                                     <i class="bi bi-check-lg"></i>
                                 </button>
                             </form>
                             <form action="/Worker/Messages/Delete" method="post" style="margin:0;">
-                                <input type="hidden" name="__RequestVerificationToken" value="${tokenValue}" />
-                                <input type="hidden" name="id" value="${notification.id}" />
+                                <input type="hidden" name="__RequestVerificationToken" value="${encodeHtml(tokenValue)}" />
+                                <input type="hidden" name="id" value="${notificationId}" />
                                 <button type="submit" class="action-btn btn-delete shadow-sm" title="${deleteLabel}">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
@@ -527,18 +549,18 @@
                             </div>
                             <div class="card-main-content">
                                 <div class="card-header-row">
-                                    <h4 class="card-title">${notification.title}</h4>
+                                    <h4 class="card-title">${encodeHtml(notification.title)}</h4>
                                     <span class="unread-indicator" title="Unread"></span>
                                 </div>
-                                <p class="card-message-text">${notification.message}</p>
+                                <p class="card-message-text">${encodeHtml(notification.message)}</p>
                                 <div class="card-meta-row">
                                     <span class="card-meta-item">
                                         <i class="bi bi-clock"></i>
-                                        ${dateStr}
+                                        ${encodeHtml(dateStr)}
                                     </span>
                                     <span class="card-meta-item">
                                         <i class="bi bi-bookmark-fill"></i>
-                                        ${localizedType}
+                                        ${encodeHtml(localizedType)}
                                     </span>
                                 </div>
                             </div>
@@ -569,14 +591,14 @@
                     icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
                 }
             }
-            const saved = localStorage.getItem('shatbly-theme') || 'light';
+            const saved = localStorage.getItem('shtbly-theme') || 'light';
             applyTheme(saved);
             if (btn) {
                 btn.addEventListener('click', function () {
                     const current = html.getAttribute('data-theme') || 'light';
                     const next = current === 'dark' ? 'light' : 'dark';
                     applyTheme(next);
-                    localStorage.setItem('shatbly-theme', next);
+                    localStorage.setItem('shtbly-theme', next);
                 });
             }
         })();

@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuestPDF.Fluent;
-using Shatbly.Reports;
+using Shtbly.Reports;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_SUPER_ADMIN},{SD.ROLE_ADMIN}")]
@@ -201,11 +201,6 @@ namespace Shatbly.Areas.Admin.Controllers
                 Roles = roles.AsEnumerable()
             };
 
-            if (model.RoleName != SD.ROLE_WORKER && TempData.TryGetValue("SavedPassword", out var savedPassword))
-            {
-                model.Password = savedPassword as string;
-            }
-
             return View(model);
         }
         [HttpPost]
@@ -308,7 +303,6 @@ namespace Shatbly.Areas.Admin.Controllers
                     editUserVM.Roles = roles.AsEnumerable();
                     return View(editUserVM);
                 }
-                TempData["SavedPassword"] = editUserVM.Password;
             }
 
             // Update Roles
@@ -319,13 +313,28 @@ namespace Shatbly.Areas.Admin.Controllers
             TempData["success-notification"] = _localizer["UpdateSuccessful"].Value;
             return RedirectToAction(nameof(Edit), new { id = editUserVM.Id });
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
+            var currentUserId = _userManager.GetUserId(User);
+            if (id == currentUserId)
+            {
+                TempData["error-notification"] = "You cannot delete your own account.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
+
+            if (await _userManager.IsInRoleAsync(user, SD.ROLE_SUPER_ADMIN) && !User.IsInRole(SD.ROLE_SUPER_ADMIN))
+            {
+                return Forbid();
+            }
+
             var result = await _userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
@@ -338,7 +347,7 @@ namespace Shatbly.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> ExportPdf([FromServices] Shatbly.DataAccess.ApplicationDbContext context)
+        public async Task<IActionResult> ExportPdf([FromServices] Shtbly.DataAccess.ApplicationDbContext context)
         {
             var users = await _userManager.Users
                 .Include(u => u.Orders)

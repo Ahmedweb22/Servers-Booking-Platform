@@ -1,12 +1,12 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.BookingSystem;
-using Shatbly.Services.File_Service;
-using Shatbly.Models;
-using Shatbly.ViewModels;
+using Shtbly.Services.BookingSystem;
+using Shtbly.Services.File_Service;
+using Shtbly.Models;
+using Shtbly.ViewModels;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -87,7 +87,7 @@ namespace Shatbly.Areas.Customer.Controllers
                 if(result)
                 {
                     TempData["Success"] = _localizer["ReviewSuccess"].Value;
-                    return RedirectToAction("DetailsBooking", "BookingSystem", new { id = reviewVM.OrderId });
+                    return Redirect($"/b/{UrlObfuscator.Encrypt(reviewVM.OrderId)}");
                 }
                 else
                 {
@@ -104,7 +104,7 @@ namespace Shatbly.Areas.Customer.Controllers
             if (bookingDetails == null || bookingDetails.Booking.UserId != userId)
             {
                 TempData["Error"] = _localizer["BookingNotFoundOrNoAccess"].Value;
-                return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
+                return Redirect($"/b/{UrlObfuscator.Encrypt(id)}");
             }
 
             ViewBag.WorkerName = bookingDetails.Booking.Worker?.Name ?? _sharedLocalizer["Unspecified"].Value;
@@ -115,6 +115,7 @@ namespace Shatbly.Areas.Customer.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [ActionName("RaiseDispute")]
         public async Task<IActionResult> RaiseDisputePost(int id, string reason)
         { 
@@ -123,7 +124,7 @@ namespace Shatbly.Areas.Customer.Controllers
             if (booking == null || booking.Booking.UserId != userId)
             {
                 TempData["Error"] = _localizer["BookingNotFoundOrNoAccess"].Value;
-                return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
+                return Redirect($"/b/{UrlObfuscator.Encrypt(id)}");
             }
             if (string.IsNullOrEmpty(reason))
             {
@@ -139,7 +140,7 @@ namespace Shatbly.Areas.Customer.Controllers
             {
                 TempData["Error"] = _localizer["DisputeFailed"].Value;
             }
-            return RedirectToAction("DetailsBooking", "BookingSystem", new { id });
+            return Redirect($"/b/{UrlObfuscator.Encrypt(id)}");
         }
 
     }

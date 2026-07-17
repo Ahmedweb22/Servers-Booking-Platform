@@ -1,4 +1,4 @@
-namespace Shatbly.Services.Chat
+﻿namespace Shtbly.Services.Chat
 {
         public interface IChatService
         {

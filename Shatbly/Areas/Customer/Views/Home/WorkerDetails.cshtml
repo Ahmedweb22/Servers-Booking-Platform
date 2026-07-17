@@ -1,4 +1,4 @@
-@model Shatbly.Models.WorkerProfile
+﻿@model Shtbly.Models.WorkerProfile
 
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
@@ -598,7 +598,7 @@
             </a>
         </div>
 
-        <a href="/Customer/BookingSystem/CreateBooking?workerId=@Model.UserId"
+        <a href="/Customer/BookingSystem/CreateBooking?workerId=@Shtbly.Utilities.UrlObfuscator.Encrypt(Model.Id)"
            class="btn btn-primary fw-bold fs-4 py-3 px-5 shadow-sm rounded-pill" style="min-width: 300px; text-decoration: none;">
             @Localizer["BookAppointmentNow"] <i class="bi bi-calendar-check ms-2"></i>
         </a>

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using Shatbly.Services.IServices;
+using Shtbly.Services.IServices;
 
-namespace Shatbly.Services
+namespace Shtbly.Services
 {
     public enum EmailType
     {

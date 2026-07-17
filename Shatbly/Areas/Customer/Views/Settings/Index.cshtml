@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.CustomerSettingsVM
+﻿@model Shtbly.ViewModels.CustomerSettingsVM
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
 }
@@ -113,7 +113,10 @@
                 <!-- Left Column: Navigation Tabs -->
                 <div class="col-md-3">
                     <div class="nav flex-column nav-pills gap-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                        <button class="nav-link settings-nav-pill active text-start" id="v-pills-password-tab" data-bs-toggle="pill" data-bs-target="#v-pills-password" type="button" role="tab" aria-controls="v-pills-password" aria-selected="true">
+                        <button class="nav-link settings-nav-pill active text-start" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="true">
+                            <i class="bi bi-person-circle me-2"></i> @Localizer["Profile"]
+                        </button>
+                        <button class="nav-link settings-nav-pill text-start" id="v-pills-password-tab" data-bs-toggle="pill" data-bs-target="#v-pills-password" type="button" role="tab" aria-controls="v-pills-password" aria-selected="false">
                             <i class="bi bi-shield-lock me-2"></i> @Localizer["ChangePassword"]
                         </button>
                         <button class="nav-link settings-nav-pill text-start" id="v-pills-addresses-tab" data-bs-toggle="pill" data-bs-target="#v-pills-addresses" type="button" role="tab" aria-controls="v-pills-addresses" aria-selected="false">
@@ -126,8 +129,29 @@
                 <div class="col-md-9">
                     <div class="tab-content" id="v-pills-tabContent">
                         
+                        <!-- TAB 0: Profile -->
+                        <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                            <div class="settings-card">
+                                <h4 class="fw-800 mb-4"><i class="bi bi-person-circle me-2 text-primary"></i> @Localizer["Profile"]</h4>
+                                
+                                <form asp-action="UploadProfilePicture" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                    <div class="mb-3">
+                                        <label for="ProfilePicture" class="form-label-custom">@Localizer["ProfilePicture"]</label>
+                                        <input type="file" name="ProfilePicture" id="ProfilePicture" class="form-control form-control-custom" accept="image/*" required />
+                                        <div class="invalid-feedback">@Localizer["PleaseSelectImage"]</div>
+                                    </div>
+
+                                    <div class="text-end mt-4">
+                                        <button type="submit" class="btn btn-primary btn-action-custom">
+                                            <i class="bi bi-upload me-2"></i> @Localizer["Upload"]
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                         <!-- TAB 1: Change Password -->
-                        <div class="tab-pane fade show active" id="v-pills-password" role="tabpanel" aria-labelledby="v-pills-password-tab">
+                        <div class="tab-pane fade" id="v-pills-password" role="tabpanel" aria-labelledby="v-pills-password-tab">
                             <div class="settings-card">
                                 <h4 class="fw-800 mb-4"><i class="bi bi-key me-2 text-primary"></i> @Localizer["ChangePassword"]</h4>
                                 

@@ -1,5 +1,5 @@
 ﻿
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class AvailabilityVM
     {
@@ -8,7 +8,7 @@ namespace Shatbly.ViewModels
         public int WorkerId { get; set; }
 
         [Display(Name = "Day")]
-        public Shatbly.Models.DayOfWeek DayOfWeek { get; set; }
+        public Shtbly.Models.DayOfWeek DayOfWeek { get; set; }
 
         [Display(Name = "Start Time")]
         public TimeSpan StartTime { get; set; }

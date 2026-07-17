@@ -1,5 +1,5 @@
-
-namespace Shatbly.Repositories;
+﻿
+namespace Shtbly.Repositories;
 public interface INotificationRepository
 {
     Task AddAsync(Notification notification, CancellationToken cancellationToken = default);

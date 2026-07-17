@@ -1,6 +1,6 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
-namespace Shatbly.Repositories
+namespace Shtbly.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {

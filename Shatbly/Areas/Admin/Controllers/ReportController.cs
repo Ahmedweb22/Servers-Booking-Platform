@@ -1,30 +1,30 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.DataAccess;
-using Shatbly.Models;
-using Shatbly.ViewModels;
+using Shtbly.DataAccess;
+using Shtbly.Models;
+using Shtbly.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
     public class ReportController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly Shtbly.UnitOfWork.IUnitOfWork _unitOfWork;
 
-        public ReportController(ApplicationDbContext context)
+        public ReportController(Shtbly.UnitOfWork.IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IActionResult> Index()
         {
-            var bookings = await _context.Orders.ToListAsync();
+            var bookings = await _unitOfWork.Orders.GetAsync(tracking: false);
             var totalBookings = bookings.Count;
             var completedBookings = bookings.Count(b => b.Status == OrderStatuses.Completed);
             var cancelledBookings = bookings.Count(b => b.Status == OrderStatuses.Cancelled);
@@ -37,8 +37,8 @@ namespace Shatbly.Areas.Admin.Controllers
             var averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
 
             // Get user role distribution
-            var roles = await _context.Roles.ToListAsync();
-            var userRoles = await _context.UserRoles.ToListAsync();
+            var roles = await _unitOfWork.Roles.GetAsync(tracking: false);
+            var userRoles = await _unitOfWork.UserRoles.GetAsync(tracking: false);
             var roleCounts = userRoles
                 .GroupBy(ur => ur.RoleId)
                 .ToDictionary(g => g.Key, g => g.Count());
@@ -57,9 +57,12 @@ namespace Shatbly.Areas.Admin.Controllers
             }
 
             // Services Performance
-            var servicesUsage = await _context.Orders
-                .Where(o => o.Service != null)
-                .Include(o => o.Service)
+            var allOrders = await _unitOfWork.Orders.GetAsync(
+                expression: o => o.Service != null,
+                includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Service },
+                tracking: false);
+
+            var servicesUsage = allOrders
                 .GroupBy(o => o.Service!.Id)
                 .Select(g => new
                 {
@@ -68,13 +71,14 @@ namespace Shatbly.Areas.Admin.Controllers
                     BookingCount = g.Count(),
                     TotalRevenue = g.Where(o => o.Status == OrderStatuses.Completed || o.Status == OrderStatuses.Confirmed).Sum(o => o.TotalPrice)
                 })
-                .ToListAsync();
+                .ToList();
 
             // Get average hourly rates for services in category
-            var serviceRates = await _context.WorkerServices
+            var workerServices = await _unitOfWork.WorkerServices.GetAsync(tracking: false);
+            var serviceRates = workerServices
                 .GroupBy(ws => ws.CategoryId)
                 .Select(g => new { CategoryId = g.Key, AvgRate = g.Average(ws => ws.HourlyRate) })
-                .ToDictionaryAsync(g => g.CategoryId, g => g.AvgRate);
+                .ToDictionary(g => g.CategoryId, g => g.AvgRate);
 
             var servicePerformanceList = new List<ServiceReportItem>();
             foreach (var su in servicesUsage)

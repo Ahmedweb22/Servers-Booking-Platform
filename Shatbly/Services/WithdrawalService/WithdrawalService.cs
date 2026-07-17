@@ -1,7 +1,7 @@
-using Shatbly.Services.CurrentWorkerService1;
-using Shatbly.ViewModels;
+﻿using Shtbly.Services.CurrentWorkerService1;
+using Shtbly.ViewModels;
 
-namespace Shatbly.Services.WithdrawalService
+namespace Shtbly.Services.WithdrawalService
 {
     public class WithdrawalService : IWithdrawalService
     {

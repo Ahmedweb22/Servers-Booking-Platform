@@ -1,4 +1,4 @@
-﻿//namespace Shatbly.Services.AdminSetting
+﻿//namespace Shtbly.Services.AdminSetting
 //{
 //    public class AdminSettingsService
 //    {

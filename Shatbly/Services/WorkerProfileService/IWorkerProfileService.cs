@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.WorkerProfileService
+﻿namespace Shtbly.Services.WorkerProfileService
 {
     public interface IWorkerProfileService
     {

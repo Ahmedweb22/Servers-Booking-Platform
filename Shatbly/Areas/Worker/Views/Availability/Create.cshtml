@@ -1,4 +1,4 @@
-﻿@model Shatbly.ViewModels.CreateAvailabilityVM
+﻿@model Shtbly.ViewModels.CreateAvailabilityVM
 
 @{
     ViewData["Title"] = "Add Availability";
@@ -20,7 +20,7 @@
                     <label asp-for="DayOfWeek" class="form-label"></label>
                     <select asp-for="DayOfWeek"
                             class="form-select"
-                            asp-items="Html.GetEnumSelectList<Shatbly.Models.DayOfWeek>()">
+                            asp-items="Html.GetEnumSelectList<Shtbly.Models.DayOfWeek>()">
                     </select>
                     <span asp-validation-for="DayOfWeek" class="text-danger"></span>
                 </div>

@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
-using Shatbly.Models;
-using Shatbly.Repositories.IRepositories;
-using Shatbly.Utilities;
-using Shatbly.ViewModels;
+using Shtbly.Models;
+using Shtbly.Repositories.IRepositories;
+using Shtbly.Utilities;
+using Shtbly.ViewModels;
 using System.Linq.Expressions;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
@@ -301,6 +301,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
         // ───────── DELETE ─────────
         [HttpDelete]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var review = await _reviewRepo.GetOneAsync(r => r.Id == id, tracking: true);

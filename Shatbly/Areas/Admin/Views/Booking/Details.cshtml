@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.BookingDetailsVM
+﻿@model Shtbly.ViewModels.BookingDetailsVM
 
 @{
     ViewData["Title"] = "Booking Details";
@@ -143,6 +143,49 @@
         </div>
     </div>
 
+    @if (Model.Booking.Payment != null)
+    {
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fa-brands fa-stripe fa-lg me-2"></i> Payment Details</h5>
+                        <span class="badge bg-light text-primary">@Model.Booking.Payment.Status</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="text-muted small">Method</label>
+                                <div class="fw-semibold">@Model.Booking.Payment.Method</div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="text-muted small">Amount</label>
+                                <div class="fw-semibold">@Model.Booking.Payment.Amount.ToString("C")</div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="text-muted small">Transaction ID</label>
+                                <div class="fw-semibold">@(Model.Booking.Payment.TransactionId ?? Model.Booking.Payment.GatewayRef ?? "N/A")</div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="text-muted small">Paid At</label>
+                                <div class="fw-semibold">@(Model.Booking.Payment.PaidAt?.ToString("yyyy-MM-dd hh:mm tt") ?? "N/A")</div>
+                            </div>
+                        </div>
+                        
+                        @if (System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "receipts", $"Receipt-{Model.Booking.Id}.pdf")))
+                        {
+                            <div class="mt-2 pt-3 border-top text-end">
+                                <a href="/receipts/Receipt-@(Model.Booking.Id).pdf" target="_blank" class="btn btn-primary">
+                                    <i class="fa-solid fa-file-pdf me-1"></i> Download Receipt
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (Model.Booking.Disputes != null && Model.Booking.Disputes.Any())
     {
         <div class="card shadow-sm border-0 mt-4">
@@ -169,7 +212,7 @@
                                     <td class="fw-semibold text-danger">@dispute.Reason</td>
                                     <td>@dispute.Description</td>
                                     <td>
-                                        <span class="badge @(dispute.Status == Shatbly.Models.DisputeStatus.Open ? "bg-warning text-dark" : "bg-success")">
+                                        <span class="badge @(dispute.Status == Shtbly.Models.DisputeStatus.Open ? "bg-warning text-dark" : "bg-success")">
                                             @dispute.Status
                                         </span>
                                     </td>

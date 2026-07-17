@@ -1,22 +1,24 @@
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using Shatbly.Services;
-using Shatbly.Services.TokenServices;
-using Shatbly.ViewModels;
+using Shtbly.Services;
+using Shtbly.Services.TokenServices;
+using Shtbly.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
-namespace Shatbly.Areas.Identity.Controllers
+namespace Shtbly.Areas.Identity.Controllers
 {
     [Area(SD.IDENTITY_AREA)]
     public class AccountController : Controller
     {
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, int> _otpAttempts = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _passwordResetAuthorizations = new();
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IEmailSender _emailSender;
@@ -24,11 +26,11 @@ namespace Shatbly.Areas.Identity.Controllers
         private readonly IRepository<OTP_Verification> _otpRepository;
         private readonly ITokenService _tokenService;
         private readonly IStringLocalizer<AccountController> _localizer;
-        private readonly IRepository<Shatbly.Models.Address> _addressRepository;
+        private readonly IRepository<Shtbly.Models.Address> _addressRepository;
 
         public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IEmailSender emailSender, IAccountService accountService,
             IRepository<OTP_Verification> otpRepository, ITokenService tokenService, IStringLocalizer<AccountController> localizer,
-            IRepository<Shatbly.Models.Address> addressRepository)
+            IRepository<Shtbly.Models.Address> addressRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -99,7 +101,7 @@ namespace Shatbly.Areas.Identity.Controllers
             }
 
             // Create and save customer's default address
-            var address = new Shatbly.Models.Address
+            var address = new Shtbly.Models.Address
             {
                 City = model.City,
                 District = model.District ?? string.Empty,
@@ -173,7 +175,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 return View(model);
             }
  
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
             if (!result.Succeeded)
             {
                 if (result.IsNotAllowed)
@@ -239,7 +241,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
             if (!result.Succeeded)
             {
                 if (result.IsNotAllowed)
@@ -313,7 +315,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
             if (!result.Succeeded)
             {
                 if (result.IsNotAllowed)
@@ -394,14 +396,14 @@ namespace Shatbly.Areas.Identity.Controllers
             }
             if (userOtpsCount < 5)
             {
-                string otp = new Random().Next(1000, 9999).ToString();
+                string otp = RandomNumberGenerator.GetInt32(1000, 10000).ToString();
                 string msg = string.Format(_localizer["OtpEmailBody"].Value, otp);
                 await _accountService.SendEmailAsync(EmailType.ForgetPassword, msg, user);
                 await _otpRepository.CreateAsync(new()
                 {
                     UserId = user.Id,
                     Code = otp,
-                    Type = Shatbly.Models.OtpType.PasswordReset,
+                    Type = Shtbly.Models.OtpType.PasswordReset,
                     PhoneEmail = user.Email ?? string.Empty,
                     ExpiresAt = DateTime.UtcNow.AddMinutes(5)
                 });
@@ -467,11 +469,18 @@ namespace Shatbly.Areas.Identity.Controllers
             _otpAttempts.TryRemove(user.Id, out _);
             otp.IsUsed = true;
             await _otpRepository.CommitAsync();
+            _passwordResetAuthorizations[user.Id] = DateTime.UtcNow.AddMinutes(10);
             return RedirectToAction("ResetPassword", new { userId = user.Id });
         }
         [HttpGet]
         public IActionResult ResetPassword(string userId)
         {
+            if (!HasValidPasswordResetAuthorization(userId))
+            {
+                TempData["error-notification"] = _localizer["InvalidOtp"].Value;
+                return RedirectToAction("ForgetPassword");
+            }
+
             var model = new ResetPasswordVM
             {
                 UserId = userId
@@ -483,6 +492,12 @@ namespace Shatbly.Areas.Identity.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
+            if (!HasValidPasswordResetAuthorization(model.UserId))
+            {
+                ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
+                return View(model);
+            }
+
             var user = await _userManager.FindByIdAsync(model.UserId);
             if (user is null)
             {
@@ -499,6 +514,7 @@ namespace Shatbly.Areas.Identity.Controllers
                 }
                 return View(model);
             }
+            _passwordResetAuthorizations.TryRemove(user.Id, out _);
             TempData["success-notification"] = _localizer["PasswordResetSuccess"].Value;
             return RedirectToAction("Login");
         }
@@ -547,8 +563,6 @@ namespace Shatbly.Areas.Identity.Controllers
             if (user == null)
             {
                 var username = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0];
-                Random random = new Random();
-
                 var givenName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
                 var surname = info.Principal.FindFirstValue(ClaimTypes.Surname);
 
@@ -564,13 +578,13 @@ namespace Shatbly.Areas.Identity.Controllers
                 bool phoneExists;
                 do
                 {
-                    placeholderPhone = "05" + random.Next(100000000, 999999999).ToString();
+                    placeholderPhone = "05" + RandomNumberGenerator.GetInt32(100000000, 1000000000).ToString();
                     phoneExists = await _userManager.Users.AnyAsync(u => u.Phone == placeholderPhone);
                 } while (phoneExists);
 
                 user = new User
                 {
-                    UserName = username.Replace(" ", "") + random.Next(1000, 9999),
+                    UserName = username.Replace(" ", "") + RandomNumberGenerator.GetInt32(1000, 10000),
                     Email = email,
                     EmailConfirmed = true,
                     FName = givenName,
@@ -607,6 +621,27 @@ namespace Shatbly.Areas.Identity.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        private static bool HasValidPasswordResetAuthorization(string? userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return false;
+            }
+
+            if (!_passwordResetAuthorizations.TryGetValue(userId, out var expiresAt))
+            {
+                return false;
+            }
+
+            if (expiresAt >= DateTime.UtcNow)
+            {
+                return true;
+            }
+
+            _passwordResetAuthorizations.TryRemove(userId, out _);
+            return false;
         }
     }
 

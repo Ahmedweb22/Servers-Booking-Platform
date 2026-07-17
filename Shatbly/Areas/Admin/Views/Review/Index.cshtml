@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.AdminReviewsIndexVM
+﻿@model Shtbly.ViewModels.AdminReviewsIndexVM
 @using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
@@ -276,7 +276,7 @@
                             fetch(`/Admin/Review/Delete/${id}`, {
                                 method: "DELETE",
                                 headers: {
-                                    // Include request verification token if necessary, but standard delete actions in this system seem to use basic REST DELETE endpoints
+                                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
                                 }
                             })
                             .then(response => {

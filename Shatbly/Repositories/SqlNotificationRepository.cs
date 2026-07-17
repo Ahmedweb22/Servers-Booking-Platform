@@ -1,6 +1,6 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 
-namespace Shatbly.Repositories
+namespace Shtbly.Repositories
 {
 public class SqlNotificationRepository(IConfiguration configuration) : INotificationRepository
 {

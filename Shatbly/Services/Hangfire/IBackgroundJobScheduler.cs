@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Shatbly.Services.Hangfire
+namespace Shtbly.Services.Hangfire
 {
     public interface IBackgroundJobScheduler
     {

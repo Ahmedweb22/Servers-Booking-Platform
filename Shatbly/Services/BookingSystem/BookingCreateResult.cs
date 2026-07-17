@@ -1,5 +1,5 @@
-
-namespace Shatbly.Services.BookingSystem;
+﻿
+namespace Shtbly.Services.BookingSystem;
 
 public class BookingCreateResult
 {

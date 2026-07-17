@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Shatbly.Models
+namespace Shtbly.Models
 {
     public enum WalletTransactionType
     {

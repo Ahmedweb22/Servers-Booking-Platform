@@ -1,7 +1,7 @@
-using Shatbly.Models;
+﻿using Shtbly.Models;
 using System.Collections.Generic;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class CustomerSettingsVM
     {

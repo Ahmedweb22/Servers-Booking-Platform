@@ -1,29 +1,29 @@
-using global::Shatbly.Services.Notification;
+﻿using global::Shtbly.Services.Notification;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using Shatbly.Services.File_Service;
-using Shatbly.Services.Chat;
+using Shtbly.Services.File_Service;
+using Shtbly.Services.Chat;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_WORKER},{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
     public class ChatController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly Shtbly.UnitOfWork.IUnitOfWork _unitOfWork;
         private readonly INotificationService _notificationService;
         private readonly IChatService _chatService;
         private readonly IFileService _fileService;
 
         public ChatController(
-            ApplicationDbContext context,
+            Shtbly.UnitOfWork.IUnitOfWork unitOfWork,
             INotificationService notificationService,
             IChatService chatService,
             IFileService fileService)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _notificationService = notificationService;
             _chatService = chatService;
             _fileService = fileService;
@@ -40,20 +40,22 @@ namespace Shatbly.Areas.Worker.Controllers
                 if (string.IsNullOrWhiteSpace(CurrentUserId))
                     return Unauthorized();
 
-                var workerProfile = await _context.WorkerProfiles
-                    .FirstOrDefaultAsync(
-                        x => x.UserId == CurrentUserId,
-                        cancellationToken);
+                var workerProfile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                    expression: x => x.UserId == CurrentUserId,
+                    tracking: false);
 
                 if (workerProfile == null)
                     return Unauthorized();
 
-                var booking = await _context.Bookings
-                    .Include(x => x.Client)
-                    .Include(x => x.Worker)
-                    .FirstOrDefaultAsync(
-                        x => x.Id == bookingId,
-                        cancellationToken);
+                var booking = await _unitOfWork.Bookings.GetOneAsync(
+                    expression: x => x.Id == bookingId,
+                    includes: new System.Linq.Expressions.Expression<System.Func<Booking, object>>[]
+                    {
+                        x => x.Client!,
+                        x => x.Worker!,
+                        x => x.Worker!.User!
+                    },
+                    tracking: false);
 
                 if (booking == null)
                     return NotFound();
@@ -61,12 +63,15 @@ namespace Shatbly.Areas.Worker.Controllers
                 if (booking.WorkerId != workerProfile.Id)
                     return Forbid();
 
-                var messages = await _context.ChatMessages
-                    .Include(x => x.Sender)
-                    .Include(x => x.Receiver)
-                    .Where(x => x.BookingId == bookingId)
-                    .OrderBy(x => x.SentAt)
-                    .ToListAsync(cancellationToken);
+                var allMessages = await _unitOfWork.ChatMessages.GetAsync(
+                    expression: x => x.BookingId == bookingId,
+                    includes: new System.Linq.Expressions.Expression<System.Func<ChatMessage, object>>[]
+                    {
+                        x => x.Sender!,
+                        x => x.Receiver!
+                    },
+                    tracking: true);
+                var messages = allMessages.OrderBy(x => x.SentAt).ToList();
 
                 var unreadMessages = messages
                     .Where(x =>
@@ -80,7 +85,7 @@ namespace Shatbly.Areas.Worker.Controllers
                     msg.ReadAt = DateTime.UtcNow;
                 }
 
-                await _context.SaveChangesAsync(cancellationToken);
+                await _unitOfWork.CommitAsync();
 
                 var users = new[] { CurrentUserId, booking.ClientId }.OrderBy(x => x).ToArray();
                 ViewBag.ConversationKey = $"booking-{booking.Id}-chat-{users[0]}-{users[1]}";
@@ -90,7 +95,9 @@ namespace Shatbly.Areas.Worker.Controllers
                     BookingId = booking.Id,
                     ClientId = booking.ClientId,
                     ClientName = booking.Client.UserName,
-                    Messages = messages
+                    Messages = messages,
+                    ClientProfilePictureUrl = booking.Client.ProfilePicture,
+                    WorkerProfilePictureUrl = !string.IsNullOrEmpty(booking.Worker.ProfilePicturePath) ? booking.Worker.ProfilePicturePath : booking.Worker.User.ProfilePicture
                 };
 
                 return View(vm);
@@ -112,19 +119,17 @@ namespace Shatbly.Areas.Worker.Controllers
                         nameof(Conversation),
                         new { bookingId });
 
-                var workerProfile = await _context.WorkerProfiles
-                    .FirstOrDefaultAsync(
-                        x => x.UserId == CurrentUserId,
-                        cancellationToken);
+                var workerProfile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                    expression: x => x.UserId == CurrentUserId,
+                    tracking: false);
 
                 if (workerProfile == null)
                     return Unauthorized();
 
-                var booking = await _context.Bookings
-                    .Include(x => x.Client)
-                    .FirstOrDefaultAsync(
-                        x => x.Id == bookingId,
-                        cancellationToken);
+                var booking = await _unitOfWork.Bookings.GetOneAsync(
+                    expression: x => x.Id == bookingId,
+                    includes: new System.Linq.Expressions.Expression<System.Func<Booking, object>>[] { x => x.Client! },
+                    tracking: false);
 
                 if (booking == null)
                     return NotFound();

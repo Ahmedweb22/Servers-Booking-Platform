@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.ChatCustomerViewModel
+﻿@model Shtbly.ViewModels.ChatCustomerViewModel
 
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
@@ -306,14 +306,21 @@
                         <i class="bi @(isRtl ? "bi-chevron-right" : "bi-chevron-left")"></i>
                     </a>
                     
-                    <div class="chat-avatar">
-                        @workerInitial
+                    <div class="chat-avatar" style="overflow: hidden;">
+                        @if (!string.IsNullOrEmpty(Model.WorkerProfilePictureUrl))
+                        {
+                            <img src="/@Model.WorkerProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            @workerInitial
+                        }
                     </div>
                     
                     <div class="chat-user-details">
                         <h3>@Model.WorkerName</h3>
                         <span>
-                            <span class="online-indicator-dot"></span>
+                             <span class="online-indicator-dot"></span>
                             @Localizer["Online"]
                         </span>
                     </div>
@@ -344,21 +351,21 @@
                     {
                         bool mine = msg.SenderId == currentUserId;
 
-                        <div class="bubble-wrapper @(mine ? "mine" : "other")">
-                            <div class="message-bubble shadow-sm @(string.IsNullOrEmpty(msg.Message) ? "image-only" : "")">
-                                @if (!string.IsNullOrEmpty(msg.ImageUrl))
-                                {
-                                    <img src="/@msg.ImageUrl" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/@msg.ImageUrl')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />
-                                }
-                                @if (!string.IsNullOrEmpty(msg.Message))
-                                {
-                                    <div class="message-text">@msg.Message</div>
-                                }
-                                <div class="message-footer">
-                                    <span>@msg.SentAt.ToLocalTime().ToString("t")</span>
-                                    @if (mine)
+                        if (mine)
+                        {
+                            <div class="bubble-wrapper mine" style="display: flex; align-items: flex-end; gap: 8px; justify-content: flex-end; margin-bottom: 12px;">
+                                <div class="message-bubble shadow-sm @(string.IsNullOrEmpty(msg.Message) ? "image-only" : "")">
+                                    @if (!string.IsNullOrEmpty(msg.ImageUrl))
                                     {
-                                        if (msg.IsRead)
+                                        <img src="/@msg.ImageUrl" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/@msg.ImageUrl')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />
+                                    }
+                                    @if (!string.IsNullOrEmpty(msg.Message))
+                                    {
+                                        <div class="message-text">@msg.Message</div>
+                                    }
+                                    <div class="message-footer">
+                                        <span>@msg.SentAt.ToLocalTime().ToString("t")</span>
+                                        @if (msg.IsRead)
                                         {
                                             <i class="bi bi-check2-all text-info" title="Read" style="font-size: 1.05rem;"></i>
                                         }
@@ -366,10 +373,48 @@
                                         {
                                             <i class="bi bi-check2" title="Sent" style="font-size: 1.05rem;"></i>
                                         }
+                                    </div>
+                                </div>
+                                <div class="msg-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; overflow: hidden; flex-shrink: 0; margin-bottom: 4px;" title="Me">
+                                    @if (!string.IsNullOrEmpty(Model.CustomerProfilePictureUrl))
+                                    {
+                                        <img src="/@Model.CustomerProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("Me")
                                     }
                                 </div>
                             </div>
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="bubble-wrapper other" style="display: flex; align-items: flex-end; gap: 8px; justify-content: flex-start; margin-bottom: 12px;">
+                                <div class="msg-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #1d4ed8; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; overflow: hidden; flex-shrink: 0; margin-bottom: 4px;" title="@Model.WorkerName">
+                                    @if (!string.IsNullOrEmpty(Model.WorkerProfilePictureUrl))
+                                    {
+                                        <img src="/@Model.WorkerProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        @workerInitial
+                                    }
+                                </div>
+                                <div class="message-bubble shadow-sm @(string.IsNullOrEmpty(msg.Message) ? "image-only" : "")">
+                                    @if (!string.IsNullOrEmpty(msg.ImageUrl))
+                                    {
+                                        <img src="/@msg.ImageUrl" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/@msg.ImageUrl')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />
+                                    }
+                                    @if (!string.IsNullOrEmpty(msg.Message))
+                                    {
+                                        <div class="message-text">@msg.Message</div>
+                                    }
+                                    <div class="message-footer">
+                                        <span>@msg.SentAt.ToLocalTime().ToString("t")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                 }
             </div>
@@ -468,7 +513,8 @@
                         method: "POST",
                         body: formData,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'RequestVerificationToken': formData.get('__RequestVerificationToken') || ''
                         }
                     }).then(response => {
                         if (response.ok) {
@@ -516,40 +562,96 @@
                     const isMine = message.senderId === "@currentUserId";
                     const bubbleWrapper = document.createElement("div");
                     bubbleWrapper.className = `bubble-wrapper ${isMine ? 'mine' : 'other'}`;
+                    bubbleWrapper.style.display = "flex";
+                    bubbleWrapper.style.alignItems = "flex-end";
+                    bubbleWrapper.style.gap = "8px";
+                    bubbleWrapper.style.justifyContent = isMine ? "flex-end" : "flex-start";
+                    bubbleWrapper.style.marginBottom = "12px";
  
                     const sentTime = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
  
-                    let checkmarksHtml = "";
-                    if (isMine) {
-                        checkmarksHtml = message.isRead 
-                            ? '<i class="bi bi-check2-all text-info" title="Read" style="font-size: 1.05rem;"></i>' 
-                            : '<i class="bi bi-check2" title="Sent" style="font-size: 1.05rem;"></i>';
-                    }
+                    const messageBubble = document.createElement("div");
+                    messageBubble.className = `message-bubble shadow-sm ${!message.message ? 'image-only' : ''}`;
  
-                    let imgHtml = "";
                     if (message.imageUrl) {
-                        imgHtml = `<img src="/${message.imageUrl}" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/${message.imageUrl}')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`;
+                        const imagePath = String(message.imageUrl).replace(/^\/+/, "");
+                        if (!imagePath.includes("..")) {
+                            const image = document.createElement("img");
+                            image.src = `/${imagePath}`;
+                            image.className = "chat-image img-fluid d-block mb-1 cursor-pointer";
+                            image.style.maxWidth = "250px";
+                            image.style.borderRadius = "12px";
+                            image.style.marginBottom = "8px";
+                            image.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                            image.addEventListener("click", () => window.open(`/${imagePath}`, "_blank", "noopener"));
+                            messageBubble.appendChild(image);
+                        }
                     }
  
-                    let msgTextHtml = "";
                     if (message.message) {
-                        msgTextHtml = `<div class="message-text">${escapeHtml(message.message)}</div>`;
+                        const messageText = document.createElement("div");
+                        messageText.className = "message-text";
+                        messageText.textContent = message.message;
+                        messageBubble.appendChild(messageText);
                     }
  
-                    bubbleWrapper.innerHTML = `
-                        <div class="message-bubble shadow-sm ${!message.message ? 'image-only' : ''}">
-                            ${imgHtml}
-                            ${msgTextHtml}
-                            <div class="message-footer">
-                                <span>${sentTime}</span>
-                                ${checkmarksHtml}
-                            </div>
-                        </div>
-                    `;
+                    const footer = document.createElement("div");
+                    footer.className = "message-footer";
+ 
+                    const sentTimeElement = document.createElement("span");
+                    sentTimeElement.textContent = sentTime;
+                    footer.appendChild(sentTimeElement);
+ 
+                    if (isMine) {
+                        const checkmark = document.createElement("i");
+                        checkmark.className = message.isRead ? "bi bi-check2-all text-info" : "bi bi-check2";
+                        checkmark.title = message.isRead ? "Read" : "Sent";
+                        checkmark.style.fontSize = "1.05rem";
+                        footer.appendChild(checkmark);
+                    }
+ 
+                    messageBubble.appendChild(footer);
+
+                    // Create Avatar Element
+                    const avatarDiv = document.createElement("div");
+                    avatarDiv.className = "msg-avatar";
+                    avatarDiv.style.width = "32px";
+                    avatarDiv.style.height = "32px";
+                    avatarDiv.style.borderRadius = "50%";
+                    avatarDiv.style.background = isMine ? "#3b82f6" : "#1d4ed8";
+                    avatarDiv.style.color = "white";
+                    avatarDiv.style.display = "flex";
+                    avatarDiv.style.alignItems = "center";
+                    avatarDiv.style.justifyContent = "center";
+                    avatarDiv.style.fontSize = "0.85rem";
+                    avatarDiv.style.fontWeight = "700";
+                    avatarDiv.style.overflow = "hidden";
+                    avatarDiv.style.flexShrink = "0";
+                    avatarDiv.style.marginBottom = "4px";
+
+                    const picUrl = isMine ? "@Model.CustomerProfilePictureUrl" : "@Model.WorkerProfilePictureUrl";
+                    if (picUrl && picUrl.trim() !== "") {
+                        const avatarImg = document.createElement("img");
+                        avatarImg.src = `/${picUrl}`;
+                        avatarImg.style.width = "100%";
+                        avatarImg.style.height = "100%";
+                        avatarImg.style.objectFit = "cover";
+                        avatarDiv.appendChild(avatarImg);
+                    } else {
+                        avatarDiv.textContent = isMine ? "Me" : "@workerInitial";
+                    }
+
+                    if (isMine) {
+                        bubbleWrapper.appendChild(messageBubble);
+                        bubbleWrapper.appendChild(avatarDiv);
+                    } else {
+                        bubbleWrapper.appendChild(avatarDiv);
+                        bubbleWrapper.appendChild(messageBubble);
+                    }
  
                     chatBody.appendChild(bubbleWrapper);
                     chatBody.scrollTop = chatBody.scrollHeight;
-
+ 
                     // Mark as read in real-time if received from the other party
                     if (!isMine) {
                         connection.invoke("MarkAsRead", message.id).catch(err => console.error(err.toString()));
@@ -559,7 +661,7 @@
                 connection.on("MessageRead", function (data) {
                     const checks = document.querySelectorAll(".bi-check2");
                     checks.forEach(check => {
-                        check.className = "bi bi-check2-all text-info";
+                        check.className = "bi-check2-all text-info";
                         check.title = "Read";
                     });
                 });
@@ -569,15 +671,6 @@
                         .catch(err => console.error(err.toString()));
                 }).catch(err => console.error(err.toString()));
                 </text>
-            }
-
-            function escapeHtml(text) {
-                return text
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
             }
         });
     </script>

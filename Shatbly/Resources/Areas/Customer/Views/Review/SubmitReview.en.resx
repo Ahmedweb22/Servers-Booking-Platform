@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -26,7 +26,7 @@
   <data name="OptionalLabel" xml:space="preserve"><value>Optional</value></data>
   <data name="CommentPlaceholder" xml:space="preserve"><value>Describe the quality of work, technician's punctuality, and professionalism...</value></data>
   <data name="AddImagesLabel" xml:space="preserve"><value>Add photos of the completed work</value></data>
-  <data name="AddImagesDescription" xml:space="preserve"><value>You can attach photos of the place before and after starting work to show the result and share it with the Shatbly community.</value></data>
+  <data name="AddImagesDescription" xml:space="preserve"><value>You can attach photos of the place before and after starting work to show the result and share it with the Shtbly community.</value></data>
   <data name="BeforeImageLabel" xml:space="preserve"><value>Before Work Photo</value></data>
   <data name="UploadSpecsBefore" xml:space="preserve"><value>JPG, PNG up to 5 MB</value></data>
   <data name="AfterImageLabel" xml:space="preserve"><value>After Work Photo</value></data>

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Shatbly.DataAccess.Migrations
+namespace Shtbly.DataAccess.Migrations
 {
     /// <inheritdoc />
     public partial class AddIsApprovedToReview : Migration

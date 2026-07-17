@@ -41,6 +41,10 @@
     const typingText = "@Localizer["Typing"]";
     const errorText = "@Localizer["ErrorMessage"]";
 
+    function getAntiforgeryToken() {
+        return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    }
+
     function toggleChat() {
         const box = document.getElementById('chatBox');
         box.classList.toggle('d-none');
@@ -61,7 +65,10 @@
 
         const res = await fetch('/Customer/ServiceChat/Send', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': getAntiforgeryToken()
+            },
             body: JSON.stringify({ message: msg, history: chatHistory.slice(-10) })
         });
 
@@ -81,11 +88,13 @@
         const isUser = role === 'user';
         const div = document.createElement('div');
         div.className = `d-flex mb-2 ${isUser ? 'justify-content-start' : 'justify-content-end'}`;
-        div.innerHTML = `
-            <div class="px-3 py-2 rounded-3 ${isUser ? 'bg-light' : 'bg-primary text-white'}"
-                 style="max-width:80%; direction:${isRtl ? 'rtl' : 'ltr'}; text-align:${isRtl ? 'right' : 'left'};">
-                ${text}
-            </div>`;
+        const bubble = document.createElement('div');
+        bubble.className = `px-3 py-2 rounded-3 ${isUser ? 'bg-light' : 'bg-primary text-white'}`;
+        bubble.style.maxWidth = '80%';
+        bubble.style.direction = isRtl ? 'rtl' : 'ltr';
+        bubble.style.textAlign = isRtl ? 'right' : 'left';
+        bubble.textContent = text;
+        div.appendChild(bubble);
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
     }

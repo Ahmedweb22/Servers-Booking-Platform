@@ -1,7 +1,7 @@
-@model Shatbly.ViewModels.BookingVM
+﻿@model Shtbly.ViewModels.BookingVM
 @using Microsoft.AspNetCore.Localization
-@using Shatbly.Models
-@using Shatbly.Utilities
+@using Shtbly.Models
+@using Shtbly.Utilities
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
@@ -146,6 +146,12 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-2">
+                                        @if (System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "receipts", $"Receipt-{item.Id}.pdf")))
+                                        {
+                                            <a href="/receipts/Receipt-@(item.Id).pdf" target="_blank" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold" title="Download Receipt">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </a>
+                                        }
                                         <a href="/Admin/Booking/Details/@item.Id"
                                            class="btn btn-outline-info btn-sm px-3 rounded-pill fw-semibold">
                                             <i class="bi bi-eye-fill me-1"></i> @(isRtl ? "تفاصيل" : "Details")

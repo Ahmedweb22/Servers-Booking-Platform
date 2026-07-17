@@ -1,4 +1,4 @@
-@model Shatbly.ViewModels.CustomerProfileVM
+﻿@model Shtbly.ViewModels.CustomerProfileVM
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
 }
@@ -133,13 +133,24 @@
                         }
                     }
                 }
-                <div class="avatar-wrapper">
-                    @initials
+                <div class="avatar-wrapper" id="profileAvatarWrapper" style="cursor: pointer; position: relative;" onclick="document.getElementById('profilePicInput').click();">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                    {
+                        <img id="profileAvatarImg" src="/@Model.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                    }
+                    else
+                    {
+                        <span id="profileAvatarInitials">@initials</span>
+                    }
+                    <div class="avatar-edit-overlay" style="position: absolute; bottom: 0; right: 0; background: #2563eb; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; font-size: 0.85rem;">
+                        <i class="bi bi-camera-fill"></i>
+                    </div>
                 </div>
 
                 <!-- Profile Body Form -->
                 <div class="profile-body">
-                    <form asp-action="Index" method="post" class="needs-validation" novalidate>
+                    <form asp-action="Index" method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
+                        <input type="file" asp-for="ProfilePictureFile" id="profilePicInput" style="display: none;" accept=".jpg,.jpeg,.png" onchange="previewProfilePic(this)" />
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
 
                         <div class="row g-4">
@@ -199,6 +210,32 @@
 @section Scripts {
     <partial name="~/Views/Shared/_ValidationScriptsPartial.cshtml" />
     <script>
+        function previewProfilePic(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var wrapper = document.getElementById('profileAvatarWrapper');
+                    var initialsSpan = document.getElementById('profileAvatarInitials');
+                    if (initialsSpan) {
+                        initialsSpan.style.display = 'none';
+                    }
+                    var img = document.getElementById('profileAvatarImg');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.id = 'profileAvatarImg';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        img.style.borderRadius = '50%';
+                        wrapper.insertBefore(img, wrapper.firstChild);
+                    }
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         // Bootstrap form validation logic
         (() => {
             'use strict';

@@ -1,9 +1,11 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.Hangfire.TestJob;
+using Shtbly.Services.Hangfire.TestJob;
 
-namespace Shatbly.Controllers
+namespace Shtbly.Controllers
 {
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
     public class TestController : Controller
     {
         public IActionResult FireAndForget()

@@ -1,10 +1,10 @@
-@using Microsoft.AspNetCore.Localization
+﻿@using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
     Layout = "_IdentityLayout";
-    ViewData["Title"] = isRtl ? "سياسة الخصوصية - شطبلي" : "Privacy Policy - Shatbly";
+    ViewData["Title"] = isRtl ? "سياسة الخصوصية - شطبلي" : "Privacy Policy - Shtbly";
     ViewData["HeroTitle"] = isRtl ? "سياسة الخصوصية" : "Privacy Policy";
     ViewData["HeroSubtitle"] = isRtl 
         ? "كيف نقوم بجمع واستخدام وحماية بياناتك الشخصية" 
@@ -117,7 +117,7 @@
                         </div>
 
                         <p class="lead text-secondary mb-5">
-                            At Shatbly, your privacy and data security are our top priorities. This Privacy Policy details how we collect, use, and protect your personal information when you use our platform and services.
+                            At Shtbly, your privacy and data security are our top priorities. This Privacy Policy details how we collect, use, and protect your personal information when you use our platform and services.
                         </p>
 
                         <div class="row g-4">

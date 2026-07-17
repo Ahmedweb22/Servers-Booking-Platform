@@ -1,6 +1,6 @@
-﻿using Shatbly.Models;
+﻿using Shtbly.Models;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class ChatViewModel
     {

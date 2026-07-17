@@ -111,11 +111,32 @@
             <span>@Localizer["Disputes"]</span>
         </a>
 
+        <a href="/Hangfire" target="_blank"
+           class="nav-item hangfire-nav-item @(Context.Request.Path.StartsWithSegments("/Hangfire") ? "active" : "")">
+            <i class="fa-solid fa-fire-flame-curved hangfire-icon"></i>
+            <span class="hangfire-text">Hangfire Dashboard</span>
+            <span class="badge rounded-pill ms-auto hangfire-badge d-flex align-items-center justify-content-center">
+                <span class="spinner-grow spinner-grow-sm me-1" role="status" aria-hidden="true" style="width: 0.5rem; height: 0.5rem;"></span>
+                Live
+            </span>
+        </a>
+
+        <a href="/health-ui" target="_blank"
+           class="nav-item health-nav-item @(Context.Request.Path.StartsWithSegments("/health-ui") ? "active" : "")"
+           id="nav-system-health">
+            <i class="fa-solid fa-heart-pulse health-icon"></i>
+            <span class="health-text-styled">@Localizer["SystemHealth"]</span>
+            <span id="health-alarm-badge" class="badge bg-danger ms-auto d-none pulse-alarm">
+                <i class="fa-solid fa-triangle-exclamation"></i> @Localizer["Alert"]
+            </span>
+        </a>
+
         <a asp-area="Admin" asp-controller="AdminSettings" asp-action="Index"
            class="nav-item @(currentController == "Setting" ? "active" : "")">
             <i class="fa-solid fa-gear"></i>
             <span>@Localizer["Settings"]</span>
         </a>
+
 
         <a href="/Identity/Account/Logout" class="nav-item text-danger">
             <i class="fa-solid fa-right-from-bracket"></i>

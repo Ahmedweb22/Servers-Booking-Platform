@@ -5,6 +5,14 @@
         </button>
         @await Html.PartialAsync("_LanguageSwitcher")
 
+        <!-- Health Status Indicator -->
+        <div id="healthStatusIndicator" class="d-none me-2">
+            <a href="/health-ui" class="icon-btn position-relative" style="color: #ef4444;" title="System Health Issues Detected">
+                <i class="fa-solid fa-heart-pulse blink-health"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 8px; height: 8px; margin-top: 6px; margin-left: -6px;"></span>
+            </a>
+        </div>
+
         <div class="dropdown">
             <button class="icon-btn position-relative" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-regular fa-bell"></i>
@@ -44,10 +52,45 @@
     .unread-notification {
         background-color: #f0f6ff !important;
     }
+    .blink-health {
+        animation: pulse-health 1.5s infinite ease-in-out;
+        color: #ef4444 !important;
+    }
+    @@keyframes pulse-health {
+        0% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0.7));
+        }
+        70% {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.7));
+        }
+        100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 0px rgba(239, 68, 68, 0));
+        }
+    }
 </style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        const encodeHtml = function (value) {
+            return String(value ?? "").replace(/[&<>"']/g, function (char) {
+                return ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                })[char];
+            });
+        };
+
+        const safePositiveInt = function (value) {
+            const parsed = Number.parseInt(value, 10);
+            return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : 0;
+        };
+
         const notificationsDropdownBtn = document.getElementById('notificationsDropdown');
         if (notificationsDropdownBtn) {
             notificationsDropdownBtn.addEventListener('show.bs.dropdown', function () {
@@ -85,6 +128,7 @@
                             const item = document.createElement('div');
                             item.className = `p-3 border-bottom d-flex align-items-start gap-2 hover-bg-light ${notification.isRead ? '' : 'unread-notification'}`;
                             item.style.cursor = 'pointer';
+                            const notificationId = safePositiveInt(notification.id);
                             
                             // Handle click to mark read and navigate
                             item.addEventListener('click', function (e) {
@@ -94,8 +138,11 @@
                                 };
                                 
                                 if (!notification.isRead) {
-                                    fetch(`/Customer/Notification/MarkAsReadApi/${notification.id}`, {
-                                        method: 'POST'
+                                    fetch(`/Customer/Notification/MarkAsReadApi/${notificationId}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                                        }
                                     }).then(() => {
                                         navigate();
                                     }).catch(() => {
@@ -109,11 +156,11 @@
                             item.innerHTML = `
                                 <div class="flex-grow-1" style="min-width: 0;">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-bold small text-dark text-truncate d-inline-block" style="max-width: 180px;">${notification.title}</span>
-                                        <span class="text-muted" style="font-size: 0.72rem; flex-shrink: 0;">${notification.createdAt}</span>
+                                        <span class="fw-bold small text-dark text-truncate d-inline-block" style="max-width: 180px;">${encodeHtml(notification.title)}</span>
+                                        <span class="text-muted" style="font-size: 0.72rem; flex-shrink: 0;">${encodeHtml(notification.createdAt)}</span>
                                     </div>
                                     <p class="mb-0 text-secondary small" style="font-size: 0.8rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3;">
-                                        ${notification.message}
+                                        ${encodeHtml(notification.message)}
                                     </p>
                                 </div>
                                 ${!notification.isRead ? '<span class="badge bg-primary rounded-circle p-1 align-self-center" style="width: 8px; height: 8px; flex-shrink: 0; min-width: auto; min-height: auto;"> </span>' : ''}
@@ -132,5 +179,68 @@
                     });
             });
         }
+
+        // Fetch health status and notify admin if unhealthy
+        fetch('/health')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Health check request failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.status && data.status !== 'Healthy') {
+                    // Show health warning indicator in topbar
+                    const indicator = document.getElementById('healthStatusIndicator');
+                    if (indicator) {
+                        indicator.classList.remove('d-none');
+                        indicator.setAttribute('title', `@Localizer["HealthWarningTitle"]: ${data.status}`);
+                    }
+                    
+                    // Show sidebar badge if present
+                    const sidebarBadge = document.getElementById('health-alarm-badge');
+                    if (sidebarBadge) {
+                        sidebarBadge.classList.remove('d-none');
+                    }
+
+                    // Turn the sidebar link and icon red
+                    const navItem = document.getElementById('nav-system-health');
+                    if (navItem) {
+                        navItem.classList.add('is-unhealthy');
+                    }
+                    
+                    // Show toastr notification once per session
+                    if (!sessionStorage.getItem('health_warning_shown')) {
+                        toastr.warning(
+                            `@Localizer["HealthWarningMessage"]`,
+                            `@Localizer["HealthWarningTitle"]`,
+                            {
+                                timeOut: 10000,
+                                closeButton: true,
+                                progressBar: true,
+                                onclick: function () {
+                                    window.location.href = '/health-ui';
+                                }
+                            }
+                        );
+                        sessionStorage.setItem('health_warning_shown', 'true');
+                    }
+                } else {
+                    // System is healthy, clear any alert elements/classes
+                    const indicator = document.getElementById('healthStatusIndicator');
+                    if (indicator) {
+                        indicator.classList.add('d-none');
+                    }
+                    const sidebarBadge = document.getElementById('health-alarm-badge');
+                    if (sidebarBadge) {
+                        sidebarBadge.classList.add('d-none');
+                    }
+                    const navItem = document.getElementById('nav-system-health');
+                    if (navItem) {
+                        navItem.classList.remove('is-unhealthy');
+                    }
+                }
+            })
+            .catch(err => console.error('Error fetching health status:', err));
     });
 </script>

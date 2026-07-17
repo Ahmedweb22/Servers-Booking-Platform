@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class ServiceReportItem
     {

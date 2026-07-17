@@ -1,10 +1,10 @@
-@model Shatbly.ViewModels.EditWorkerProfileVM
+﻿@model Shtbly.ViewModels.EditWorkerProfileVM
 @using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
-    ViewData["Title"] = isRtl ? "تعديل الملف الشخصي - شطبلي" : "Edit Worker Profile - Shatbly";
+    ViewData["Title"] = isRtl ? "تعديل الملف الشخصي - شطبلي" : "Edit Worker Profile - Shtbly";
 
     var profilePictureUrl = "";
     if (!string.IsNullOrEmpty(Model.ExistingProfilePicturePath))

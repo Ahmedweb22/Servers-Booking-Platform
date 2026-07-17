@@ -1,6 +1,6 @@
 ﻿using Microsoft.Build.Tasks;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class PromotionCreateVM
     {

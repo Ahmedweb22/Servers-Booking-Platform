@@ -27,4 +27,6 @@
   <data name="LoadingNotifications" xml:space="preserve"><value>Loading notifications...</value></data>
   <data name="NoNotifications" xml:space="preserve"><value>No notifications yet</value></data>
   <data name="ErrorLoadingNotifications" xml:space="preserve"><value>Failed to load notifications.</value></data>
+  <data name="HealthWarningTitle" xml:space="preserve"><value>System Health Alert</value></data>
+  <data name="HealthWarningMessage" xml:space="preserve"><value>One or more system services are reporting issues. Click to inspect.</value></data>
 </root>

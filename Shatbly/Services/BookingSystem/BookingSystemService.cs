@@ -1,10 +1,10 @@
-using Stripe;
-using BookingTypes = Shatbly.ViewModels.BookingTypes;
-using Review = Shatbly.Models.Review;
-using Shatbly.DataAccess;
+﻿using Stripe;
+using BookingTypes = Shtbly.ViewModels.BookingTypes;
+using Review = Shtbly.Models.Review;
+using Shtbly.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace Shatbly.Services.BookingSystem;
+namespace Shtbly.Services.BookingSystem;
 public enum RecurrencePatterns
 {
     None,
@@ -31,9 +31,9 @@ public class BookingSystemService : IBookingSystemService
     private readonly IRepository<ServiceCategory> _serviceCategoryRepository;
     private readonly IRepository<Order> _orderRepository;
     private readonly IRepository<Review> _reviewRepository;
-    private readonly IRepository<Shatbly.Models.Booking> _bookingRepository;
-    private readonly IRepository<Shatbly.Models.Address> _addressRepository;
-    private readonly IRepository<Shatbly.Models.WorkerProfile> _workerProfileRepository;
+    private readonly IRepository<Shtbly.Models.Booking> _bookingRepository;
+    private readonly IRepository<Shtbly.Models.Address> _addressRepository;
+    private readonly IRepository<Shtbly.Models.WorkerProfile> _workerProfileRepository;
     private readonly UserManager<User> _userManager;
     private readonly IStringLocalizer<BookingSystemService> _localizer;
     private readonly ApplicationDbContext _context;
@@ -43,9 +43,9 @@ public class BookingSystemService : IBookingSystemService
         IRepository<ServiceCategory> serviceCategoryRepository,
         IRepository<Order> orderRepository,
         IRepository<Review> reviewRepository,
-        IRepository<Shatbly.Models.Booking> bookingRepository,
-        IRepository<Shatbly.Models.Address> addressRepository,
-        IRepository<Shatbly.Models.WorkerProfile> workerProfileRepository,
+        IRepository<Shtbly.Models.Booking> bookingRepository,
+        IRepository<Shtbly.Models.Address> addressRepository,
+        IRepository<Shtbly.Models.WorkerProfile> workerProfileRepository,
         IStringLocalizer<BookingSystemService> localizer,
         ApplicationDbContext context)
     {
@@ -68,17 +68,21 @@ public class BookingSystemService : IBookingSystemService
             .OrderBy(s => s.Id)
             .ToList();
 
-        var workers = (await _userManager.GetUsersInRoleAsync(SD.ROLE_WORKER))
-        .OrderBy(w => w.FName)
-        .ThenBy(w => w.LName)
-        .ToList();
-
         // Load all worker profiles and map them to their service categories and hourly rates
         var workerProfiles = await _context.WorkerProfiles
             .AsNoTracking()
+            .Include(wp => wp.User)
             .Include(wp => wp.WorkerServices)
             .Where(wp => wp.IsApproved && wp.WorkerServices != null)
             .ToListAsync();
+
+        var workers = workerProfiles
+            .Where(wp => wp.User != null)
+            .Select(wp => wp.User)
+            .Distinct()
+            .OrderBy(w => w.FName)
+            .ThenBy(w => w.LName)
+            .ToList();
 
         var workerMap = workerProfiles.ToDictionary(
             wp => wp.UserId,
@@ -254,6 +258,78 @@ public class BookingSystemService : IBookingSystemService
 
         return availability;
     }
+
+    public async Task<bool> UpdateWorkerOrderStatusAsync(int orderId, OrderStatuses status, string currentUserId, bool isAr, string workerName)
+    {
+        var order = await _orderRepository.GetOneAsync(
+            expression: o => o.Id == orderId,
+            includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] 
+            { 
+                o => o.Booking, 
+                o => o.Service, 
+                o => o.User 
+            }
+        );
+
+        if (order == null || order.WorkerId != currentUserId)
+        {
+            return false;
+        }
+
+        // Perform status transition
+        order.Status = status;
+
+        // Sync with parent Booking if present
+        if (order.Booking != null)
+        {
+            if (status == OrderStatuses.Confirmed)
+            {
+                order.Booking.Status = BookingStatus.Confirmed;
+            }
+            else if (status == OrderStatuses.Completed)
+            {
+                order.Booking.Status = BookingStatus.Completed;
+
+                // Fetch the worker's wallet
+                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == order.WorkerId);
+                if (wallet == null)
+                {
+                    wallet = new Wallet { UserId = order.WorkerId, Balance = 0, UpdatedAt = DateTime.UtcNow };
+                    await _context.Wallets.AddAsync(wallet);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Calculate payout: TotalPrice - ConvenienceFee
+                decimal payout = Math.Max(0m, order.TotalPrice - order.ConvenienceFee);
+
+                // Credit wallet
+                wallet.Balance += payout;
+                wallet.UpdatedAt = DateTime.UtcNow;
+                _context.Wallets.Update(wallet);
+
+                // Create WalletTransaction
+                var transaction = new WalletTransaction
+                {
+                    WalletId = wallet.Id,
+                    Amount = payout,
+                    Type = WalletTransactionType.Earning,
+                    Reference = $"Payout for Booking #{order.Id}",
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.WalletTransactions.AddAsync(transaction);
+                await _context.SaveChangesAsync();
+            }
+            else if (status == OrderStatuses.Cancelled || status == OrderStatuses.Rejected)
+            {
+                order.Booking.Status = BookingStatus.Cancelled;
+            }
+        }
+
+        _orderRepository.Update(order);
+        await _orderRepository.CommitAsync();
+        return true;
+    }
+
     private async Task<DateTime?> TryGetEarliestAvailableSlotAsync(string workerId, int durationHours)
     {
         var availability = await GetAvailableSlotsByDateAsync(workerId);
@@ -374,7 +450,7 @@ public class BookingSystemService : IBookingSystemService
         var pricing = CalculatePricing(basePrice, model.BookingType, (RecurrencePatterns)model.RecurrencePattern);
 
         // Validate and apply promo code discount
-        Shatbly.Models.PromotionCode? promoCode = null;
+        Shtbly.Models.PromotionCode? promoCode = null;
         if (model.PromoCodeId.HasValue)
         {
             promoCode = await _context.PromotionCodes
@@ -407,7 +483,7 @@ public class BookingSystemService : IBookingSystemService
         }
 
         // Validate and apply coupon discount
-        Shatbly.Models.Coupon? coupon = null;
+        Shtbly.Models.Coupon? coupon = null;
         if (model.CouponId.HasValue)
         {
             coupon = await _context.Coupons
@@ -440,7 +516,7 @@ public class BookingSystemService : IBookingSystemService
         var address = (await _addressRepository.GetAsync(a => a.UserId == customer.Id && a.Street == model.AddressLine)).FirstOrDefault();
         if (address is null)
         {
-            address = new Shatbly.Models.Address
+            address = new Shtbly.Models.Address
             {
                 UserId = customer.Id,
                 City = "Cairo",
@@ -452,7 +528,7 @@ public class BookingSystemService : IBookingSystemService
             await _addressRepository.CommitAsync();
         }
 
-        var parentBooking = new Shatbly.Models.Booking
+        var parentBooking = new Shtbly.Models.Booking
         {
             ClientId = customer.Id,
             WorkerId = workerProfile.Id,
@@ -461,7 +537,7 @@ public class BookingSystemService : IBookingSystemService
             DurationHours = model.DurationHours,
             TotalPrice = pricing.TotalPrice,
             DiscountAmt = pricing.DiscountAmount,
-            Status = Shatbly.Models.BookingStatus.Pending,
+            Status = Shtbly.Models.BookingStatus.Pending,
             PromoCodeId = promoCode?.Id,
             CouponId = coupon?.Id,
             CreatedAt = DateTime.UtcNow
@@ -475,8 +551,8 @@ public class BookingSystemService : IBookingSystemService
             ServiceId = service.Id,
             WorkerId = worker!.Id,
             Status = OrderStatuses.Pending,
-            BookingType = (Shatbly.Models.BookingTypes)Enum.Parse(
-                typeof(Shatbly.Models.BookingTypes),
+            BookingType = (Shtbly.Models.BookingTypes)Enum.Parse(
+                typeof(Shtbly.Models.BookingTypes),
                 model.BookingType.ToString()),
             ScheduledAt = resolvedScheduledAt!.Value,
             DurationHours = model.DurationHours,
@@ -485,9 +561,7 @@ public class BookingSystemService : IBookingSystemService
             Notes = model.Notes,
             BookingId = parentBooking.Id,
             PaymentMethod = model.PaymentMethod,
-            PaymentStatus = model.PaymentMethod is (Models.PaymentMethods)PaymentMethods.Cash
-                ? PaymentStatuses.Pending
-                : PaymentStatuses.Paid,
+            PaymentStatus = PaymentStatuses.Pending,
             RecurrencePattern = model.RecurrencePattern,
             ServicePrice = pricing.ServicePrice,
             ConvenienceFee = pricing.ConvenienceFee,
@@ -590,7 +664,7 @@ public class BookingSystemService : IBookingSystemService
         if (booking.Booking is not null)
         {
             booking.Booking.ScheduledAt = validSlot;
-            booking.Booking.Status = Shatbly.Models.BookingStatus.Pending;
+            booking.Booking.Status = Shtbly.Models.BookingStatus.Pending;
         }
 
         _orderRepository.Update(booking);
@@ -631,7 +705,7 @@ public class BookingSystemService : IBookingSystemService
 
         if (booking.Booking is not null)
         {
-            booking.Booking.Status = Shatbly.Models.BookingStatus.Cancelled;
+            booking.Booking.Status = Shtbly.Models.BookingStatus.Cancelled;
         }
 
         _orderRepository.Update(booking);
@@ -790,7 +864,7 @@ public class BookingSystemService : IBookingSystemService
             var date = now.Date.AddDays(dayOffset);
             var slots = new List<string>();
 
-            var dayOfWeekModel = (Shatbly.Models.DayOfWeek)date.DayOfWeek;
+            var dayOfWeekModel = (Shtbly.Models.DayOfWeek)date.DayOfWeek;
             var dailyAvailabilities = availabilities.Where(a => a.DayOfWeek == dayOfWeekModel).ToList();
 
             foreach (var avail in dailyAvailabilities)
@@ -886,16 +960,16 @@ public class BookingSystemService : IBookingSystemService
 
         return 0m;
     }
-    public async Task<bool> MarkAsPaidAsync(int bookingId)
+    public async Task<bool> MarkAsPaidAsync(int bookingId, string paidByUserId)
     { 
-    var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId, new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Booking });
+    var booking = await _orderRepository.GetOneAsync(o => o.Id == bookingId && o.UserId == paidByUserId, new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Booking });
         if (booking != null)
         { 
         booking.PaymentStatus = PaymentStatuses.Paid;
             booking.Status = OrderStatuses.Confirmed;
             if (booking.Booking != null)
             {
-                booking.Booking.Status = Shatbly.Models.BookingStatus.Confirmed;
+                booking.Booking.Status = Shtbly.Models.BookingStatus.Confirmed;
             }
              _orderRepository.Update(booking);
             await _orderRepository.CommitAsync();

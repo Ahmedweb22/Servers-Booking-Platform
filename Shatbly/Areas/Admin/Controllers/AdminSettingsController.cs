@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using static Shatbly.ViewModels.AdminSettingsViewModel;
-using static Shatbly.ViewModels.SettingViewModel;
+using static Shtbly.ViewModels.AdminSettingsViewModel;
+using static Shtbly.ViewModels.SettingViewModel;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
+    [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
     public class AdminSettingsController : Controller
     {
         private readonly UserManager<User> _userManager;

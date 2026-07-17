@@ -852,3 +852,65 @@ body.dashboard-body {
     color: #e2e8f0 !important;
 }
 
+/* ── System Health Sidebar Item UI Override ── */
+#nav-system-health.is-unhealthy {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+#nav-system-health.is-unhealthy i, 
+#nav-system-health.is-unhealthy span.health-text {
+    color: #ffffff !important;
+}
+
+#nav-system-health.is-unhealthy:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+#nav-system-health.is-unhealthy #health-alarm-badge {
+    background-color: #ffffff !important;
+    color: #dc3545 !important;
+}
+#nav-system-health .health-text {
+    max-width: 90px;
+    display: inline-block;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+#health-alarm-badge {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-radius: 50px !important;
+    padding: 6px 14px !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px;
+    border: none !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.45);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: none;
+}
+
+/* ── Pulse Alarm Animation ── */
+.pulse-alarm {
+    animation: pulse-danger-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-danger-glow {
+    0% {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.1);
+    }
+    100% {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.45);
+    }
+}
+
+

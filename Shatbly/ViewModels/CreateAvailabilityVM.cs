@@ -1,5 +1,5 @@
 ﻿
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class CreateAvailabilityVM : IValidatableObject
     {
@@ -10,7 +10,7 @@ namespace Shatbly.ViewModels
 
         [Required]
         [Display(Name = "Day")]
-        public Shatbly.Models.DayOfWeek DayOfWeek { get; set; }
+        public Shtbly.Models.DayOfWeek DayOfWeek { get; set; }
 
         [Required]
         [DataType(DataType.Time)]

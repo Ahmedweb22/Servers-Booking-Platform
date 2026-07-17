@@ -1,6 +1,6 @@
 ﻿    using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Shatbly.Utilities.Dbintializes;
-namespace Shatbly.HealthCheck
+using Shtbly.Utilities.Dbintializes;
+namespace Shtbly.HealthCheck
 {
 
     public class WorkerHealthCheck : IHealthCheck

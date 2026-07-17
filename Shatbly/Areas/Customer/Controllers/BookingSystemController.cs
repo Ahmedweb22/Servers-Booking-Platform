@@ -1,16 +1,20 @@
-using Microsoft.AspNetCore.Authorization;
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.DataAccess;
-using Shatbly.Models;
-using Shatbly.Services.BookingSystem;
-using Shatbly.Services.Hangfire;
-using Shatbly.UnitOfWork;
-using Shatbly.ViewModels;
+using Shtbly.DataAccess;
+using Shtbly.Models;
+using Shtbly.Services.BookingSystem;
+using Shtbly.Services.Hangfire;
+using Shtbly.UnitOfWork;
+using Shtbly.ViewModels;
 using Stripe.Checkout;
+using Shtbly.Services.Receipt;
+using Shtbly.Utilities;
+using Shtbly.Services.Notification;
+using System.IO;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -20,18 +24,27 @@ namespace Shatbly.Areas.Customer.Controllers
         private readonly IBookingSystemService _bookingSystemService;
         private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<BookingSystemController> _localizer;
-        private readonly ApplicationDbContext _context;
+        private readonly Shtbly.UnitOfWork.IUnitOfWork _unitOfWork;
+        private readonly IReceiptService _receiptService;
+        private readonly IEmailSenderWithAttachment _emailSender;
+        private readonly INotificationService _notificationService;
 
         public BookingSystemController(
             IBookingSystemService bookingSystemService, 
             UserManager<User> userManager, 
             IStringLocalizer<BookingSystemController> localizer,
-            ApplicationDbContext context)
+            Shtbly.UnitOfWork.IUnitOfWork unitOfWork,
+            IReceiptService receiptService,
+            IEmailSenderWithAttachment emailSender,
+            INotificationService notificationService)
         {
             _bookingSystemService = bookingSystemService;
             _userManager = userManager;
             _localizer = localizer;
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _receiptService = receiptService;
+            _emailSender = emailSender;
+            _notificationService = notificationService;
         }
         [HttpGet]
         public async Task<IActionResult> CreateBooking(string? workerId)
@@ -50,12 +63,28 @@ namespace Shatbly.Areas.Customer.Controllers
             {
                 ViewBag.IsWorkerLocked = true;
 
-                if (int.TryParse(workerId, out var workerProfileId))
+                int? finalWorkerProfileId = null;
+                
+                if (!Guid.TryParse(workerId, out _))
+                {
+                    var decryptedId = Shtbly.Utilities.UrlObfuscator.Decrypt(workerId);
+                    if (decryptedId > 0)
+                    {
+                        finalWorkerProfileId = decryptedId;
+                    }
+                    else if (int.TryParse(workerId, out var parsedId))
+                    {
+                        finalWorkerProfileId = parsedId;
+                    }
+                }
+
+                if (finalWorkerProfileId.HasValue)
                 {
                     // It is a worker profile ID, resolve the user ID
-                    var workerProfile = await _context.WorkerProfiles
-                        .Include(w => w.WorkerServices)
-                        .FirstOrDefaultAsync(w => w.Id == workerProfileId);
+                    var workerProfile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                        expression: w => w.Id == finalWorkerProfileId.Value,
+                        includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { w => w.WorkerServices! },
+                        tracking: false);
                         
                     if (workerProfile != null)
                     {
@@ -71,9 +100,10 @@ namespace Shatbly.Areas.Customer.Controllers
                     // It is a string User ID
                     model.WorkerId = workerId;
                     
-                    var workerProfile = await _context.WorkerProfiles
-                        .Include(w => w.WorkerServices)
-                        .FirstOrDefaultAsync(w => w.UserId == workerId);
+                    var workerProfile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                        expression: w => w.UserId == workerId,
+                        includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { w => w.WorkerServices! },
+                        tracking: false);
                         
                     if (workerProfile != null && workerProfile.WorkerServices != null)
                     {
@@ -110,10 +140,11 @@ namespace Shatbly.Areas.Customer.Controllers
             }
 
             TempData["Success"] = result.SuccessMessage;
-            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
+            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId.Value });
         }
 
         [HttpGet]
+        [Route("b/{id}")]
         public async Task<IActionResult> DetailsBooking(int id)
         {
             var model = await _bookingSystemService.GetDetailsAsync(id);
@@ -169,25 +200,97 @@ namespace Shatbly.Areas.Customer.Controllers
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
         }
         [HttpGet]
-        public async Task<IActionResult> Success(int id)
+        public async Task<IActionResult> Success(int id, string? sessionId)
         { 
-        var booking = await _bookingSystemService.GetDetailsAsync(id);
+            var booking = await _bookingSystemService.GetDetailsAsync(id);
             if (booking is null)
             {
                 return NotFound();
             }
-        var result = await _bookingSystemService.MarkAsPaidAsync(id);
+
+            var result = await _bookingSystemService.MarkAsPaidAsync(id, _userManager.GetUserId(User)!);
             if (result)
             {
                 TempData["Success"] = _localizer["PaymentSuccess"].Value;
+                
+                try 
+                {
+                    // If we have a sessionId, fetch it from Stripe and save the Payment details
+                    if (!string.IsNullOrEmpty(sessionId))
+                    {
+                        var sessionService = new Stripe.Checkout.SessionService();
+                        var session = sessionService.Get(sessionId);
+                        if (session != null && session.PaymentStatus == "paid")
+                        {
+                            var bookingToUpdate = await _unitOfWork.Bookings.GetOneAsync(
+                                b => b.Id == id, 
+                                new System.Linq.Expressions.Expression<System.Func<Shtbly.Models.Booking, object>>[] { b => b.Payment });
+                                
+                            if (bookingToUpdate != null && bookingToUpdate.Payment == null)
+                            {
+                                bookingToUpdate.Payment = new Shtbly.Models.Payment
+                                {
+                                    BookingId = id,
+                                    Amount = session.AmountTotal.HasValue ? (decimal)session.AmountTotal.Value / 100m : booking.Booking.TotalPrice,
+                                    Method = Shtbly.Models.PaymentMethod.Card,
+                                    Status = Shtbly.Models.PaymentStatus.Paid,
+                                    GatewayName = "Stripe",
+                                    GatewayRef = session.Id,
+                                    TransactionId = session.PaymentIntentId,
+                                    PaidAt = DateTime.UtcNow
+                                };
+                                await _unitOfWork.CommitAsync();
+                            }
+                        }
+                    }
 
+                    // Reload booking with full includes to ensure we have Worker.User
+                    var fullBooking = await _unitOfWork.Bookings.GetOneAsync(
+                        b => b.Id == id, 
+                        new System.Linq.Expressions.Expression<System.Func<Shtbly.Models.Booking, object>>[] { 
+                            b => b.Client, 
+                            b => b.Worker.User, 
+                            b => b.Payment 
+                        });
+                    if (fullBooking != null)
+                    {
+                        var receiptPath = await _receiptService.GenerateReceiptPdfAsync(fullBooking);
+                        string receiptUrl = "/receipts/" + Path.GetFileName(receiptPath);
+                        TempData["ReceiptUrl"] = receiptUrl;
+                        
+                        await _notificationService.CreateNotificationAsync(
+                            fullBooking.ClientId,
+                            "Payment Receipt",
+                            $"Your payment for booking #{fullBooking.Id} was successful.",
+                            NotificationType.System,
+                            fullBooking.Id);
+                        
+                        await _emailSender.SendEmailWithAttachmentAsync(
+                            fullBooking.Client.Email,
+                            $"Payment Receipt for Booking #{fullBooking.Id}",
+                            $"<p>Thank you for your payment. Please find your receipt attached.</p>",
+                            receiptPath);
+                            
+                        if (fullBooking.Worker?.User != null)
+                        {
+                            await _emailSender.SendEmailWithAttachmentAsync(
+                                fullBooking.Worker.User.Email,
+                                $"Payment Received for Booking #{fullBooking.Id}",
+                                $"<p>A payment was made by {fullBooking.Client.FName} for booking #{fullBooking.Id}. Please find the receipt attached.</p>",
+                                receiptPath);
+                        }
+                    }
+                } 
+                catch(Exception) 
+                {
+                    // Ignore background errors
+                }
             }
             else
             {
                 TempData["Error"] = _localizer["PaymentFailed"].Value;
             }
 
-      
             return RedirectToAction(nameof(DetailsBooking), new { id = id });
         }
         [HttpGet]
@@ -225,7 +328,7 @@ namespace Shatbly.Areas.Customer.Controllers
             }
 
             TempData[result.Succeeded ? "Success" : "Error"] = result.Message;
-            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
+            return Redirect($"/b/{Shtbly.Utilities.UrlObfuscator.Encrypt(result.BookingId)}");
         }
         public async Task<IActionResult> Pay(int id)
         {
@@ -243,7 +346,7 @@ namespace Shatbly.Areas.Customer.Controllers
                     "card",
                 },
                 Mode = "payment",
-                SuccessUrl = $"{Request.Scheme}://{Request.Host}/Customer/BookingSystem/Success?id={id}",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/Customer/BookingSystem/Success?id={id}&sessionId={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{Request.Scheme}://{Request.Host}/Customer/BookingSystem/Cancel?id={id}",
                 LineItems = new List<SessionLineItemOptions>
                 {
@@ -252,7 +355,7 @@ namespace Shatbly.Areas.Customer.Controllers
                     PriceData = new SessionLineItemPriceDataOptions
                     {
                         UnitAmount = (long)(booking.Booking.TotalPrice * 100),
-                        Currency = "usd",
+                        Currency = "egp",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = string.Format(_localizer["TechnicalServiceFrom"].Value, booking.Booking.User?.Name ?? "Customer"),
@@ -277,9 +380,10 @@ namespace Shatbly.Areas.Customer.Controllers
                 return Json(new { succeeded = false, message = _localizer["PromoCodeRequired"]?.Value ?? "Promo code is required." });
             }
 
-            var promo = await _context.PromotionCodes
-                .Include(pc => pc.Promotion)
-                .FirstOrDefaultAsync(pc => pc.Code == code && pc.IsActive && pc.Promotion.IsActive);
+            var promo = await _unitOfWork.PromotionCodes.GetOneAsync(
+                expression: pc => pc.Code == code && pc.IsActive && pc.Promotion.IsActive,
+                includes: new System.Linq.Expressions.Expression<System.Func<PromotionCode, object>>[] { pc => pc.Promotion },
+                tracking: false);
 
             if (promo == null)
             {
@@ -352,8 +456,9 @@ namespace Shatbly.Areas.Customer.Controllers
                 return Json(new { succeeded = false, message = _localizer["CouponRequired"]?.Value ?? "Coupon code is required." });
             }
 
-            var coupon = await _context.Coupons
-                .FirstOrDefaultAsync(c => c.Code == code && c.IsActive);
+            var coupon = await _unitOfWork.Coupons.GetOneAsync(
+                expression: c => c.Code == code && c.IsActive,
+                tracking: false);
 
             if (coupon == null)
             {
@@ -413,7 +518,7 @@ namespace Shatbly.Areas.Customer.Controllers
         //[HttpPost]
         //public async Task<IActionResult> Confirm(CreateBookingViewModel model)
         //{
-        //    // ... ÅäÔÇÁ ÇáÜ Booking Òí ãÇ åæ ÚäÏß
+        //    // ... ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ Booking ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         //    var deadline = DateTime.UtcNow.AddMinutes(15);
 
@@ -428,7 +533,7 @@ namespace Shatbly.Areas.Customer.Controllers
         //        AddressLine = model.AddressLine,
         //        AddressLabel = model.AddressLabel,
         //        WorkerResponseDeadlineUtc = deadline,
-        //        // ... ÈÇÞí ÇáÍÞæá (PaymentMethod, ServicePrice, TotalPrice, etc.)
+        //        // ... ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (PaymentMethod, ServicePrice, TotalPrice, etc.)
         //    };
 
         //    await unitOfWork.Orders.CreateAsync(order);
@@ -438,8 +543,8 @@ namespace Shatbly.Areas.Customer.Controllers
         //        job => job.ExecuteAsync(order.Id),
         //        TimeSpan.FromMinutes(15));
 
-        //    // ãÍÊÇÌ ÊÎÒä ÇáÜ jobId - Order ãÝíåæÔ property ÈÊÇÚÊåÇ ÍÇáíðÇ
-        //    // (ÔæÝ ÇáãáÇÍÙÉ ÊÍÊ)
+        //    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ jobId - Order ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ property ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        //    // (ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
 
         //    return RedirectToAction("Details", new { id = order.Id });
         //}

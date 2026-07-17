@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.Models;
+using Shtbly.Models;
 
-namespace Shatbly.DataAccess
+namespace Shtbly.DataAccess
 {
     public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
-        //"DefaultConnection": "Server=db50836.public.databaseasp.net; Database=db50836; User Id=db50836; Password=Q#j8nX7@=3hW; Encrypt=False; MultipleActiveResultSets=True;"
-
         public DbSet<User> Users { get; set; }
         public DbSet<OTP_Verification> OtpVerifications { get; set; }
         public DbSet<Address> Addresses { get; set; }

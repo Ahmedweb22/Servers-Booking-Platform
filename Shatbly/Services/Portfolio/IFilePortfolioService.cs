@@ -1,6 +1,6 @@
-﻿using Shatbly.Services.Portfolio;
+﻿using Shtbly.Services.Portfolio;
 
-namespace Shatbly.Services.Portfolio
+namespace Shtbly.Services.Portfolio
 {
     public interface IFilePortfolioService
     {

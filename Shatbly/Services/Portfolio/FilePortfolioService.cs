@@ -1,5 +1,5 @@
-﻿using Shatbly.Services.Portfolio;
-namespace Shatbly.Services.Portfolio
+﻿using Shtbly.Services.Portfolio;
+namespace Shtbly.Services.Portfolio
 {
     public class FilePortfolioService : IFilePortfolioService
     {
@@ -56,6 +56,11 @@ namespace Shatbly.Services.Portfolio
                 return FileUploadResult.Failure("Invalid file content type.");
             }
 
+            if (!await HasValidSignatureAsync(file, extension, normalizedType))
+            {
+                return FileUploadResult.Failure("Invalid file signature.");
+            }
+
             var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var uploadFolder = Path.Combine(webRoot, "uploads", "portfolio");
 
@@ -79,7 +84,21 @@ namespace Shatbly.Services.Portfolio
 
             var webRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             var cleanPath = relativePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
-            var physicalPath = Path.Combine(webRoot, cleanPath);
+            if (cleanPath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries).Contains(".."))
+            {
+                return;
+            }
+
+            var webRootFullPath = Path.GetFullPath(webRoot);
+            var physicalPath = Path.GetFullPath(Path.Combine(webRootFullPath, cleanPath));
+            var webRootPrefix = webRootFullPath.EndsWith(Path.DirectorySeparatorChar)
+                ? webRootFullPath
+                : webRootFullPath + Path.DirectorySeparatorChar;
+
+            if (!physicalPath.StartsWith(webRootPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
 
             if (File.Exists(physicalPath))
             {
@@ -95,6 +114,30 @@ namespace Shatbly.Services.Portfolio
                 "Video" => contentType == "video/mp4",
                 _ => false
             };
+        }
+
+        private static async Task<bool> HasValidSignatureAsync(IFormFile file, string extension, string fileType)
+        {
+            await using var validationStream = file.OpenReadStream();
+            var header = new byte[12];
+            var bytesRead = await validationStream.ReadAsync(header);
+
+            if (fileType == "Image")
+            {
+                return extension switch
+                {
+                    ".jpg" or ".jpeg" => bytesRead >= 3 &&
+                                         header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF,
+                    ".png" => bytesRead >= 4 &&
+                              header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47,
+                    _ => false
+                };
+            }
+
+            return fileType == "Video" &&
+                   extension == ".mp4" &&
+                   bytesRead >= 12 &&
+                   header[4] == 0x66 && header[5] == 0x74 && header[6] == 0x79 && header[7] == 0x70;
         }
     }
 }

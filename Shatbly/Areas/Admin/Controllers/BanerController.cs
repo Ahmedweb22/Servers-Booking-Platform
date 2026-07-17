@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shtbly.Services.File_Service;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
@@ -11,12 +12,18 @@ namespace Shatbly.Areas.Admin.Controllers
         private readonly IRepository<Banner> _bannerRepo;
         private readonly UserManager<User> _userManager;
         private readonly IStringLocalizer<BanerController> _localizer;
+        private readonly IFileService _fileService;
 
-        public BanerController(IRepository<Banner> bannerRepo, UserManager<User> userManager, IStringLocalizer<BanerController> localizer)
+        public BanerController(
+            IRepository<Banner> bannerRepo,
+            UserManager<User> userManager,
+            IStringLocalizer<BanerController> localizer,
+            IFileService fileService)
         {
             _bannerRepo = bannerRepo;
             _userManager = userManager;
             _localizer = localizer;
+            _fileService = fileService;
         }
 
         public async Task<IActionResult> Index(string? title, int page = 1)
@@ -62,13 +69,19 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (img != null && img.Length > 0)
             {
-                var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(img.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", newFileName);
-                using (var stream = System.IO.File.Create(filePath))
+                var upload = await _fileService.UploadFileAsync(
+                    img,
+                    "img/banners",
+                    5 * 1024 * 1024,
+                    [".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+
+                if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
                 {
-                    await img.CopyToAsync(stream);
+                    ModelState.AddModelError("ImageUrl", upload.ErrorMessage ?? _localizer["PleaseUploadImage"].Value);
+                    return View(banner);
                 }
-                banner.ImageUrl = newFileName;
+
+                banner.ImageUrl = Path.GetFileName(upload.FilePath);
             }
             else
             {
@@ -113,26 +126,28 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (img != null && img.Length > 0)
             {
-                var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(img.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", newFileName);
-                using (var stream = System.IO.File.Create(filePath))
+                var upload = await _fileService.UploadFileAsync(
+                    img,
+                    "img/banners",
+                    5 * 1024 * 1024,
+                    [".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+
+                if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
                 {
-                    await img.CopyToAsync(stream);
+                    ModelState.AddModelError("ImageUrl", upload.ErrorMessage ?? _localizer["PleaseUploadImage"].Value);
+                    return View(banner);
                 }
 
                 if (!string.IsNullOrEmpty(existingBanner.ImageUrl))
                 {
-                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", existingBanner.ImageUrl);
-                    if (System.IO.File.Exists(oldFilePath))
-                    {
-                        System.IO.File.Delete(oldFilePath);
-                    }
-                    banner.ImageUrl = newFileName;
+                    DeleteBannerImage(existingBanner.ImageUrl);
                 }
-                else
-                {
-                    banner.ImageUrl = existingBanner.ImageUrl;
-                }
+
+                banner.ImageUrl = Path.GetFileName(upload.FilePath);
+            }
+            else
+            {
+                banner.ImageUrl = existingBanner.ImageUrl;
             }
             banner.UserId = existingBanner.UserId;
 
@@ -142,20 +157,34 @@ namespace Shatbly.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
         [Authorize(Roles = $" {SD.ROLE_SUPER_ADMIN}")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var banner = await _bannerRepo.GetOneAsync(e => e.Id == id);
             if (banner is null)
                 return NotFound();
-            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\banners", banner.ImageUrl);
-            if (System.IO.File.Exists(oldFilePath))
-            {
-                System.IO.File.Delete(oldFilePath);
-            }
+            DeleteBannerImage(banner.ImageUrl);
             _bannerRepo.Delete(banner);
             await _bannerRepo.CommitAsync();
             TempData["Notification"] = _localizer["BannerDeletedSuccess"].Value;
             return RedirectToAction(nameof(Index));
+        }
+
+        private static void DeleteBannerImage(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            var safeFileName = Path.GetFileName(fileName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "banners", safeFileName);
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
         }
     }
 }

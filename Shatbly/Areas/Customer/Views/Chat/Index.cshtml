@@ -1,8 +1,8 @@
-@model Shatbly.ViewModels.ChatViewModel
+﻿@model Shtbly.ViewModels.ChatViewModel
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @inject Microsoft.AspNetCore.Identity.UserManager<User> UserManager
-@inject Shatbly.DataAccess.ApplicationDbContext DbContext
+@inject Shtbly.DataAccess.ApplicationDbContext DbContext
 
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
@@ -370,7 +370,7 @@
                         </p>
                         @if (workerProfileId > 0)
                         {
-                            <a href="/Customer/BookingSystem/CreateBooking?workerId=@workerProfileId" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
+                            <a href="/Customer/BookingSystem/CreateBooking?workerId=@Shtbly.Utilities.UrlObfuscator.Encrypt(workerProfileId)" class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm" style="box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);">
                                 @bookBtnLabel <i class="bi bi-calendar-check ms-1"></i>
                             </a>
                         }
@@ -520,7 +520,8 @@
                         method: "POST",
                         body: formData,
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'RequestVerificationToken': formData.get('__RequestVerificationToken') || ''
                         }
                     }).then(response => {
                         if (response.ok) {
@@ -571,33 +572,48 @@
 
                     const sentTime = new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                    let checkmarksHtml = "";
-                    if (isMine) {
-                        checkmarksHtml = message.isRead 
-                            ? '<i class="bi bi-check2-all text-info" title="Read" style="font-size: 1.05rem;"></i>' 
-                            : '<i class="bi bi-check2" title="Sent" style="font-size: 1.05rem;"></i>';
-                    }
+                    const messageBubble = document.createElement("div");
+                    messageBubble.className = `message-bubble shadow-sm ${!message.message ? 'image-only' : ''}`;
 
-                    let imgHtml = "";
                     if (message.imageUrl) {
-                        imgHtml = `<img src="/${message.imageUrl}" class="chat-image img-fluid d-block mb-1 cursor-pointer" onclick="window.open('/${message.imageUrl}')" style="max-width: 250px; border-radius: 12px; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`;
+                        const imagePath = String(message.imageUrl).replace(/^\/+/, "");
+                        if (!imagePath.includes("..")) {
+                            const image = document.createElement("img");
+                            image.src = `/${imagePath}`;
+                            image.className = "chat-image img-fluid d-block mb-1 cursor-pointer";
+                            image.style.maxWidth = "250px";
+                            image.style.borderRadius = "12px";
+                            image.style.marginBottom = "8px";
+                            image.style.boxShadow = "0 4px 12px rgba(0,0,0,0.08)";
+                            image.addEventListener("click", () => window.open(`/${imagePath}`, "_blank", "noopener"));
+                            messageBubble.appendChild(image);
+                        }
                     }
 
-                    let msgTextHtml = "";
                     if (message.message) {
-                        msgTextHtml = `<div class="message-text">${escapeHtml(message.message)}</div>`;
+                        const messageText = document.createElement("div");
+                        messageText.className = "message-text";
+                        messageText.textContent = message.message;
+                        messageBubble.appendChild(messageText);
                     }
 
-                    bubbleWrapper.innerHTML = `
-                        <div class="message-bubble shadow-sm ${!message.message ? 'image-only' : ''}">
-                            ${imgHtml}
-                            ${msgTextHtml}
-                            <div class="message-footer">
-                                <span>${sentTime}</span>
-                                ${checkmarksHtml}
-                            </div>
-                        </div>
-                    `;
+                    const footer = document.createElement("div");
+                    footer.className = "message-footer";
+
+                    const sentTimeElement = document.createElement("span");
+                    sentTimeElement.textContent = sentTime;
+                    footer.appendChild(sentTimeElement);
+
+                    if (isMine) {
+                        const checkmark = document.createElement("i");
+                        checkmark.className = message.isRead ? "bi bi-check2-all text-info" : "bi bi-check2";
+                        checkmark.title = message.isRead ? "Read" : "Sent";
+                        checkmark.style.fontSize = "1.05rem";
+                        footer.appendChild(checkmark);
+                    }
+
+                    messageBubble.appendChild(footer);
+                    bubbleWrapper.appendChild(messageBubble);
 
                     chatBody.appendChild(bubbleWrapper);
                     chatBody.scrollTop = chatBody.scrollHeight;

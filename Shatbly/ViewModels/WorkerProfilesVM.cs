@@ -1,8 +1,8 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
-using Shatbly.Models;
+using Shtbly.Models;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class WorkerProfilesVM
     {

@@ -1,9 +1,9 @@
-using ICSharpCode.Decompiler.CSharp.Syntax;
+﻿using ICSharpCode.Decompiler.CSharp.Syntax;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
-namespace Shatbly.Reports;
+namespace Shtbly.Reports;
 
 public class SimpleReport : IDocument
 {
@@ -24,10 +24,10 @@ public class SimpleReport : IDocument
 
     public DocumentMetadata GetMetadata() => new()
     {
-        Title = "Shatbly Users Report",
-        Author = "Shatbly Admin Dashboard",
+        Title = "Shtbly Users Report",
+        Author = "Shtbly Admin Dashboard",
         Subject = "Detailed user analytics report",
-        Keywords = "users,roles,orders,analytics,shatbly",
+        Keywords = "users,roles,orders,analytics,shtbly",
         CreationDate = _generatedAt
     };
 
@@ -55,7 +55,7 @@ public class SimpleReport : IDocument
             {
                 row.RelativeItem().Column(column =>
                 {
-                    column.Item().Text("Shatbly")
+                    column.Item().Text("Shtbly")
                         .FontSize(24)
                         .Bold()
                         .FontColor(Colors.White);
@@ -343,7 +343,7 @@ public class SimpleReport : IDocument
             .PaddingTop(8)
             .Row(row =>
             {
-                row.RelativeItem().Text("Shatbly Admin Dashboard")
+                row.RelativeItem().Text("Shtbly Admin Dashboard")
                     .FontSize(8)
                     .FontColor(ReportColors.Muted);
 

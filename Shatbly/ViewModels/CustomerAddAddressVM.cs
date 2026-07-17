@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shatbly.ViewModels
+namespace Shtbly.ViewModels
 {
     public class CustomerAddAddressVM
     {

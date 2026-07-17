@@ -1,4 +1,4 @@
-﻿namespace Shatbly.ViewModels
+﻿namespace Shtbly.ViewModels
 {
     public class PromotionCodeCreateVM
     {

@@ -1,7 +1,7 @@
-using Shatbly.Models;
-using NotificationModel = Shatbly.Models.Notification;
+﻿using Shtbly.Models;
+using NotificationModel = Shtbly.Models.Notification;
 
-namespace Shatbly.Services.Notification
+namespace Shtbly.Services.Notification
 {
     public interface INotificationService
     {

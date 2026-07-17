@@ -1,10 +1,10 @@
-@using Microsoft.AspNetCore.Localization
+﻿@using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
     Layout = "_IdentityLayout";
-    ViewData["Title"] = isRtl ? "اتصل بنا - شطبلي" : "Contact Us - Shatbly";
+    ViewData["Title"] = isRtl ? "اتصل بنا - شطبلي" : "Contact Us - Shtbly";
     ViewData["HeroTitle"] = isRtl ? "تواصل معنا" : "Contact Us";
     ViewData["HeroSubtitle"] = isRtl 
         ? "يسعدنا دائماً الإجابة على استفساراتك وتلقي مقترحاتك" 

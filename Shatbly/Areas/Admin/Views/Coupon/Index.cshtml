@@ -160,7 +160,10 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/Admin/Coupon/Delete/${id}`, {
-                                method: "DELETE"
+                                method: "DELETE",
+                                headers: {
+                                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                                }
                             })
                             .then(response => {
                                 if (response.ok) {

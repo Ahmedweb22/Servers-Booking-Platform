@@ -1,4 +1,4 @@
-@model IEnumerable<Shatbly.Models.Dipuste>
+﻿@model IEnumerable<Shtbly.Models.Dipuste>
 @using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
@@ -84,7 +84,7 @@
                                 @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
                             </td>
                             <td>
-                                @if (item.Status == Shatbly.Models.DisputeStatus.Resolved || item.Status == Shatbly.Models.DisputeStatus.Closed)
+                                @if (item.Status == Shtbly.Models.DisputeStatus.Resolved || item.Status == Shtbly.Models.DisputeStatus.Closed)
                                 {
                                     <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
                                         @item.Status
@@ -103,7 +103,7 @@
                                 </div>
                             </td>
                             <td class="text-center">
-                                @if (item.Status != Shatbly.Models.DisputeStatus.Resolved && item.Status != Shatbly.Models.DisputeStatus.Closed)
+                                @if (item.Status != Shtbly.Models.DisputeStatus.Resolved && item.Status != Shtbly.Models.DisputeStatus.Closed)
                                 {
                                     <button type="button" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold js-resolve-dispute" 
                                             data-id="@item.Id">

@@ -1,4 +1,4 @@
-﻿@model IReadOnlyList<Shatbly.ViewModels.AvailabilityVM>
+﻿@model IReadOnlyList<Shtbly.ViewModels.AvailabilityVM>
 
 @{
     ViewData["Title"] = "Weekly Availability";
@@ -31,9 +31,9 @@
     }
 
     <div class="row g-3">
-        @foreach (Shatbly.Models.DayOfWeek day in Enum.GetValues<Shatbly.Models.DayOfWeek>())
+        @foreach (Shtbly.Models.DayOfWeek day in Enum.GetValues<Shtbly.Models.DayOfWeek>())
         {
-            var slots = groupedSchedule.GetValueOrDefault(day) ?? new List<Shatbly.ViewModels.AvailabilityVM>();
+            var slots = groupedSchedule.GetValueOrDefault(day) ?? new List<Shtbly.ViewModels.AvailabilityVM>();
 
             <div class="col-md-6 col-xl-4">
                 <div class="card h-100 shadow-sm">

@@ -1,6 +1,6 @@
-@model UsersVM
+﻿@model UsersVM
 @using Microsoft.AspNetCore.Localization
-@using Shatbly.Utilities
+@using Shtbly.Utilities
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
@@ -182,7 +182,18 @@
                     cancelButtonText: isRtl ? "إلغاء" : "Cancel"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = url;
+                        fetch(url, {
+                            method: "POST",
+                            headers: {
+                                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                            }
+                        }).then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                Swal.fire({ title: "Error!", text: "Unable to delete the user.", icon: "error" });
+                            }
+                        });
                     }
                 });
             });

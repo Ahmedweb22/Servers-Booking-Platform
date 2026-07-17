@@ -1,17 +1,19 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Shatbly.Models;
-using Shatbly.Utilities;
-using Shatbly.ViewModels;
+using Shtbly.Models;
+using Shtbly.Utilities;
+using Shtbly.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Shtbly.Services.File_Service;
+using Microsoft.AspNetCore.Http;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -22,19 +24,55 @@ namespace Shatbly.Areas.Customer.Controllers
         private readonly IRepository<Address> _addressRepository;
         private readonly IStringLocalizer<SettingsController> _localizer;
         private readonly ILogger<SettingsController> _logger;
+        private readonly IFileService _fileService;
 
         public SettingsController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IRepository<Address> addressRepository,
             IStringLocalizer<SettingsController> localizer,
-            ILogger<SettingsController> logger)
+            ILogger<SettingsController> logger,
+            IFileService fileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _addressRepository = addressRepository;
             _localizer = localizer;
             _logger = logger;
+            _fileService = fileService;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadProfilePicture(IFormFile ProfilePicture)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            if (ProfilePicture != null && ProfilePicture.Length > 0)
+            {
+                var uploadResult = await _fileService.UploadFileAsync(
+                    ProfilePicture,
+                    "uploads/profile",
+                    5 * 1024 * 1024,
+                    new[] { ".jpg", ".jpeg", ".png", ".webp" });
+
+                if (uploadResult.Succeeded)
+                {
+                    user.ProfilePicture = uploadResult.FilePath;
+                    await _userManager.UpdateAsync(user);
+                    TempData["Success"] = _localizer["ProfilePictureUpdated"]?.Value ?? "Profile picture updated successfully.";
+                }
+                else
+                {
+                    TempData["Error"] = _localizer["ProfilePictureUploadFailed"]?.Value ?? "Failed to upload profile picture.";
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]

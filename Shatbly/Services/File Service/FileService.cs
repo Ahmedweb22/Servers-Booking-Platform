@@ -1,4 +1,4 @@
-namespace Shatbly.Services.File_Service
+﻿namespace Shtbly.Services.File_Service
 {
     public class FileService : IFileService
     {
@@ -18,6 +18,13 @@ namespace Shatbly.Services.File_Service
             if (file.Length == 0)
             {
                 return FileUploadResult.Failure("The uploaded file is empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(folderPath) ||
+                Path.IsPathRooted(folderPath) ||
+                folderPath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries).Contains(".."))
+            {
+                return FileUploadResult.Failure("Invalid upload folder.");
             }
 
             if (file.Length > maxSizeInBytes)
@@ -45,7 +52,7 @@ namespace Shatbly.Services.File_Service
             else if (extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp")
             {
                 await using var validationStream = file.OpenReadStream();
-                var header = new byte[8];
+                var header = new byte[12];
                 var bytesRead = await validationStream.ReadAsync(header);
 
                 bool isValidImage = false;
@@ -61,7 +68,10 @@ namespace Shatbly.Services.File_Service
                 {
                     isValidImage = true;
                 }
-                else if (bytesRead >= 4 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46)
+                else if (extension == ".webp" &&
+                         bytesRead >= 12 &&
+                         header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
+                         header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50)
                 {
                     isValidImage = true;
                 }

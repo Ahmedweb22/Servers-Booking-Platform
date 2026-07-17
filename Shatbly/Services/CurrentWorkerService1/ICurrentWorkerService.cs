@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Shatbly.Services.CurrentWorkerService1
+namespace Shtbly.Services.CurrentWorkerService1
 {
     public interface ICurrentWorkerService
     {

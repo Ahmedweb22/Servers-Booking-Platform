@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.Notification;
-using Shatbly.Services.AI;
+using Shtbly.Services.Notification;
+using Shtbly.Services.AI;
+using Shtbly.Services.File_Service;
 using System.IO;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]
@@ -16,7 +17,8 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IStringLocalizer<WorkerController> _localizer;
         private readonly INotificationService _notificationService;
         private readonly IIdValidationService _idValidationService;
-        private readonly IRepository<Shatbly.Models.Address> _addressRepository;
+        private readonly IFileService _fileService;
+        private readonly IRepository<Shtbly.Models.Address> _addressRepository;
 
         public WorkerController(
             UserManager<User> userManager, 
@@ -24,13 +26,15 @@ namespace Shatbly.Areas.Worker.Controllers
             IStringLocalizer<WorkerController> localizer,
             INotificationService notificationService,
             IIdValidationService idValidationService,
-            IRepository<Shatbly.Models.Address> addressRepository)
+            IFileService fileService,
+            IRepository<Shtbly.Models.Address> addressRepository)
         {
             _userManager = userManager;
             _profileRepository = profileRepository;
             _localizer = localizer;
             _notificationService = notificationService;
             _idValidationService = idValidationService;
+            _fileService = fileService;
             _addressRepository = addressRepository;
         }
 
@@ -43,6 +47,7 @@ namespace Shatbly.Areas.Worker.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendCV(WorkerVM model)
         {
             if (!ModelState.IsValid)
@@ -92,28 +97,38 @@ namespace Shatbly.Areas.Worker.Controllers
             }
 
             await _userManager.AddToRoleAsync(applicationUser, SD.ROLE_WORKER);
-          
-            var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(model.cv.FileName);
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", newFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            using (var stream = System.IO.File.Create(filePath))
+
+            var cvUpload = await _fileService.UploadFileAsync(
+                model.cv,
+                "uploads/cv",
+                maxSizeInBytes: 5 * 1024 * 1024,
+                allowedExtensions: new[] { ".pdf" });
+
+            if (!cvUpload.Succeeded)
             {
-                model.cv.CopyTo(stream);
+                await _userManager.DeleteAsync(applicationUser);
+                ModelState.AddModelError("cv", cvUpload.ErrorMessage ?? "Invalid CV file.");
+                return View(model);
             }
 
-            var newIdFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(model.IdCardPhoto.FileName);
-            var idFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_id", newIdFileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(idFilePath)!);
-            using (var stream = System.IO.File.Create(idFilePath))
+            var idUpload = await _fileService.UploadFileAsync(
+                model.IdCardPhoto,
+                "uploads/worker-id",
+                maxSizeInBytes: 5 * 1024 * 1024,
+                allowedExtensions: new[] { ".jpg", ".jpeg", ".png", ".webp" });
+
+            if (!idUpload.Succeeded)
             {
-                model.IdCardPhoto.CopyTo(stream);
+                await _userManager.DeleteAsync(applicationUser);
+                ModelState.AddModelError("IdCardPhoto", idUpload.ErrorMessage ?? "Invalid ID card photo.");
+                return View(model);
             }
 
             var Worker = new WorkerProfile
             {
                 UserId = applicationUser.Id,
-                CVPath = newFileName,
-                IdCardPhotoPath = newIdFileName,
+                CVPath = cvUpload.FilePath,
+                IdCardPhotoPath = idUpload.FilePath,
                 Bio = string.Empty,
             };
         
@@ -121,7 +136,7 @@ namespace Shatbly.Areas.Worker.Controllers
             await _profileRepository.CommitAsync();
 
             // Create and save worker's address
-            var address = new Shatbly.Models.Address
+            var address = new Shtbly.Models.Address
             {
                 City = "القاهرة",
                 District = "وسط البلد",

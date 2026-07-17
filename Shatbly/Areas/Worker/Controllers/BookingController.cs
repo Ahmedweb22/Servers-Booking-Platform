@@ -1,17 +1,20 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using Shatbly.Models;
-using Shatbly.Repositories.IRepositories;
-using Shatbly.Services.Notification;
+using Shtbly.Models;
+using Shtbly.Repositories.IRepositories;
+using Shtbly.Services.Notification;
 using Microsoft.AspNetCore.Localization;
-using Shatbly.Services.BookingSystem;
+using Shtbly.Services.BookingSystem;
 
-using Shatbly.DataAccess;
+using Shtbly.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using Shtbly.UnitOfWork;
+using Shtbly.Services.Receipt;
+using Shtbly.Utilities;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]
@@ -20,18 +23,27 @@ namespace Shatbly.Areas.Worker.Controllers
         private readonly IRepository<Order> _orderRepository;
         private readonly INotificationService _notificationService;
         private readonly UserManager<User> _userManager;
-        private readonly ApplicationDbContext _context;
+        private readonly IBookingSystemService _bookingSystemService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IReceiptService _receiptService;
+        private readonly IEmailSenderWithAttachment _emailSender;
 
         public BookingController(
             IRepository<Order> orderRepository,
             INotificationService notificationService,
             UserManager<User> userManager,
-            ApplicationDbContext context)
+            IBookingSystemService bookingSystemService,
+            IUnitOfWork unitOfWork,
+            IReceiptService receiptService,
+            IEmailSenderWithAttachment emailSender)
         {
             _orderRepository = orderRepository;
             _notificationService = notificationService;
             _userManager = userManager;
-            _context = context;
+            _bookingSystemService = bookingSystemService;
+            _unitOfWork = unitOfWork;
+            _receiptService = receiptService;
+            _emailSender = emailSender;
         }
 
         [HttpGet]
@@ -49,7 +61,8 @@ namespace Shatbly.Areas.Worker.Controllers
                 { 
                     o => o.Service, 
                     o => o.User,
-                    o => o.Booking
+                    o => o.Booking,
+                    o => o.Booking.Payment
                 },
                 tracking: false
             );
@@ -68,80 +81,29 @@ namespace Shatbly.Areas.Worker.Controllers
                 return Unauthorized();
             }
 
-            var order = await _orderRepository.GetOneAsync(
-                expression: o => o.Id == orderId,
-                includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] 
-                { 
-                    o => o.Booking, 
-                    o => o.Service, 
-                    o => o.User 
-                }
-            );
+            var isAr = Request.HttpContext.Features.Get<IRequestCultureFeature>()?.RequestCulture.UICulture.Name == "ar";
+            var workerName = isAr ? User.Identity.Name : User.Identity.Name;
 
-            if (order == null || order.WorkerId != currentUserId)
+            bool success = await _bookingSystemService.UpdateWorkerOrderStatusAsync(orderId, status, currentUserId, isAr, workerName);
+
+            if (!success)
             {
                 return NotFound();
             }
 
-            // Perform status transition
-            order.Status = status;
+            var order = await _orderRepository.GetOneAsync(
+                expression: o => o.Id == orderId,
+                includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { o => o.Service! },
+                tracking: false);
 
-            // Sync with parent Booking if present
-            if (order.Booking != null)
+            if (order == null)
             {
-                if (status == OrderStatuses.Confirmed)
-                {
-                    order.Booking.Status = BookingStatus.Confirmed;
-                }
-                else if (status == OrderStatuses.Completed)
-                {
-                    order.Booking.Status = BookingStatus.Completed;
-
-                    // Fetch the worker's wallet
-                    var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == order.WorkerId);
-                    if (wallet == null)
-                    {
-                        wallet = new Wallet { UserId = order.WorkerId, Balance = 0, UpdatedAt = DateTime.UtcNow };
-                        await _context.Wallets.AddAsync(wallet);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    // Calculate payout: TotalPrice - ConvenienceFee
-                    decimal payout = Math.Max(0m, order.TotalPrice - order.ConvenienceFee);
-
-                    // Credit wallet
-                    wallet.Balance += payout;
-                    wallet.UpdatedAt = DateTime.UtcNow;
-                    _context.Wallets.Update(wallet);
-
-                    // Create WalletTransaction
-                    var transaction = new WalletTransaction
-                    {
-                        WalletId = wallet.Id,
-                        Amount = payout,
-                        Type = WalletTransactionType.Earning,
-                        Reference = $"Payout for Booking #{order.Id}",
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    await _context.WalletTransactions.AddAsync(transaction);
-                    await _context.SaveChangesAsync();
-                }
-                else if (status == OrderStatuses.Cancelled || status == OrderStatuses.Rejected)
-                {
-                    order.Booking.Status = BookingStatus.Cancelled;
-                }
+                return NotFound();
             }
-
-            _orderRepository.Update(order);
-            await _orderRepository.CommitAsync();
 
             // Notify the customer
             string title = "";
             string message = "";
-            var reqCultureFeature = HttpContext.Features.Get<IRequestCultureFeature>();
-            var isAr = reqCultureFeature?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
-
-            var workerName = User.Identity?.Name ?? (isAr ? "الفني" : "Worker");
 
             if (status == OrderStatuses.Confirmed)
             {
@@ -266,6 +228,112 @@ namespace Shatbly.Areas.Worker.Controllers
             else
             {
                 TempData["Error"] = isAr ? "فشل رفع النزاع للطلب." : "Failed to raise dispute.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsPaid(int orderId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            var order = await _orderRepository.GetOneAsync(
+                expression: o => o.Id == orderId,
+                includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] { 
+                    o => o.Booking,
+                    o => o.Booking.Payment
+                }
+            );
+
+            if (order == null || order.WorkerId != currentUserId)
+            {
+                TempData["Error"] = "Booking not found or you don't have access.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (order.PaymentMethod == Shtbly.Models.PaymentMethods.Cash && order.PaymentStatus == Shtbly.Models.PaymentStatuses.Pending)
+            {
+                order.PaymentStatus = Shtbly.Models.PaymentStatuses.Paid;
+                
+                if (order.Booking != null)
+                {
+                    // Also update the underlying booking's payment status if present
+                    var booking = order.Booking;
+                    if (booking.Payment != null)
+                    {
+                        booking.Payment.Status = Shtbly.Models.PaymentStatus.Paid;
+                        booking.Payment.PaidAt = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        booking.Payment = new Shtbly.Models.Payment
+                        {
+                            BookingId = booking.Id,
+                            Amount = booking.TotalPrice,
+                            Method = Shtbly.Models.PaymentMethod.Cash,
+                            Status = Shtbly.Models.PaymentStatus.Paid,
+                            GatewayName = "Cash",
+                            GatewayRef = "CASH-REF",
+                            GatewayResponse = "Paid to worker directly",
+                            TransactionId = "CASH-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                            PaidAt = DateTime.UtcNow
+                        };
+                    }
+                }
+                
+                await _orderRepository.CommitAsync();
+
+                // Generate Receipt and Send Emails
+                if (order.Booking != null)
+                {
+                    // Reload booking with full includes to ensure we have Client and Worker.User for emails
+                    var fullBooking = await _unitOfWork.Bookings.GetOneAsync(
+                        b => b.Id == order.BookingId, 
+                        new System.Linq.Expressions.Expression<System.Func<Shtbly.Models.Booking, object>>[] { 
+                            b => b.Client, 
+                            b => b.Worker.User, 
+                            b => b.Payment 
+                        });
+
+                    if (fullBooking != null)
+                    {
+                        var receiptPath = await _receiptService.GenerateReceiptPdfAsync(fullBooking);
+
+                        await _notificationService.CreateNotificationAsync(
+                            fullBooking.ClientId,
+                            "Payment Receipt",
+                            $"Your cash payment for booking #{fullBooking.Id} was recorded.",
+                            NotificationType.System,
+                            fullBooking.Id);
+                        
+                        await _emailSender.SendEmailWithAttachmentAsync(
+                            fullBooking.Client.Email,
+                            $"Payment Receipt for Booking #{fullBooking.Id}",
+                            $"<p>Thank you for your payment. Please find your receipt attached.</p>",
+                            receiptPath);
+                            
+                        if (fullBooking.Worker?.User != null)
+                        {
+                            await _emailSender.SendEmailWithAttachmentAsync(
+                                fullBooking.Worker.User.Email,
+                                $"Payment Received for Booking #{fullBooking.Id}",
+                                $"<p>A cash payment was recorded for booking #{fullBooking.Id}. Please find the receipt attached.</p>",
+                                receiptPath);
+                        }
+                    }
+                }
+
+                TempData["Success"] = "Payment marked as received.";
+            }
+            else
+            {
+                TempData["Error"] = "This booking cannot be marked as paid.";
             }
 
             return RedirectToAction(nameof(Index));

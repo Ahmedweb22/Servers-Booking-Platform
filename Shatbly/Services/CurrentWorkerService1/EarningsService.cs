@@ -1,8 +1,8 @@
-﻿using Shatbly.Models;
-using Shatbly.UnitOfWork;
-using Shatbly.ViewModels;
+﻿using Shtbly.Models;
+using Shtbly.UnitOfWork;
+using Shtbly.ViewModels;
 
-namespace Shatbly.Services.CurrentWorkerService1
+namespace Shtbly.Services.CurrentWorkerService1
 {
     public class EarningsService : IEarningsService
     {

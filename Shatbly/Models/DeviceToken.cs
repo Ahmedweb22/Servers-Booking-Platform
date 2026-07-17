@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices;
 
-namespace Shatbly.Models
+namespace Shtbly.Models
 {
     public enum Platform
     {

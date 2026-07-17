@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.SignalR;
-using Shatbly.Hubs;
-using Shatbly.Models;
-using Shatbly.Services.Notification;
-using Shatbly.UnitOfWork;
+﻿using Microsoft.AspNetCore.SignalR;
+using Shtbly.Hubs;
+using Shtbly.Models;
+using Shtbly.Services.Notification;
+using Shtbly.UnitOfWork;
 
-namespace Shatbly.Services.Chat
+namespace Shtbly.Services.Chat
 {
     public class ChatService(
         IUnitOfWork unitOfWork,

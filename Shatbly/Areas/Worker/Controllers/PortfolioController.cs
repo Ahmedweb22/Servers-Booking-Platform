@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.Portfolio;
+using Shtbly.Services.Portfolio;
 using System.Security.Claims;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
 
     [Area(SD.WORKER_AREA)]

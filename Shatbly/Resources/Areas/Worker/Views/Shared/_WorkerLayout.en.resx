@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -23,7 +23,7 @@
   <data name="Withdrawals" xml:space="preserve"><value>Withdrawals</value></data>
   <data name="WorkerDashboard" xml:space="preserve"><value>Worker Dashboard</value></data>
   <data name="Logout" xml:space="preserve"><value>Logout</value></data>
-  <data name="FooterText" xml:space="preserve"><value>Shatbly Worker Panel</value></data>
+  <data name="FooterText" xml:space="preserve"><value>Shtbly Worker Panel</value></data>
   <data name="Bookings" xml:space="preserve"><value>Bookings</value></data>
   <data name="Reviews" xml:space="preserve"><value>Reviews</value></data>
 </root>

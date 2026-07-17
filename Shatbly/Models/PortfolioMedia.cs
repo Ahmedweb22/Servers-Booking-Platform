@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace Shatbly.Models
+namespace Shtbly.Models
 {
 
     public enum MediaType

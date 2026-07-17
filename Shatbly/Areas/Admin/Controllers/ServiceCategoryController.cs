@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shtbly.Services.File_Service;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
@@ -9,10 +10,16 @@ namespace Shatbly.Areas.Admin.Controllers
     {
         private IRepository<ServiceCategory> _serviceCategoryRepository;
         private readonly IStringLocalizer<ServiceCategoryController> _localizer;
-        public ServiceCategoryController(IRepository<ServiceCategory> categoryRepository, IStringLocalizer<ServiceCategoryController> localizer)
+        private readonly IFileService _fileService;
+
+        public ServiceCategoryController(
+            IRepository<ServiceCategory> categoryRepository,
+            IStringLocalizer<ServiceCategoryController> localizer,
+            IFileService fileService)
         {
             _serviceCategoryRepository = categoryRepository;
             _localizer = localizer;
+            _fileService = fileService;
         }
 
         public async Task<IActionResult> Index(string? name, int page = 1)
@@ -50,13 +57,26 @@ namespace Shatbly.Areas.Admin.Controllers
             {
                 return View(serviceCategory);
             }
-            var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(icon.FileName);
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\service_categories", newFileName);
-            using (var stream = System.IO.File.Create(filePath))
+
+            if (icon is null || icon.Length == 0)
             {
-                icon.CopyTo(stream);
+                ModelState.AddModelError(nameof(ServiceCategory.Icon), "Service category icon is required.");
+                return View(serviceCategory);
             }
-            serviceCategory.Icon = newFileName;
+
+            var upload = await _fileService.UploadFileAsync(
+                icon,
+                "img/service_categories",
+                2 * 1024 * 1024,
+                [".jpg", ".jpeg", ".png", ".gif", ".webp"]);
+
+            if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
+            {
+                ModelState.AddModelError(nameof(ServiceCategory.Icon), upload.ErrorMessage ?? "Invalid service category icon.");
+                return View(serviceCategory);
+            }
+
+            serviceCategory.Icon = Path.GetFileName(upload.FilePath);
 
             await _serviceCategoryRepository.CreateAsync(serviceCategory);
             await _serviceCategoryRepository.CommitAsync();
@@ -89,21 +109,21 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (icon is not null && icon.Length > 0)
             {
-                var newFileName = Guid.NewGuid().ToString().Substring(0, 7) + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(icon.FileName);
+                var upload = await _fileService.UploadFileAsync(
+                    icon,
+                    "img/service_categories",
+                    2 * 1024 * 1024,
+                    [".jpg", ".jpeg", ".png", ".gif", ".webp"]);
 
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\service_categories", newFileName);
-                using (var stream = System.IO.File.Create(filePath))
+                if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
                 {
-                    icon.CopyTo(stream);
+                    ModelState.AddModelError(nameof(ServiceCategory.Icon), upload.ErrorMessage ?? "Invalid service category icon.");
+                    return View(serviceCategory);
                 }
 
-                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\service_categories", serviceCategoryInDB.Icon);
-                if (System.IO.File.Exists(oldFilePath))
-                {
-                    System.IO.File.Delete(oldFilePath);
-                }
+                DeleteCategoryIcon(serviceCategoryInDB.Icon);
 
-                serviceCategory.Icon = newFileName;
+                serviceCategory.Icon = Path.GetFileName(upload.FilePath);
             }
             else
             {
@@ -116,6 +136,8 @@ namespace Shatbly.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var serviceCategory = await _serviceCategoryRepository.GetOneAsync(c => c.Id == id);
@@ -124,17 +146,29 @@ namespace Shatbly.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\service_categories", serviceCategory.Icon);
-            if (System.IO.File.Exists(oldFilePath))
-            {
-                System.IO.File.Delete(oldFilePath);
-            }
+            DeleteCategoryIcon(serviceCategory.Icon);
 
             _serviceCategoryRepository.Delete(serviceCategory);
             await _serviceCategoryRepository.CommitAsync();
 
             TempData["Notification"] = _localizer["CategoryDeletedSuccess"].Value;
             return RedirectToAction(nameof(Index));
+        }
+
+        private static void DeleteCategoryIcon(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return;
+            }
+
+            var safeFileName = Path.GetFileName(fileName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", "service_categories", safeFileName);
+
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
         }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Services.TokenServices;
+using Shtbly.Services.TokenServices;
 
-namespace Shatbly.Areas.Identity.Controllers
+namespace Shtbly.Areas.Identity.Controllers
 {
    //[Area(SD.IDENTITY_AREA)]
    // public class TokenController : Controller

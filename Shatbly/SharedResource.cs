@@ -1,4 +1,4 @@
-namespace Shatbly;
+﻿namespace Shtbly;
 
 /// <summary>
 /// Marker class for shared localization resources.

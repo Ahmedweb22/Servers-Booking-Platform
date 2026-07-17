@@ -1,14 +1,15 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using Shatbly.Models;
-using Shatbly.Utilities;
-using Shatbly.ViewModels;
+using Shtbly.Models;
+using Shtbly.Utilities;
+using Shtbly.ViewModels;
 using System;
 using System.Threading.Tasks;
+using Shtbly.Services.File_Service;
 
-namespace Shatbly.Areas.Customer.Controllers
+namespace Shtbly.Areas.Customer.Controllers
 {
     [Area(SD.CUSTOMER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_CUSTOMER}")]
@@ -17,15 +18,18 @@ namespace Shatbly.Areas.Customer.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IStringLocalizer<ProfileController> _localizer;
+        private readonly IFileService _fileService;
 
         public ProfileController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IStringLocalizer<ProfileController> localizer)
+            IStringLocalizer<ProfileController> localizer,
+            IFileService fileService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _localizer = localizer;
+            _fileService = fileService;
         }
 
         [HttpGet]
@@ -43,7 +47,8 @@ namespace Shatbly.Areas.Customer.Controllers
                 LName = user.LName,
                 Phone = user.Phone,
                 Address = user.Address,
-                Email = user.Email
+                Email = user.Email,
+                ProfilePictureUrl = user.ProfilePicture
             };
 
             return View(model);
@@ -61,6 +66,7 @@ namespace Shatbly.Areas.Customer.Controllers
 
             // In display-only fields, keep the original values
             model.Email = user.Email;
+            model.ProfilePictureUrl = user.ProfilePicture;
 
             if (!ModelState.IsValid)
             {
@@ -74,6 +80,27 @@ namespace Shatbly.Areas.Customer.Controllers
                 if (phoneExists)
                 {
                     ModelState.AddModelError("Phone", _localizer["PhoneAlreadyExists"].Value);
+                    return View(model);
+                }
+            }
+
+            // Handle Profile Picture Upload
+            if (model.ProfilePictureFile != null && model.ProfilePictureFile.Length > 0)
+            {
+                var uploadResult = await _fileService.UploadFileAsync(
+                    model.ProfilePictureFile,
+                    "uploads/profiles",
+                    5 * 1024 * 1024,
+                    new[] { ".jpg", ".jpeg", ".png" }
+                );
+
+                if (uploadResult.Succeeded)
+                {
+                    user.ProfilePicture = uploadResult.FilePath;
+                }
+                else
+                {
+                    ModelState.AddModelError("ProfilePictureFile", uploadResult.ErrorMessage);
                     return View(model);
                 }
             }

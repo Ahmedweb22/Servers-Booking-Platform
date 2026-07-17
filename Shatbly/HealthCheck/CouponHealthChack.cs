@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Shatbly.HealthCheck
+namespace Shtbly.HealthCheck
 {
     public class CouponHealthChack : IHealthCheck
     {

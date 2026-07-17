@@ -1,11 +1,11 @@
-@model LoginVM
+﻿@model LoginVM
 @using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
     Layout = "_IdentityLayout";
-    ViewData["Title"] = isRtl ? "تسجيل دخول الفنيين - شطبلي" : "Worker Login - Shatbly";
+    ViewData["Title"] = isRtl ? "تسجيل دخول الفنيين - شطبلي" : "Worker Login - Shtbly";
 }
 
 <style>

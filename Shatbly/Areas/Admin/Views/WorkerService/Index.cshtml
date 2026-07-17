@@ -1,4 +1,4 @@
-@using Shatbly.ViewModels
+﻿@using Shtbly.ViewModels
 @model WorkerServicesVM
 
 @{
@@ -140,7 +140,10 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             fetch(`/Admin/WorkerService/Delete/${id}`, {
-                                method: "DELETE"
+                                method: "DELETE",
+                                headers: {
+                                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value || ""
+                                }
                             })
                             .then(response => {
                                 if (response.ok) {

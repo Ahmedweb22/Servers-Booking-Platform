@@ -1,5 +1,5 @@
 ﻿
-namespace Shatbly.HealthCheck
+namespace Shtbly.HealthCheck
 {
     public class BookingHealthChack : IHealthCheck
     {

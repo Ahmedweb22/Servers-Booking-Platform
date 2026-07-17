@@ -435,6 +435,7 @@
                             </div>
                         </div>
                         <form method="post" action="/Customer/Home/ToggleFavorite">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="workerId" value="@worker.Id" />
                             <button class="fav-btn @(Model.FavoriteWorkerIds.Contains(worker.Id) ? "active" : "")" type="submit">
                                 @if (Model.FavoriteWorkerIds.Contains(worker.Id))

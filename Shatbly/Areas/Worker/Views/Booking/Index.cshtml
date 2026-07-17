@@ -1,5 +1,5 @@
-@model IEnumerable<Order>
-@using Shatbly.Models
+﻿@model IEnumerable<Order>
+@using Shtbly.Models
 
 @{
     var curCulture = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name ?? "en";
@@ -589,6 +589,59 @@
                             </div>
                         </div>
                     </div>
+                    
+                    @if (order.Booking?.Payment != null)
+                    {
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#paymentModal-@order.Id">
+                                <i class="fa-solid fa-circle-info me-1"></i> Payment Details
+                            </button>
+                        </div>
+
+                        <!-- Payment Details Modal -->
+                        <div class="modal fade" id="paymentModal-@order.Id" tabindex="-1" aria-labelledby="paymentModalLabel-@order.Id" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title" id="paymentModalLabel-@order.Id">
+                                            @if (order.Booking.Payment.GatewayName == "Stripe")
+                                            {
+                                                <i class="fa-brands fa-stripe fa-lg me-2"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa-solid fa-money-bill-wave me-2"></i>
+                                            }
+                                            Payment Details
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <strong>Transaction ID:</strong> <br/>
+                                            <span class="text-muted">@(order.Booking.Payment.TransactionId ?? order.Booking.Payment.GatewayRef ?? "N/A")</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Method:</strong> <br/>
+                                            <span class="text-muted">@order.Booking.Payment.Method</span>
+                                        </div>
+                                        <div class="mb-3">
+                                            <strong>Paid At:</strong> <br/>
+                                            <span class="text-muted">@(order.Booking.Payment.PaidAt?.ToString("yyyy-MM-dd hh:mm tt") ?? "N/A")</span>
+                                        </div>
+                                        
+                                        @if (System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "receipts", $"Receipt-{order.BookingId}.pdf")))
+                                        {
+                                            <hr />
+                                            <a href="/receipts/Receipt-@(order.BookingId).pdf" target="_blank" class="btn btn-outline-dark w-100">
+                                                <i class="fa-solid fa-file-pdf me-1"></i> Download Receipt
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                     <!-- Footer actions and prices -->
                     <div class="card-footer-wrapper">
@@ -633,6 +686,16 @@
                                     <i class="bi bi-chat-left-dots me-1"></i> @txtChat
                                 </a>
 
+                                @if (order.PaymentMethod == PaymentMethods.Cash && order.PaymentStatus == PaymentStatuses.Pending)
+                                {
+                                    <form asp-area="Worker" asp-controller="Booking" asp-action="MarkAsPaid" method="post" style="display:inline;">
+                                        <input type="hidden" name="orderId" value="@order.Id" />
+                                        <button type="submit" class="action-btn-custom action-btn-success">
+                                            <i class="bi bi-cash-coin me-1"></i> @(isRtl ? "تأكيد الدفع" : "Mark as Paid")
+                                        </button>
+                                    </form>
+                                }
+
                                 @if (order.Booking != null && order.Booking.Status != BookingStatus.Disputed)
                                 {
                                     <a href="/Worker/Booking/RaiseDispute?id=@order.Id" class="action-btn-custom action-btn-danger">
@@ -645,6 +708,16 @@
                                 <a href="/Worker/Chat/Conversation?bookingId=@order.BookingId" class="action-btn-custom action-btn-outline">
                                     <i class="bi bi-chat-left-dots me-1"></i> @txtChat
                                 </a>
+
+                                @if (order.PaymentMethod == PaymentMethods.Cash && order.PaymentStatus == PaymentStatuses.Pending)
+                                {
+                                    <form asp-area="Worker" asp-controller="Booking" asp-action="MarkAsPaid" method="post" style="display:inline;">
+                                        <input type="hidden" name="orderId" value="@order.Id" />
+                                        <button type="submit" class="action-btn-custom action-btn-success">
+                                            <i class="bi bi-cash-coin me-1"></i> @(isRtl ? "تأكيد الدفع" : "Mark as Paid")
+                                        </button>
+                                    </form>
+                                }
 
                                 @if (order.Status == OrderStatuses.Completed && order.Booking != null && order.Booking.Status != BookingStatus.Disputed)
                                 {

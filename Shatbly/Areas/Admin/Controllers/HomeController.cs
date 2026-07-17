@@ -1,43 +1,52 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.DataAccess;
-using Shatbly.Models;
-using Shatbly.ViewModels;
+using Shtbly.DataAccess;
+using Shtbly.Models;
+using Shtbly.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN} , {SD.ROLE_SUPER_ADMIN}")]
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly Shtbly.UnitOfWork.IUnitOfWork _unitOfWork;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(Shtbly.UnitOfWork.IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IActionResult> Index()
         {
-            var usersCount = await _context.Users.CountAsync();
-            var serviceCategoryCount = await _context.ServiceCategories.CountAsync(x => x.IsActive);
-            var orderCount = await _context.Orders.CountAsync();
+            var allUsers = await _unitOfWork.Users.GetAsync(tracking: false);
+            var usersCount = allUsers.Count;
+            var allServiceCategories = await _unitOfWork.ServiceCategories.GetAsync(x => x.IsActive, tracking: false);
+            var serviceCategoryCount = allServiceCategories.Count;
+            
+            var allOrders = await _unitOfWork.Orders.GetAsync(
+                includes: new System.Linq.Expressions.Expression<System.Func<Order, object>>[] 
+                { 
+                    o => o.User!, 
+                    o => o.Service! 
+                }, 
+                tracking: false
+            );
+            var orderCount = allOrders.Count;
 
-            var totalRevenue = await _context.Orders
+            var totalRevenue = allOrders
                 .Where(o => o.Status == OrderStatuses.Completed || o.Status == OrderStatuses.Confirmed)
-                .SumAsync(o => o.TotalPrice);
+                .Sum(o => o.TotalPrice);
 
-            var recentOrders = await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.Service)
+            var recentOrders = allOrders
                 .OrderByDescending(o => o.CreatedAt)
                 .Take(5)
-                .ToListAsync();
+                .ToList();
 
             // 1. Orders Over Time (Monthly counts for last 6 months)
             var monthlyOrderLabels = new List<string>();
@@ -51,14 +60,13 @@ namespace Shatbly.Areas.Admin.Controllers
                 var startOfMonth = new DateTime(monthDate.Year, monthDate.Month, 1);
                 var endOfMonth = startOfMonth.AddMonths(1);
 
-                var count = await _context.Orders
-                    .CountAsync(o => o.CreatedAt >= startOfMonth && o.CreatedAt < endOfMonth);
+                var count = allOrders.Count(o => o.CreatedAt >= startOfMonth && o.CreatedAt < endOfMonth);
                 monthlyOrderCounts.Add(count);
             }
 
             // 2. User Distribution (Admins, Workers, Customers)
-            var roles = await _context.Roles.ToListAsync();
-            var userRoles = await _context.UserRoles.ToListAsync();
+            var roles = await _unitOfWork.Roles.GetAsync(tracking: false);
+            var userRoles = await _unitOfWork.UserRoles.GetAsync(tracking: false);
             var roleCounts = userRoles
                 .GroupBy(ur => ur.RoleId)
                 .Select(g => new { RoleId = g.Key, Count = g.Count() })
@@ -87,13 +95,13 @@ namespace Shatbly.Areas.Admin.Controllers
             }
 
             // 3. Services Usage (Most requested services)
-            var servicesUsage = await _context.Orders
-                .Where(o => o.Service != null)
+            var servicesUsage = allOrders
+                .Where(o => o.Service != null && o.Service.NameEn != null)
                 .GroupBy(o => o.Service!.NameEn)
                 .Select(g => new { ServiceName = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(6)
-                .ToListAsync();
+                .ToList();
 
             var servicesUsageLabels = servicesUsage.Select(su => su.ServiceName).ToList();
             var servicesUsageCounts = servicesUsage.Select(su => su.Count).ToList();

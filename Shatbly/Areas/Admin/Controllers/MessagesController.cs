@@ -1,33 +1,33 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shatbly.DataAccess;
-using Shatbly.Models;
-using Shatbly.Services.Notification;
-using Shatbly.Utilities;
-using Shatbly.ViewModels;
+using Shtbly.DataAccess;
+using Shtbly.Models;
+using Shtbly.Services.Notification;
+using Shtbly.Utilities;
+using Shtbly.ViewModels;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
     public class MessagesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly Shtbly.UnitOfWork.IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
         private readonly INotificationService _notificationService;
 
         public MessagesController(
-            ApplicationDbContext context,
+            Shtbly.UnitOfWork.IUnitOfWork unitOfWork,
             UserManager<User> userManager,
             INotificationService notificationService)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
             _notificationService = notificationService;
         }
@@ -36,10 +36,10 @@ namespace Shatbly.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             // Self-healing pass: auto-confirm emails for all already approved workers
-            var approvedUnconfirmedWorkers = await _context.WorkerProfiles
-                .Include(wp => wp.User)
-                .Where(wp => wp.IsApproved && wp.User != null && !wp.User.EmailConfirmed)
-                .ToListAsync();
+            var approvedUnconfirmedWorkers = await _unitOfWork.WorkerProfiles.GetAsync(
+                expression: wp => wp.IsApproved && wp.User != null && !wp.User.EmailConfirmed,
+                includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { wp => wp.User! }
+            );
 
             if (approvedUnconfirmedWorkers.Any())
             {
@@ -47,19 +47,17 @@ namespace Shatbly.Areas.Admin.Controllers
                 {
                     wp.User.EmailConfirmed = true;
                 }
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CommitAsync();
             }
 
-            var pendingWorkers = await _context.WorkerProfiles
-                .Include(wp => wp.User)
-                .Where(wp => !wp.IsApproved)
-                .OrderByDescending(wp => wp.CreatedAt)
-                .ToListAsync();
+            var allWorkerProfiles = await _unitOfWork.WorkerProfiles.GetAsync(
+                expression: wp => !wp.IsApproved,
+                includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { wp => wp.User! }
+            );
+            var pendingWorkers = allWorkerProfiles.OrderByDescending(wp => wp.CreatedAt).ToList();
 
-            var users = await _context.Users
-                .OrderBy(u => u.FName)
-                .ThenBy(u => u.LName)
-                .ToListAsync();
+            var allUsers = await _unitOfWork.Users.GetAsync(tracking: false);
+            var users = allUsers.OrderBy(u => u.FName).ThenBy(u => u.LName).ToList();
 
             var currentUserId = _userManager.GetUserId(User);
 
@@ -69,12 +67,14 @@ namespace Shatbly.Areas.Admin.Controllers
                 .Distinct()
                 .ToList();
 
-            var allNotifications = await _context.Notifications
-                .AsNoTracking()
-                .Include(n => n.User)
+            var notificationsList = await _unitOfWork.Notifications.GetAsync(
+                includes: new System.Linq.Expressions.Expression<System.Func<Notification, object>>[] { n => n.User! },
+                tracking: false
+            );
+            var allNotifications = notificationsList
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(100)
-                .ToListAsync();
+                .ToList();
 
             var incomingMessages = allNotifications
                 .Where(n => currentUserId != null ? n.UserId == currentUserId : adminUserIds.Contains(n.UserId))
@@ -143,9 +143,10 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveWorker(int profileId)
         {
-            var profile = await _context.WorkerProfiles
-                .Include(wp => wp.User)
-                .FirstOrDefaultAsync(wp => wp.Id == profileId);
+            var profile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                expression: wp => wp.Id == profileId,
+                includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { wp => wp.User! },
+                tracking: true);
 
             if (profile == null)
             {
@@ -173,7 +174,7 @@ namespace Shatbly.Areas.Admin.Controllers
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.CommitAsync();
 
             // Send notification to the newly approved worker
             await _notificationService.CreateNotificationAsync(
@@ -192,9 +193,10 @@ namespace Shatbly.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectWorker(int profileId, string? rejectionReason)
         {
-            var profile = await _context.WorkerProfiles
-                .Include(wp => wp.User)
-                .FirstOrDefaultAsync(wp => wp.Id == profileId);
+            var profile = await _unitOfWork.WorkerProfiles.GetOneAsync(
+                expression: wp => wp.Id == profileId,
+                includes: new System.Linq.Expressions.Expression<System.Func<WorkerProfile, object>>[] { wp => wp.User! },
+                tracking: true);
 
             if (profile == null)
             {
@@ -233,8 +235,8 @@ namespace Shatbly.Areas.Admin.Controllers
                 }
             }
 
-            _context.WorkerProfiles.Remove(profile);
-            await _context.SaveChangesAsync();
+            _unitOfWork.WorkerProfiles.Delete(profile);
+            await _unitOfWork.CommitAsync();
 
             TempData["success-notification"] = "Worker application rejected and removed. / تم رفض الطلب وحذفه.";
             return RedirectToAction(nameof(Index));

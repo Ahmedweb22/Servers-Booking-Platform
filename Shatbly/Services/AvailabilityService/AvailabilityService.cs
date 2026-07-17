@@ -1,5 +1,5 @@
 ﻿
-namespace Shatbly.Services.AvailabilityService
+namespace Shtbly.Services.AvailabilityService
 {
     public class AvailabilityService : IAvailabilityService
     {

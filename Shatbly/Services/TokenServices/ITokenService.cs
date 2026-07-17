@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Shatbly.Services.TokenServices
+namespace Shtbly.Services.TokenServices
 {
     public interface ITokenService
     {

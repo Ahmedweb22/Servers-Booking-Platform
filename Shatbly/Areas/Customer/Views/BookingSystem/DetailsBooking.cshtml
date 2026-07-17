@@ -1,5 +1,5 @@
-@model Shatbly.ViewModels.BookingDetailsViewModel
-@using Shatbly.Models
+﻿@model Shtbly.ViewModels.BookingDetailsViewModel
+@using Shtbly.Models
 
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
@@ -262,6 +262,15 @@
                             <strong>@Model.Booking.Booking.Coupon.Code</strong>
                         </div>
                     }
+                </div>
+            }
+
+            @if (Model.Booking.PaymentStatus == Shtbly.Models.PaymentStatuses.Paid || System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "receipts", $"Receipt-{Model.Booking.BookingId}.pdf")))
+            {
+                <div class="mt-3 text-center">
+                    <a href="/receipts/Receipt-@(Model.Booking.BookingId).pdf" target="_blank" class="btn btn-primary w-100" style="border-radius: 8px; background-color: #2b3035; border-color: #2b3035;">
+                        <i class="fa-solid fa-file-pdf"></i> @Localizer["ViewReceipt", "View Receipt"]
+                    </a>
                 </div>
             }
         </section>

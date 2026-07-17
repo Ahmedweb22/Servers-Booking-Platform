@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using System.Linq.Expressions;
 
-namespace Shatbly.Services.Hangfire
+namespace Shtbly.Services.Hangfire
 {
     public class HangfireJobScheduler : IBackgroundJobScheduler
     {

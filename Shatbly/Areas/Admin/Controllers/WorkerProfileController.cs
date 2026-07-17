@@ -1,12 +1,13 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq.Expressions;
-using Shatbly.Models;
-using Shatbly.ViewModels;
-using Shatbly.Utilities;
+using Shtbly.Models;
+using Shtbly.ViewModels;
+using Shtbly.Utilities;
+using Shtbly.Services.File_Service;
 using System.IO;
 
-namespace Shatbly.Areas.Admin.Controllers
+namespace Shtbly.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}")]
@@ -16,17 +17,20 @@ namespace Shatbly.Areas.Admin.Controllers
         private readonly IRepository<User> _userRepo;
         private readonly IStringLocalizer<WorkerProfileController> _localizer;
         private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
+        private readonly IFileService _fileService;
 
         public WorkerProfileController(
             IRepository<WorkerProfile> workerProfileRepo,
             IRepository<User> userRepo,
             IStringLocalizer<WorkerProfileController> localizer,
-            IStringLocalizer<SharedResource> sharedLocalizer)
+            IStringLocalizer<SharedResource> sharedLocalizer,
+            IFileService fileService)
         {
             _workerProfileRepo = workerProfileRepo;
             _userRepo = userRepo;
             _localizer = localizer;
             _sharedLocalizer = sharedLocalizer;
+            _fileService = fileService;
         }
 
         // ───────── INDEX ─────────
@@ -109,14 +113,21 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (model.CVFile is not null)
             {
-                var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(model.CVFile.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", newFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-                using (var stream = System.IO.File.Create(filePath))
+                var upload = await _fileService.UploadFileAsync(
+                    model.CVFile,
+                    "img/worker/worker_cv",
+                    5 * 1024 * 1024,
+                    [".pdf"]);
+
+                if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
                 {
-                    await model.CVFile.CopyToAsync(stream);
+                    model.Users = await _userRepo.GetAsync(tracking: false);
+                    ModelState.AddModelError(nameof(model.CVFile), upload.ErrorMessage ?? "Invalid CV file.");
+                    TempData["error-notification"] = upload.ErrorMessage ?? "Invalid CV file.";
+                    return View(model);
                 }
-                workerProfile.CVPath = newFileName;
+
+                workerProfile.CVPath = upload.FilePath;
             }
 
             await _workerProfileRepo.CreateAsync(workerProfile);
@@ -196,24 +207,23 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (model.CVFile is not null)
             {
-                var newFileName = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString("yyyy-MM-dd") + Path.GetExtension(model.CVFile.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", newFileName);
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-                using (var stream = System.IO.File.Create(filePath))
+                var upload = await _fileService.UploadFileAsync(
+                    model.CVFile,
+                    "img/worker/worker_cv",
+                    5 * 1024 * 1024,
+                    [".pdf"]);
+
+                if (!upload.Succeeded || string.IsNullOrWhiteSpace(upload.FilePath))
                 {
-                    await model.CVFile.CopyToAsync(stream);
+                    model.Users = await _userRepo.GetAsync(tracking: false);
+                    ModelState.AddModelError(nameof(model.CVFile), upload.ErrorMessage ?? "Invalid CV file.");
+                    TempData["error-notification"] = upload.ErrorMessage ?? "Invalid CV file.";
+                    return View(model);
                 }
                 
-                if (!string.IsNullOrEmpty(workerProfile.CVPath))
-                {
-                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", workerProfile.CVPath);
-                    if (System.IO.File.Exists(oldFilePath))
-                    {
-                        System.IO.File.Delete(oldFilePath);
-                    }
-                }
+                DeleteCv(workerProfile.CVPath);
                 
-                workerProfile.CVPath = newFileName;
+                workerProfile.CVPath = upload.FilePath;
             }
 
             if (workerProfile.WorkerServices != null)
@@ -228,6 +238,7 @@ namespace Shatbly.Areas.Admin.Controllers
 
         // ───────── DELETE ─────────
         [HttpDelete]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var wp = await _workerProfileRepo.GetOneAsync(e => e.Id == id);
@@ -239,17 +250,48 @@ namespace Shatbly.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(wp.CVPath))
             {
-                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\img\\worker\\worker_cv", wp.CVPath);
-                if (System.IO.File.Exists(oldFilePath))
-                {
-                    System.IO.File.Delete(oldFilePath);
-                }
+                DeleteCv(wp.CVPath);
             }
 
             _workerProfileRepo.Delete(wp);
             await _workerProfileRepo.CommitAsync();
             TempData["success-notification"] = _localizer["WorkerProfileDeletedSuccess"].Value;
             return Ok();
+        }
+
+        private static void DeleteCv(string? relativePathOrFileName)
+        {
+            if (string.IsNullOrWhiteSpace(relativePathOrFileName))
+            {
+                return;
+            }
+
+            var cleanPath = relativePathOrFileName.Replace("\\", "/").TrimStart('/');
+            if (cleanPath.Split('/', StringSplitOptions.RemoveEmptyEntries).Contains(".."))
+            {
+                return;
+            }
+
+            if (!cleanPath.Contains('/'))
+            {
+                cleanPath = $"img/worker/worker_cv/{Path.GetFileName(cleanPath)}";
+            }
+
+            var webRoot = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
+            var physicalPath = Path.GetFullPath(Path.Combine(webRoot, cleanPath));
+            var webRootPrefix = webRoot.EndsWith(Path.DirectorySeparatorChar)
+                ? webRoot
+                : webRoot + Path.DirectorySeparatorChar;
+
+            if (!physicalPath.StartsWith(webRootPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (System.IO.File.Exists(physicalPath))
+            {
+                System.IO.File.Delete(physicalPath);
+            }
         }
     }
 }

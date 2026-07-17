@@ -1,7 +1,7 @@
-﻿using Shatbly.Services.WithdrawalService;
+﻿using Shtbly.Services.WithdrawalService;
 using System.Linq.Expressions;
 
-namespace Shatbly.Repositories.IRepositories
+namespace Shtbly.Repositories.IRepositories
 {
     public interface IRepository<T> where T : class
     {

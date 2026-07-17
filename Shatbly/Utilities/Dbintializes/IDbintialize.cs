@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Utilities.Dbintializes
+﻿namespace Shtbly.Utilities.Dbintializes
 {
     public interface IDbintialize
     {

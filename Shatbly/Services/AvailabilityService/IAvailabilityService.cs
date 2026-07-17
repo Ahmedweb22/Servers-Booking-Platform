@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Services.AvailabilityService
+﻿namespace Shtbly.Services.AvailabilityService
 {
     public interface IAvailabilityService
     {

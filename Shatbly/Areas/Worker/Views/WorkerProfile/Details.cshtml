@@ -1,10 +1,10 @@
-@model Shatbly.ViewModels.WorkerProfileVM
+﻿@model Shtbly.ViewModels.WorkerProfileVM
 @using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
     var isRtl = curCulture.StartsWith("ar");
-    ViewData["Title"] = isRtl ? "الملف الشخصي للفني - شطبلي" : "Worker Profile - Shatbly";
+    ViewData["Title"] = isRtl ? "الملف الشخصي للفني - شطبلي" : "Worker Profile - Shtbly";
     
     var initials = "";
     if (!string.IsNullOrEmpty(Model.WorkerName))
@@ -208,7 +208,7 @@
                             </span>
                         }
                     </h3>
-                    <p class="text-muted mb-0">@(isRtl ? "فني مسجل في منصة شطبلي" : "Registered Professional at Shatbly")</p>
+                    <p class="text-muted mb-0">@(isRtl ? "فني مسجل في منصة شطبلي" : "Registered Professional at Shtbly")</p>
                 </div>
             </div>
 
@@ -305,7 +305,7 @@
                         <div class="card-icon"><i class="bi bi-calendar-event"></i></div>
                         <h6 class="fw-bold text-muted mb-1">@(isRtl ? "تاريخ التسجيل" : "Registration Date")</h6>
                         <h4 class="fw-bold text-dark mb-0">@Model.CreatedAt.ToString("yyyy-MM-dd")</h4>
-                        <small class="text-muted">@(isRtl ? "تاريخ الانضمام لشطبلي" : "Joined Shatbly platform")</small>
+                        <small class="text-muted">@(isRtl ? "تاريخ الانضمام لشطبلي" : "Joined Shtbly platform")</small>
                     </div>
                 </div>
 

@@ -1,11 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shatbly.Models;
-using Shatbly.Repositories.IRepositories;
-using Shatbly.Utilities;
+using Shtbly.Models;
+using Shtbly.Repositories.IRepositories;
+using Shtbly.Utilities;
 using System.Security.Claims;
 
-namespace Shatbly.Areas.Worker.Controllers
+namespace Shtbly.Areas.Worker.Controllers
 {
     [Area(SD.WORKER_AREA)]
     [Authorize(Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN},{SD.ROLE_WORKER}")]

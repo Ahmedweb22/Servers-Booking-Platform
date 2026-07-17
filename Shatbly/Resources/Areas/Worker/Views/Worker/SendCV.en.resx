@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -18,7 +18,7 @@
   </xsd:schema>
   <data name="PageTitle" xml:space="preserve"><value>Shtbly | Technician Application</value></data>
   <data name="SubmitCVCardTitle" xml:space="preserve"><value>Join as a Technician</value></data>
-  <data name="SubmitCVCardSubtitle" xml:space="preserve"><value>Enter your details to register on Shatbly</value></data>
+  <data name="SubmitCVCardSubtitle" xml:space="preserve"><value>Enter your details to register on Shtbly</value></data>
   <data name="FirstNameLabel" xml:space="preserve"><value>First Name</value></data>
   <data name="FirstNamePlaceholder" xml:space="preserve"><value>First name</value></data>
   <data name="FirstNameInvalid" xml:space="preserve"><value>Enter first name (at least 2 characters).</value></data>

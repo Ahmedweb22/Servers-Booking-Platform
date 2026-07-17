@@ -2,17 +2,24 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 
-namespace Shatbly.Services.TokenServices
+namespace Shtbly.Services.TokenServices
 {
     public class TokenService : ITokenService
     {
+        private readonly IConfiguration _configuration;
+
+        public TokenService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public string GenerateAccessToken(IEnumerable<Claim> claims)
         {
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ="));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetSigningKey()));
             var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
             var tokeOptions = new JwtSecurityToken(
-                issuer: "https://localhost:7282",
-                audience: "https://localhost:7282",
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: signinCredentials
@@ -38,7 +45,7 @@ namespace Shatbly.Services.TokenServices
                 ValidateAudience = false, //you might want to validate the audience and issuer depending on your use case
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("azrzVS3bami7WdOJh38veSM92OOPJh98BDrqwUakteQ=")),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetSigningKey())),
                 ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
             };
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -48,6 +55,17 @@ namespace Shatbly.Services.TokenServices
             if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 throw new SecurityTokenException("Invalid token");
             return principal;
+        }
+
+        private string GetSigningKey()
+        {
+            var signingKey = _configuration["Jwt:SigningKey"];
+            if (string.IsNullOrWhiteSpace(signingKey))
+            {
+                throw new InvalidOperationException("JWT signing key is not configured.");
+            }
+
+            return signingKey;
         }
     }
 }

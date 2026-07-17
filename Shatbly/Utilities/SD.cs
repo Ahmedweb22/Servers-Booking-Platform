@@ -1,4 +1,4 @@
-﻿namespace Shatbly.Utilities
+﻿namespace Shtbly.Utilities
 {
     public class SD
     {

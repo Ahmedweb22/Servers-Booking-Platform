@@ -1,7 +1,7 @@
-using Shatbly.Models;
-using Shatbly.ViewModels;
+﻿using Shtbly.Models;
+using Shtbly.ViewModels;
 
-namespace Shatbly.Services.WithdrawalService
+namespace Shtbly.Services.WithdrawalService
 {
     public interface IWithdrawalService
     {

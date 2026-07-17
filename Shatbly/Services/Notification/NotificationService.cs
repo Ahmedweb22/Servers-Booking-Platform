@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Identity;
-using Shatbly.Hubs;
-using Shatbly.Models;
-using Shatbly.UnitOfWork;
-using Shatbly.Utilities;
-using NotificationModel = Shatbly.Models.Notification;
+using Shtbly.Hubs;
+using Shtbly.Models;
+using Shtbly.UnitOfWork;
+using Shtbly.Utilities;
+using NotificationModel = Shtbly.Models.Notification;
 
-namespace Shatbly.Services.Notification
+namespace Shtbly.Services.Notification
 {
     public class NotificationService(
         IUnitOfWork unitOfWork,
