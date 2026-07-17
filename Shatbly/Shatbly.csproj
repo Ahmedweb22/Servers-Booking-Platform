@@ -32,7 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services\IServices\" />
-    <Folder Include="wwwroot\img\banners\" />
     <Folder Include="wwwroot\img\service_categories\" />
     <Folder Include="wwwroot\img\worker\worker_cv\" />
   </ItemGroup>
