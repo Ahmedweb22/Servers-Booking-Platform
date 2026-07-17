@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using System.Security.Claims;
 using System.Text;
 using Hangfire;
@@ -33,6 +34,35 @@ using PromotionCode = Shtbly.Models.PromotionCode;
 using Review = Shtbly.Models.Review;
 using TokenService = Shtbly.Services.TokenServices.TokenService;
 namespace Shtbly
+=======
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Shatbly.HealthCheck;
+using Shatbly.Hubs;
+using Shatbly.Services.AI;
+using Shatbly.Services.AvailabilityService;
+using Shatbly.Services.BookingSystem;
+using Shatbly.Services.Chat;
+using Shatbly.Services.CurrentWorkerService1;
+using Shatbly.Services.File_Service;
+using Shatbly.Services.Hangfire.TestJob;
+using Shatbly.Services.Notification;
+using Shatbly.Services.Portfolio;
+using Shatbly.Services.TokenServices;
+using Shatbly.Services.WorkerProfileService;
+using Shatbly.Utilities.Dbintializes;
+using Stripe;
+using Address = Shatbly.Models.Address;
+using Coupon = Shatbly.Models.Coupon;
+using FileService = Shatbly.Services.File_Service.FileService;
+using PromotionCode = Shatbly.Models.PromotionCode;
+using Review = Shatbly.Models.Review;
+using TokenService = Shatbly.Services.TokenServices.TokenService;
+using QuestPDF.Infrastructure;
+using LicenseType = QuestPDF.Infrastructure.LicenseType;
+using Hangfire;
+
+namespace Shatbly
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
 {
     public class Program
     {
@@ -46,6 +76,7 @@ namespace Shtbly
             });
 
             builder.Services.AddHealthChecks()
+<<<<<<< HEAD
                 .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server Connection")
                 .AddCheck<DatabaseCrudHealthCheck>("Database CRUD Operations")
                 .AddCheck<DependencyInjectionHealthCheck>("Dependency Injection & Services")
@@ -54,6 +85,17 @@ namespace Shtbly
                 .AddCheck<WorkerHealthCheck>("Worker Service")
                 .AddCheck<CouponHealthChack>("Coupon Repository")
                 .AddCheck<BookingHealthChack>("Booking Repository");
+=======
+                .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), name: "SQL Server")
+                .AddCheck<WorkerHealthCheck>("Worker Service")
+                .AddCheck<CouponHealthChack>("Coupon Repository")
+                .AddCheck<BookingHealthChack>("Booking Repository")
+                .AddCheck<DatabaseQueriesHealthCheck>("Database Queries")
+                .AddCheck<EmailServiceHealthCheck>("Email Service")
+                .AddCheck<StripeHealthCheck>("Stripe Integration")
+                .AddCheck<GroqAiHealthCheck>("Groq AI Service")
+                .AddCheck<SmsServiceHealthCheck>("SMS Service");
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
 
             //hangfire
             builder.Services.AddHangfire(config => config
@@ -201,6 +243,15 @@ namespace Shtbly
             builder.Services.AddScoped<Shtbly.Services.Receipt.IReceiptService, Shtbly.Services.Receipt.ReceiptService>();
             QuestPDF.Settings.License = LicenseType.Community;
 
+            // Add Hangfire services.
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
+
             var app = builder.Build();
             var adminOnly = new AuthorizeAttribute { Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}" };
 
@@ -252,10 +303,14 @@ namespace Shtbly
             Service.Intializer().GetAwaiter().GetResult();
             app.UseAuthentication();
             app.UseAuthorization();
+<<<<<<< HEAD
             app.UseHangfireDashboard("/Hangfire", new DashboardOptions
             {
                 Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
             });
+=======
+            app.UseHangfireDashboard();
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "areas",

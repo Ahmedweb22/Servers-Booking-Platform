@@ -576,7 +576,7 @@
                         <label class="choice-card">
                             <input asp-for="PaymentMethod" type="radio" value="@paymentOption.Value" />
                             <strong>@paymentOption.Text</strong>
-                            <span>@(paymentOption.Value == "Cash" ? "Collected on arrival." : "Marked as paid once the booking is confirmed.")</span>
+                            <span>@(paymentOption.Value == "Cash" ? "Collected on arrival." : (paymentOption.Value == "Card" ? "Pay securely online with Stripe." : "Pay via your digital wallet."))</span>
                         </label>
                     }
                 </div>

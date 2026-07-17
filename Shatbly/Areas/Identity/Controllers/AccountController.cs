@@ -11,6 +11,10 @@ using Shtbly.ViewModels;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
 
 namespace Shtbly.Areas.Identity.Controllers
 {
@@ -83,12 +87,11 @@ namespace Shtbly.Areas.Identity.Controllers
             {
                 UserName = model.UserName,
                 Email = model.Email,
-               FName = model.FName,
-               LName = model.LName,
-               Name = model.FName + model.LName,
-               Phone = model.Phone
-               
-
+                FName = model.FName,
+                LName = model.LName,
+                Name = model.FName + " " + model.LName,
+                Phone = model.Phone,
+                Address = string.IsNullOrEmpty(model.District) ? $"{model.City}, {model.Street}" : $"{model.City}, {model.District}, {model.Street}"
             };
             var result = await _userManager.CreateAsync(applicationUser, model.Password);
             if (!result.Succeeded)
@@ -396,6 +399,12 @@ namespace Shtbly.Areas.Identity.Controllers
             }
             if (userOtpsCount < 5)
             {
+<<<<<<< HEAD
+=======
+                //Bug : the OTP creted a system,random (ZENA) why? عشان ده لما اجي اشفرو في الباك جراود مش هيتفر ولو اتشفر مش هيقرق عن الرقم اللي اتولد
+                //string otp = new Random().Next(1000, 9999).ToString();
+                // random : 1234 => 1#$%2@#$3@#$4!@# , Generator : 1234 => 1"rdftvbgyhnjimko,ll784652148465" 2 "trdfygbuhnijmko,l87451"
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
                 string otp = RandomNumberGenerator.GetInt32(1000, 10000).ToString();
                 string msg = string.Format(_localizer["OtpEmailBody"].Value, otp);
                 await _accountService.SendEmailAsync(EmailType.ForgetPassword, msg, user);
@@ -439,9 +448,12 @@ namespace Shtbly.Areas.Identity.Controllers
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);
             }
+            //Bug : Extera Rows && returna big table and convert this before access
+            //var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
+            var otps = await _otpRepository.GetAsync(e => e.UserId == user.Id && !e.IsUsed);
+            var otp = otps.OrderByDescending(e => e.Id).FirstOrDefault();
 
-            var otp = (await _otpRepository.GetAsync()).Where(e => e.UserId == user.Id && !e.IsUsed).OrderBy(e => e.Id).LastOrDefault();
-            if (otp == null || otp.ExpiresAt < DateTime.UtcNow)
+            if (otp is null || otp.ExpiresAt < DateTime.UtcNow)
             {
                 ModelState.AddModelError(string.Empty, _localizer["InvalidOtp"].Value);
                 return View(model);

@@ -140,7 +140,15 @@ namespace Shtbly.Areas.Customer.Controllers
             }
 
             TempData["Success"] = result.SuccessMessage;
+<<<<<<< HEAD
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId.Value });
+=======
+            if (model.PaymentMethod == Shatbly.Models.PaymentMethods.Card)
+            {
+                return RedirectToAction(nameof(Pay), new { id = result.BookingId });
+            }
+            return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
+>>>>>>> 7a8b45e0becd14f2764ca442aaa329841b25b7a6
         }
 
         [HttpGet]
