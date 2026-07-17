@@ -1,0 +1,326 @@
+using Microsoft.IdentityModel.Tokens;
+namespace Shtbly.Utilities.Dbintializes
+{
+    public class Dbintialize : IDbintialize
+    {
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<User> _userManager;
+        private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
+
+        public Dbintialize(RoleManager<IdentityRole> roleManager ,UserManager<User> userManager,
+            ApplicationDbContext context,
+            IConfiguration configuration,
+            IWebHostEnvironment environment)
+        {
+            _roleManager = roleManager;
+            _userManager = userManager;
+            _context = context;
+            _configuration = configuration;
+            _environment = environment;
+        }
+    public async Task Intializer()
+        {
+            if(_context.Database.GetPendingMigrations().Any())
+            {
+                _context.Database.Migrate();
+            }
+            if (!_roleManager.Roles.Any())
+            {
+                await _roleManager.CreateAsync(new(SD.ROLE_SUPER_ADMIN));
+                await _roleManager.CreateAsync(new(SD.ROLE_ADMIN));
+                await _roleManager.CreateAsync(new(SD.ROLE_WORKER));
+                await _roleManager.CreateAsync(new(SD.ROLE_CUSTOMER));
+
+                if (!ShouldSeedDemoUsers())
+                {
+                    return;
+                }
+
+                var demoPassword = GetDemoPassword();
+
+                await _userManager.CreateAsync(new()
+                {
+                    FName = "Super",
+                    LName = "Admin",
+                    Name = "Super Admin",
+                    Email = "SuperAdmin@gmail.com",
+                    EmailConfirmed = true,
+                    Phone = "01222222222",
+                    UserName = "SuperAdmin"
+                }, demoPassword);
+                await _userManager.CreateAsync(new()
+                {
+                    FName = "Admin",
+                    LName = "1",
+                    Name = "Admin 1",
+                    Email = "Admin@gmail.com",
+                    EmailConfirmed = true,
+                    Phone = "01555555555",  
+                    UserName = "Admin"
+                }, demoPassword);
+                await _userManager.CreateAsync(new()
+                {
+                    FName = "Worker",
+                    LName = "1",
+                    Name = "Worker 1",
+                    Email = "Worker@gmail.com",
+                    EmailConfirmed = true,
+                    Phone = "01111111111",
+                    UserName = "Worker"
+                }, demoPassword);
+                await _userManager.CreateAsync(new()
+                {
+                    FName = "Customer",
+                    LName = "1",
+                    Name = "Customer 1",
+                    Email = "Customer@gmail.com",
+                    EmailConfirmed = true,
+                    Phone = "01000000000",
+                    UserName = "Customer"
+                }, demoPassword);
+                var user = await _userManager.FindByNameAsync("SuperAdmin");
+                var user2 = await _userManager.FindByNameAsync("Admin");
+                var user3 = await _userManager.FindByNameAsync("Worker");
+                var user4 = await _userManager.FindByNameAsync("Customer");
+                if (user is not null && user2 is not null&& user3 is not null && user4 is not null) 
+                {
+                    await _userManager.AddToRoleAsync(user , SD.ROLE_SUPER_ADMIN);
+                    await _userManager.AddToRoleAsync(user2 , SD.ROLE_ADMIN);
+                    await _userManager.AddToRoleAsync(user3 , SD.ROLE_WORKER);
+                    await _userManager.AddToRoleAsync(user4 , SD.ROLE_CUSTOMER);
+
+                    // Add seed addresses and more workers
+                    var worker2 = new User
+                    {
+                        FName = "محمد",
+                        LName = "أحمد",
+                        Email = "worker2@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01234567891",
+                        UserName = "worker2"
+                    };
+                    await _userManager.CreateAsync(worker2, demoPassword);
+                    await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
+
+                    var worker3 = new User
+                    {
+                        FName = "محمود",
+                        LName = "علي",
+                        Email = "worker3@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01234567892",
+                        UserName = "worker3"
+                    };
+                    await _userManager.CreateAsync(worker3, demoPassword);
+                    await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
+
+                    _context.Addresses.AddRange(
+                        new Address { City = "الإسكندرية", District = "سموحة", Street = "شارع فوزي معاذ", UserId = user3.Id, IsDefault = true, Lat = 31.224, Lng = 29.955 },
+                        new Address { City = "القاهرة", District = "المعادي", Street = "شارع 9", UserId = worker2.Id, IsDefault = true, Lat = 29.960, Lng = 31.256 },
+                        new Address { City = "الجيزة", District = "الدقي", Street = "شارع التحرير", UserId = worker3.Id, IsDefault = true, Lat = 30.033, Lng = 31.213 },
+                        new Address { City = "القاهرة", District = "التجمع الخامس", Street = "شارع التسعين", UserId = user4.Id, IsDefault = true, Lat = 30.005, Lng = 31.450 }
+                    );
+                    
+                    // Create worker profiles
+                    var workerUsers = new[] { user3, worker2, worker3 };
+                    foreach (var wUser in workerUsers)
+                    {
+                        if (!_context.WorkerProfiles.Any(wp => wp.UserId == wUser.Id))
+                        {
+                            _context.WorkerProfiles.Add(new WorkerProfile
+                            {
+                                UserId = wUser.Id,
+                                Bio = $"فني متخصص بخبرة طويلة في منطقته",
+                                IsApproved = true,
+                                IsAvailable = true,
+                                IsVerified = true,
+                                RatingAvg = 4.5m,
+                                RatingCount = 10, CreatedAt = DateTime.UtcNow, WorkerServices = new WorkerService { CategoryId = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1, HourlyRate = 50 } });
+                        }
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Seed addresses and worker profiles if they don't exist
+            if (ShouldSeedDemoUsers() && !_context.Addresses.Any())
+            {
+                var user3 = await _userManager.FindByNameAsync("Worker");
+                var user4 = await _userManager.FindByNameAsync("Customer");
+
+                if (user3 != null && user4 != null)
+                {
+                    // Add more workers if they don't exist
+                    var worker2 = await _userManager.FindByNameAsync("worker2");
+                    if (worker2 == null)
+                    {
+                        worker2 = new User
+                        {
+                            FName = "محمد",
+                            LName = "أحمد",
+                            Name = "محمد أحمد",
+                            Email = "worker2@gmail.com",
+                            EmailConfirmed = true,
+                            Phone = "01234567891",
+                            UserName = "worker2"
+                        };
+                        await _userManager.CreateAsync(worker2, GetDemoPassword());
+                        await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
+                    }
+
+                    var worker3 = await _userManager.FindByNameAsync("worker3");
+                    if (worker3 == null)
+                    {
+                        worker3 = new User
+                        {
+                            FName = "محمود",
+                            LName = "علي",
+                            Name = "محمود علي",
+                            Email = "worker3@gmail.com",
+                            EmailConfirmed = true,
+                            Phone = "01234567892",
+                            UserName = "worker3"
+                        };
+                        await _userManager.CreateAsync(worker3, GetDemoPassword());
+                        await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
+                    }
+
+                    _context.Addresses.AddRange(
+                        new Address { City = "الإسكندرية", District = "سموحة", Street = "شارع فوزي معاذ", UserId = user3.Id, IsDefault = true, Lat = 31.224, Lng = 29.955 },
+                        new Address { City = "القاهرة", District = "المعادي", Street = "شارع 9", UserId = worker2.Id, IsDefault = true, Lat = 29.960, Lng = 31.256 },
+                        new Address { City = "الجيزة", District = "الدقي", Street = "شارع التحرير", UserId = worker3.Id, IsDefault = true, Lat = 30.033, Lng = 31.213 },
+                        new Address { City = "القاهرة", District = "التجمع الخامس", Street = "شارع التسعين", UserId = user4.Id, IsDefault = true, Lat = 30.005, Lng = 31.450 }
+                    );
+
+                    // Create worker profiles
+                    var workerUsers = new[] { user3, worker2, worker3 };
+                    foreach (var wUser in workerUsers)
+                    {
+                        if (!_context.WorkerProfiles.Any(wp => wp.UserId == wUser.Id))
+                        {
+                            _context.WorkerProfiles.Add(new WorkerProfile
+                            {
+                                UserId = wUser.Id,
+                                Bio = $"فني متخصص بخبرة طويلة في منطقته",
+                                IsApproved = true,
+                                IsAvailable = true,
+                                IsVerified = true,
+                                RatingAvg = 4.5m,
+                                RatingCount = 10, CreatedAt = DateTime.UtcNow, WorkerServices = new WorkerService { CategoryId = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1, HourlyRate = 50 } });
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // Ensure ALL workers have at least one address
+            var allWorkers = _context.WorkerProfiles.Include(w => w.User).ThenInclude(u => u.Addresses).ToList();
+            bool changesMade = false;
+            foreach (var worker in allWorkers)
+            {
+                if (worker.User != null && (worker.User.Addresses == null || !worker.User.Addresses.Any()))
+                {
+                    _context.Addresses.Add(new Address
+                    {
+                        City = "القاهرة",
+                        District = "وسط البلد",
+                        Street = "شارع طلعت حرب",
+                        UserId = worker.UserId,
+                        IsDefault = true
+                    });
+                    changesMade = true;
+                }
+            }
+
+            var workersWithoutServices = _context.WorkerProfiles.Where(wp => wp.IsApproved && wp.WorkerServices == null).ToList();
+            if (workersWithoutServices.Any())
+            {
+                var defaultCat = _context.ServiceCategories.FirstOrDefault()?.Id ?? 1;
+                foreach (var wp in workersWithoutServices)
+                {
+                    _context.WorkerServices.Add(new WorkerService { WorkerId = wp.Id, CategoryId = defaultCat, HourlyRate = 50 });
+                }
+                changesMade = true;
+            }
+
+            // Ensure ALL workers have default availability slots if they have none
+            var workersWithoutAvailability = _context.WorkerProfiles.Include(wp => wp.Availabilities).ToList();
+            foreach (var wp in workersWithoutAvailability)
+            {
+                if (wp.Availabilities == null || !wp.Availabilities.Any())
+                {
+                    for (int day = 0; day <= 4; day++) // Sunday (0) to Thursday (4)
+                    {
+                        _context.Availabilities.Add(new Avalability
+                        {
+                            WorkerId = wp.Id,
+                            DayOfWeek = (Models.DayOfWeek)day,
+                            StartTime = TimeSpan.FromHours(9), // 9:00 AM
+                            EndTime = TimeSpan.FromHours(17)   // 5:00 PM
+                        });
+                    }
+                    changesMade = true;
+                }
+            }
+
+            if (changesMade)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            // Custom balance seed for worker 1
+            if (!ShouldSeedDemoUsers())
+            {
+                return;
+            }
+
+            var worker1User = await _userManager.FindByNameAsync("Worker");
+            if (worker1User != null)
+            {
+                var worker1Profile = _context.WorkerProfiles.FirstOrDefault(wp => wp.UserId == worker1User.Id);
+                if (worker1Profile != null)
+                {
+                    var has5000Booking = _context.Bookings.Any(b => b.WorkerId == worker1Profile.Id && b.TotalPrice == 5000 && b.Status == BookingStatus.Completed);
+                    if (!has5000Booking)
+                    {
+                        var cust = await _userManager.FindByNameAsync("Customer");
+                        var addr = _context.Addresses.FirstOrDefault(a => a.UserId == cust.Id);
+                        if (cust != null && addr != null)
+                        {
+                            _context.Bookings.Add(new Booking
+                            {
+                                ClientId = cust.Id,
+                                WorkerId = worker1Profile.Id,
+                                AddressId = addr.Id,
+                                ScheduledAt = DateTime.UtcNow,
+                                DurationHours = 1,
+                                TotalPrice = 5000,
+                                DiscountAmt = 0,
+                                Status = BookingStatus.Completed,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool ShouldSeedDemoUsers()
+        {
+            return _configuration.GetValue<bool>("Seed:CreateDemoUsers") &&
+                   !string.IsNullOrWhiteSpace(_configuration["Seed:DemoPassword"]);
+        }
+
+        private string GetDemoPassword()
+        {
+            return _configuration["Seed:DemoPassword"]!;
+        }
+    }
+}
+
+
