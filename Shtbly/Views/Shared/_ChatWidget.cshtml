@@ -2,33 +2,119 @@
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
 }
 
+<style>
+    /* Chat UI Enhancements */
+    #chatBox {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    #chatBox .card-header {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0) !important;
+        border-bottom: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    #chatMessages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #chatMessages::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .chat-bubble-user {
+        background-color: #f1f5f9;
+        color: #334155;
+        border-bottom-right-radius: 4px !important;
+    }
+
+    .chat-bubble-model {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        color: white;
+        border-bottom-left-radius: 4px !important;
+    }
+
+    .chat-worker-card {
+        background: white;
+        color: #333;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-decoration: none;
+        display: block;
+        margin-top: 10px;
+        overflow: hidden;
+        transition: transform 0.2s;
+    }
+    
+    .chat-worker-card:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Custom Chatbot SVG Icon Symbol -->
+<svg style="display: none;">
+    <symbol id="chatbot-icon" viewBox="0 0 100 100">
+        <path d="M 20 45 A 30 30 0 0 1 80 45" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <circle cx="50" cy="50" r="28" fill="currentColor"/>
+        <circle cx="38" cy="48" r="5" class="eye-color"/>
+        <circle cx="62" cy="48" r="5" class="eye-color"/>
+        <rect x="12" y="40" width="12" height="24" rx="6" fill="currentColor"/>
+        <rect x="76" y="40" width="12" height="24" rx="6" fill="currentColor"/>
+        <path d="M 82 52 A 38 38 0 0 1 50 88" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <circle cx="50" cy="88" r="5" fill="currentColor"/>
+    </symbol>
+</svg>
+
+<style>
+    .chat-icon-btn { color: white; width: 32px; height: 32px; margin-top: 4px; }
+    .chat-icon-btn .eye-color { fill: #0d6efd; }
+    
+    .chat-icon-header { color: white; width: 24px; height: 24px; vertical-align: middle; }
+    .chat-icon-header .eye-color { fill: #0d6efd; }
+    
+    .chat-icon-main { color: #0dcaf0; width: 60px; height: 60px; margin-bottom: 1rem; }
+    .chat-icon-main .eye-color { fill: #fafafa; }
+</style>
+
+<!-- Marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <!-- Floating Button -->
-<button id="chatToggle" class="btn btn-primary rounded-circle shadow"
-        style="position:fixed; bottom:30px; @(isRtl ? "right:30px;" : "left:30px;") width:55px; height:55px; z-index:999;">
-    <i class="fas fa-comments"></i>
+<button id="chatToggle" class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+        style="position:fixed; bottom:30px; @(isRtl ? "right:30px;" : "left:30px;") width:60px; height:60px; z-index:999; background: linear-gradient(135deg, #0d6efd, #0dcaf0); border:none; padding:0;">
+    <svg class="chat-icon-btn"><use href="#chatbot-icon"></use></svg>
 </button>
 
 <!-- Chat Box -->
-<div id="chatBox" class="card shadow-lg d-none"
-     style="position:fixed; bottom:95px; @(isRtl ? "right:30px;" : "left:30px;") width:340px; height:460px; z-index:998; display:flex; flex-direction:column;">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-robot @(isRtl ? "me-2" : "ms-2")"></i>@Localizer["ChatHeader"]</span>
-        <button class="btn btn-sm text-white" onclick="toggleChat()">✕</button>
+<div id="chatBox" class="card d-none"
+     style="position:fixed; bottom:100px; @(isRtl ? "right:30px;" : "left:30px;") width:360px; height:500px; z-index:998; display:flex; flex-direction:column;">
+    <div class="card-header text-white d-flex justify-content-between align-items-center py-3">
+        <span>
+            <svg class="chat-icon-header @(isRtl ? "me-2" : "ms-2")"><use href="#chatbot-icon"></use></svg>
+            @Localizer["ChatHeader"]
+        </span>
+        <button class="btn btn-sm text-white border-0" style="background:transparent; font-size:1.2rem;" onclick="toggleChat()">✕</button>
     </div>
 
-    <div id="chatMessages" class="card-body overflow-auto flex-grow-1" style="font-size:14px; direction:@(isRtl ? "rtl" : "ltr");">
-        <div class="text-muted text-center mt-3">
-            <i class="fas fa-comments fa-2x mb-2 text-primary"></i>
-            <p>@Localizer["WelcomeMessage"]</p>
+    <div id="chatMessages" class="card-body overflow-auto flex-grow-1" style="font-size:14px; direction:@(isRtl ? "rtl" : "ltr"); background-color: #fafafa;">
+        <div class="text-muted text-center mt-4 mb-4">
+            <svg class="chat-icon-main"><use href="#chatbot-icon"></use></svg>
+            <h6 class="fw-bold text-dark">@Localizer["WelcomeMessage"]</h6>
+            <p class="small">اسألني عن الخدمات، الأسعار، أو أفضل العمال!</p>
         </div>
     </div>
 
-    <div class="card-footer">
-        <div class="input-group">
-            <input id="chatInput" type="text" class="form-control form-control-sm"
-                   placeholder="@Localizer["InputPlaceholder"]" style="direction:@(isRtl ? "rtl" : "ltr");"
+    <div class="card-footer bg-white border-0 py-3">
+        <div class="input-group shadow-sm rounded-pill overflow-hidden" style="border: 1px solid #e2e8f0;">
+            <input id="chatInput" type="text" class="form-control border-0 px-4"
+                   placeholder="@Localizer["InputPlaceholder"]" style="direction:@(isRtl ? "rtl" : "ltr"); box-shadow:none;"
                    onkeydown="if(event.key==='Enter') sendMessage()" />
-            <button class="btn btn-primary btn-sm" onclick="sendMessage()">
+            <button class="btn border-0 text-white px-4" style="background: linear-gradient(135deg, #0d6efd, #0dcaf0);" onclick="sendMessage()">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
@@ -87,13 +173,26 @@
         const container = document.getElementById('chatMessages');
         const isUser = role === 'user';
         const div = document.createElement('div');
-        div.className = `d-flex mb-2 ${isUser ? 'justify-content-start' : 'justify-content-end'}`;
+        div.className = `d-flex mb-3 ${isUser ? 'justify-content-start' : 'justify-content-end'}`;
+        
         const bubble = document.createElement('div');
-        bubble.className = `px-3 py-2 rounded-3 ${isUser ? 'bg-light' : 'bg-primary text-white'}`;
-        bubble.style.maxWidth = '80%';
+        bubble.className = `px-3 py-2 rounded-4 shadow-sm ${isUser ? 'chat-bubble-user' : 'chat-bubble-model'}`;
+        bubble.style.maxWidth = '85%';
         bubble.style.direction = isRtl ? 'rtl' : 'ltr';
         bubble.style.textAlign = isRtl ? 'right' : 'left';
-        bubble.textContent = text;
+        
+        // Use marked.js for model replies (to support HTML and Markdown)
+        if (!isUser) {
+            bubble.innerHTML = marked.parse(text);
+            // Ensure links open in new tab
+            const links = bubble.querySelectorAll('a');
+            links.forEach(a => {
+                a.target = '_blank';
+            });
+        } else {
+            bubble.textContent = text;
+        }
+
         div.appendChild(bubble);
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
@@ -103,9 +202,9 @@
         const container = document.getElementById('chatMessages');
         const div = document.createElement('div');
         div.id = 'typingIndicator';
-        div.className = 'd-flex mb-2 justify-content-end';
-        div.innerHTML = `<div class="px-3 py-2 rounded-3 bg-primary text-white">
-            <span class="spinner-grow spinner-grow-sm"></span> ${typingText}
+        div.className = 'd-flex mb-3 justify-content-end';
+        div.innerHTML = `<div class="px-3 py-2 rounded-4 shadow-sm chat-bubble-model">
+            <span class="spinner-border spinner-border-sm me-2"></span> ${typingText}
         </div>`;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;

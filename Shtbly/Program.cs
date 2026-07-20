@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -24,6 +24,7 @@ using Shtbly.Services.TokenServices;
 using Shtbly.Services.WorkerProfileService;
 using Shtbly.UnitOfWork;
 using Shtbly.Utilities.Dbintializes;
+using Shtbly.Middlewares;
 using Stripe;
 using Address = Shtbly.Models.Address;
 using Coupon = Shtbly.Models.Coupon;
@@ -63,7 +64,12 @@ namespace Shtbly
                 .AddCheck<EmailServiceHealthCheck>("Email Service")
                 .AddCheck<StripeHealthCheck>("Stripe Integration")
                 .AddCheck<GroqAiHealthCheck>("Groq AI Service")
-                .AddCheck<SmsServiceHealthCheck>("SMS Service");
+                .AddCheck<SmsServiceHealthCheck>("SMS Service")
+                .AddCheck<DiskSpaceHealthCheck>("Disk Space")
+                .AddCheck<MemoryHealthCheck>("Memory Usage")
+                .AddCheck<FileSystemWriteHealthCheck>("File System Write")
+                .AddCheck<GoogleAuthConfigHealthCheck>("Google OAuth Config")
+                .AddCheck<JwtConfigHealthCheck>("JWT Configuration");
 
             //hangfire
             builder.Services.AddHangfire(config => config
@@ -223,13 +229,20 @@ namespace Shtbly
             var app = builder.Build();
             var adminOnly = new AuthorizeAttribute { Roles = $"{SD.ROLE_ADMIN},{SD.ROLE_SUPER_ADMIN}" };
 
+            // Add Global Exception Middleware
+            app.UseMiddleware<GlobalExceptionMiddleware>();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Customer/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            // Handle non-exception errors (e.g. 404, 403)
+            app.UseStatusCodePagesWithReExecute("/Customer/Home/Error", "?statusCode={0}");
+
             app.MapHealthChecks("/health", new HealthCheckOptions
             {
                 ResponseWriter = async (context, report) =>

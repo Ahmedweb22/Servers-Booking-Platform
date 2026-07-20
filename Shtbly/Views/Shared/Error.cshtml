@@ -1,25 +1,119 @@
-﻿@model ErrorViewModel
+@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = Model.StatusCode.HasValue ? $"Error {Model.StatusCode}" : "Error";
+    var statusCode = Model.StatusCode ?? 500;
+    var errorMessage = Model.ErrorMessage ?? "An unexpected error occurred while processing your request.";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    .error-card {
+        background: linear-gradient(145deg, #1e293b, #0f172a);
+        border-radius: 24px;
+        padding: 60px 40px;
+        text-align: center;
+        max-width: 600px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: white;
+    }
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    .error-code {
+        font-size: 7rem;
+        font-weight: 900;
+        background: -webkit-linear-gradient(45deg, #3b82f6, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 20px;
+        text-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .error-title {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+        color: #f8fafc;
+    }
+
+    .error-message {
+        font-size: 1.15rem;
+        color: #cbd5e1;
+        line-height: 1.6;
+        margin-bottom: 35px;
+        font-weight: 500;
+    }
+
+    .btn-return {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #2563eb;
+        color: white;
+        padding: 14px 32px;
+        border-radius: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-return:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        color: white;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+
+    .request-id {
+        margin-top: 35px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-code">@statusCode</div>
+        
+        <h2 class="error-title">
+            @if (statusCode == 404)
+            {
+                <text>Page Not Found</text>
+            }
+            else if (statusCode == 403)
+            {
+                <text>Access Denied</text>
+            }
+            else
+            {
+                <text>Something went wrong</text>
+            }
+        </h2>
+        
+        <p class="error-message">
+            @errorMessage
+        </p>
+        
+        <a href="/" class="btn-return">
+            <i class="bi bi-house-door-fill"></i> Return to Homepage
+        </a>
+
+        @if (Model.ShowRequestId)
+        {
+            <div class="request-id">
+                Request ID: <code>@Model.RequestId</code>
+            </div>
+        }
+    </div>
+</div>

@@ -1,4 +1,4 @@
-﻿using BookingTypes = Shtbly.ViewModels.BookingTypes;
+using BookingTypes = Shtbly.ViewModels.BookingTypes;
 using Review = Shtbly.Models.Review;
 
 namespace Shtbly.Services.BookingSystem;
@@ -31,6 +31,7 @@ public class BookingSystemService : IBookingSystemService
     private readonly IRepository<Shtbly.Models.Booking> _bookingRepository;
     private readonly IRepository<Shtbly.Models.Address> _addressRepository;
     private readonly IRepository<Shtbly.Models.WorkerProfile> _workerProfileRepository;
+    private readonly Shtbly.Services.Receipt.IReceiptService _receiptService;
     private readonly UserManager<User> _userManager;
     private readonly IStringLocalizer<BookingSystemService> _localizer;
     private readonly ApplicationDbContext _context;
@@ -43,6 +44,7 @@ public class BookingSystemService : IBookingSystemService
         IRepository<Shtbly.Models.Booking> bookingRepository,
         IRepository<Shtbly.Models.Address> addressRepository,
         IRepository<Shtbly.Models.WorkerProfile> workerProfileRepository,
+        Shtbly.Services.Receipt.IReceiptService receiptService,
         IStringLocalizer<BookingSystemService> localizer,
         ApplicationDbContext context)
     {
@@ -53,6 +55,7 @@ public class BookingSystemService : IBookingSystemService
         _bookingRepository = bookingRepository;
         _addressRepository = addressRepository;
         _workerProfileRepository = workerProfileRepository;
+        _receiptService = receiptService;
         _localizer = localizer;
         _context = context;
     }
@@ -515,6 +518,44 @@ public class BookingSystemService : IBookingSystemService
 
         await PopulateNavigationAsync(booking);
 
+        if (booking.PaymentStatus == PaymentStatuses.Paid && booking.PaymentMethod == Shtbly.Models.PaymentMethods.Card)
+        {
+            if (booking.Booking != null)
+            {
+                var fullBooking = (await _bookingRepository.GetAsync(
+                    b => b.Id == booking.BookingId,
+                    new System.Linq.Expressions.Expression<System.Func<Shtbly.Models.Booking, object>>[] {
+                        b => b.Client,
+                        b => b.Worker.User,
+                        b => b.Payment
+                    })).FirstOrDefault();
+
+                if (fullBooking != null)
+                {
+                    if (fullBooking.Payment == null)
+                    {
+                        fullBooking.Payment = new Shtbly.Models.Payment
+                        {
+                            BookingId = booking.BookingId,
+                            Amount = booking.TotalPrice,
+                            Method = Shtbly.Models.PaymentMethod.Card,
+                            Status = Shtbly.Models.PaymentStatus.Paid,
+                            GatewayName = "Stripe",
+                            GatewayRef = "STRIPE-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                            GatewayResponse = "Paid via Stripe",
+                            TransactionId = "STRIPE-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                            PaidAt = booking.ConfirmedAt ?? DateTime.UtcNow
+                        };
+                        _bookingRepository.Update(fullBooking);
+                        await _bookingRepository.CommitAsync();
+                    }
+
+                    await _receiptService.GenerateReceiptPdfAsync(fullBooking);
+                    booking.Booking.Payment = fullBooking.Payment;
+                }
+            }
+        }
+
         var reviewList = await _reviewRepository.GetAsync(r => r.BookingId == id);
         var hasReview = reviewList != null && System.Linq.Enumerable.Any(reviewList);
 
@@ -967,9 +1008,42 @@ public class BookingSystemService : IBookingSystemService
             if (booking.Booking != null)
             {
                 booking.Booking.Status = Shtbly.Models.BookingStatus.Confirmed;
+                
+                if (booking.PaymentStatus == PaymentStatuses.Paid)
+                {
+                    booking.Booking.Payment = new Shtbly.Models.Payment
+                    {
+                        BookingId = booking.BookingId,
+                        Amount = booking.TotalPrice,
+                        Method = Shtbly.Models.PaymentMethod.Card,
+                        Status = Shtbly.Models.PaymentStatus.Paid,
+                        GatewayName = "Stripe",
+                        GatewayRef = "STRIPE-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                        GatewayResponse = "Paid via Stripe",
+                        TransactionId = "STRIPE-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper(),
+                        PaidAt = DateTime.UtcNow
+                    };
+                }
             }
             _orderRepository.Update(booking);
             await _orderRepository.CommitAsync();
+
+            if (booking.Booking != null && booking.Booking.Payment != null)
+            {
+                var fullBooking = (await _bookingRepository.GetAsync(
+                    b => b.Id == booking.BookingId,
+                    new System.Linq.Expressions.Expression<System.Func<Shtbly.Models.Booking, object>>[] {
+                        b => b.Client,
+                        b => b.Worker.User,
+                        b => b.Payment
+                    })).FirstOrDefault();
+
+                if (fullBooking != null)
+                {
+                    await _receiptService.GenerateReceiptPdfAsync(fullBooking);
+                }
+            }
+
             return true;
         }
         return false;

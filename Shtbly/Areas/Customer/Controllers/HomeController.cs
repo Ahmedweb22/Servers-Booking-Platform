@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Shtbly.Models;
 using Shtbly.Services.BookingSystem;
@@ -58,7 +58,7 @@ namespace Shtbly.Controllers
                 filter = w => w.User.FName.Contains(searchString);
             }
 
-            var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category, w => w.User.Addresses]);
+            var workers = await _workerRepository.GetAsync(expression: filter, includes: [w => w.WorkerServices.Category, w => w.User.Addresses, w => w.WorkerBookings]);
 
             // Apply location filter (city/district) after fetching
             if (!string.IsNullOrEmpty(city))
@@ -121,7 +121,8 @@ namespace Shtbly.Controllers
                     w => w.WorkerServices.Category,
                     w => w.WorkerReviews,
                     w => w.Availabilities,
-                    w => w.PortfolioMediaItems
+                    w => w.PortfolioMediaItems,
+                    w => w.WorkerBookings
                 ]);
 
             if (worker == null)
@@ -179,7 +180,7 @@ namespace Shtbly.Controllers
             {
                 return Unauthorized();
             }
-            var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId, includes: [f => f.Worker.User.Addresses, f => f.Worker.WorkerServices.Category]);
+            var favorites = await _favoriteRepository.GetAsync(f => f.ClientId == userId, includes: [f => f.Worker.User.Addresses, f => f.Worker.WorkerServices.Category, f => f.Worker.WorkerBookings]);
             var favoriteWorkers = favorites.Select(f => f.Worker).ToList();
             return View(favoriteWorkers);
         }
@@ -202,9 +203,35 @@ namespace Shtbly.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int? statusCode = null)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var vm = new ErrorViewModel 
+            { 
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+                StatusCode = statusCode
+            };
+
+            if (statusCode.HasValue)
+            {
+                if (statusCode.Value == 404)
+                {
+                    vm.ErrorMessage = "Oops! The page you are looking for doesn't exist or has been moved.";
+                }
+                else if (statusCode.Value == 403)
+                {
+                    vm.ErrorMessage = "You do not have permission to access this page.";
+                }
+                else if (statusCode.Value == 500)
+                {
+                    vm.ErrorMessage = "Internal Server Error. We're looking into it.";
+                }
+                else
+                {
+                    vm.ErrorMessage = $"An unexpected error occurred. (Status Code: {statusCode.Value})";
+                }
+            }
+
+            return View(vm);
         }
     }
 }

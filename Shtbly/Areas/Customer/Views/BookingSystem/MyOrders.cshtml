@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Order>
+@model IEnumerable<Order>
 @using Shtbly.Models
 
 @{
@@ -546,7 +546,13 @@
                                     <i class="bi bi-credit-card me-1"></i> @Localizer["PayNowBtn"]
                                 </a>
                             }
-                            <a href="/b/@UrlObfuscator.Encrypt(order.Id)" class="btn-action btn-action-primary">
+                            @if (System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "receipts", $"Receipt-{order.Id}.pdf")))
+                            {
+                                <a href="/receipts/Receipt-@(order.Id).pdf" target="_blank" class="btn-action btn-action-primary" style="background-color: #f1f5f9; color: #475467; border: 1px solid #d0d5dd;">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Receipt
+                                </a>
+                            }
+                            <a href="/b/@Shtbly.Utilities.UrlObfuscator.Encrypt(order.Id)" class="btn-action btn-action-primary">
                                 <i class="bi bi-eye me-1"></i> @Localizer["ViewDetailsBtn"]
                             </a>
                         </div>

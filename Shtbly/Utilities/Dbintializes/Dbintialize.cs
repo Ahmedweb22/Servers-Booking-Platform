@@ -32,54 +32,98 @@ namespace Shtbly.Utilities.Dbintializes
                 await _roleManager.CreateAsync(new(SD.ROLE_ADMIN));
                 await _roleManager.CreateAsync(new(SD.ROLE_WORKER));
                 await _roleManager.CreateAsync(new(SD.ROLE_CUSTOMER));
+            }
 
-                if (!ShouldSeedDemoUsers())
+            if (ShouldSeedDemoUsers())
+            {
+                var superAdminUser = await _userManager.FindByNameAsync("SuperAdmin");
+                if (superAdminUser == null)
                 {
-                    return;
+                    var result = await _userManager.CreateAsync(new()
+                    {
+                        FName = "Super",
+                        LName = "Admin",
+                        Name = "Super Admin",
+                        Email = "SuperAdmin@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01222222222",
+                        UserName = "SuperAdmin"
+                    }, "Admin123@");
+                    if (!result.Succeeded)
+                    {
+                        System.Console.WriteLine("Failed to create SuperAdmin: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+                    }
+                }
+                else
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(superAdminUser);
+                    var resetResult = await _userManager.ResetPasswordAsync(superAdminUser, token, "Admin123@");
+                    if (!resetResult.Succeeded)
+                    {
+                        System.Console.WriteLine("Failed to reset SuperAdmin: " + string.Join(", ", resetResult.Errors.Select(e => e.Description)));
+                    }
                 }
 
-                var demoPassword = GetDemoPassword();
+                var adminUser = await _userManager.FindByNameAsync("Admin");
+                if (adminUser == null)
+                {
+                    await _userManager.CreateAsync(new()
+                    {
+                        FName = "Admin",
+                        LName = "1",
+                        Name = "Admin 1",
+                        Email = "Admin@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01555555555",  
+                        UserName = "Admin"
+                    }, "Admin123@");
+                }
+                else
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(adminUser);
+                    await _userManager.ResetPasswordAsync(adminUser, token, "Admin123@");
+                }
 
-                await _userManager.CreateAsync(new()
+                var workerUser = await _userManager.FindByNameAsync("Worker");
+                if (workerUser == null)
                 {
-                    FName = "Super",
-                    LName = "Admin",
-                    Name = "Super Admin",
-                    Email = "SuperAdmin@gmail.com",
-                    EmailConfirmed = true,
-                    Phone = "01222222222",
-                    UserName = "SuperAdmin"
-                }, demoPassword);
-                await _userManager.CreateAsync(new()
+                    await _userManager.CreateAsync(new()
+                    {
+                        FName = "Worker",
+                        LName = "1",
+                        Name = "Worker 1",
+                        Email = "Worker@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01111111111",
+                        UserName = "Worker"
+                    }, "Worker123@");
+                }
+                else
                 {
-                    FName = "Admin",
-                    LName = "1",
-                    Name = "Admin 1",
-                    Email = "Admin@gmail.com",
-                    EmailConfirmed = true,
-                    Phone = "01555555555",  
-                    UserName = "Admin"
-                }, demoPassword);
-                await _userManager.CreateAsync(new()
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(workerUser);
+                    await _userManager.ResetPasswordAsync(workerUser, token, "Worker123@");
+                }
+
+                var customerUser = await _userManager.FindByNameAsync("Customer");
+                if (customerUser == null)
                 {
-                    FName = "Worker",
-                    LName = "1",
-                    Name = "Worker 1",
-                    Email = "Worker@gmail.com",
-                    EmailConfirmed = true,
-                    Phone = "01111111111",
-                    UserName = "Worker"
-                }, demoPassword);
-                await _userManager.CreateAsync(new()
+                    await _userManager.CreateAsync(new()
+                    {
+                        FName = "Customer",
+                        LName = "1",
+                        Name = "Customer 1",
+                        Email = "Customer@gmail.com",
+                        EmailConfirmed = true,
+                        Phone = "01000000000",
+                        UserName = "Customer"
+                    }, "Customer123@");
+                }
+                else
                 {
-                    FName = "Customer",
-                    LName = "1",
-                    Name = "Customer 1",
-                    Email = "Customer@gmail.com",
-                    EmailConfirmed = true,
-                    Phone = "01000000000",
-                    UserName = "Customer"
-                }, demoPassword);
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(customerUser);
+                    await _userManager.ResetPasswordAsync(customerUser, token, "Customer123@");
+                }
+
                 var user = await _userManager.FindByNameAsync("SuperAdmin");
                 var user2 = await _userManager.FindByNameAsync("Admin");
                 var user3 = await _userManager.FindByNameAsync("Worker");
@@ -92,29 +136,49 @@ namespace Shtbly.Utilities.Dbintializes
                     await _userManager.AddToRoleAsync(user4 , SD.ROLE_CUSTOMER);
 
                     // Add seed addresses and more workers
-                    var worker2 = new User
+                    var worker2 = await _userManager.FindByNameAsync("worker2");
+                    if (worker2 == null)
                     {
-                        FName = "محمد",
-                        LName = "أحمد",
-                        Email = "worker2@gmail.com",
-                        EmailConfirmed = true,
-                        Phone = "01234567891",
-                        UserName = "worker2"
-                    };
-                    await _userManager.CreateAsync(worker2, demoPassword);
-                    await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
+                        worker2 = new User
+                        {
+                            FName = "محمد",
+                            LName = "أحمد",
+                            Name = "محمد أحمد",
+                            Email = "worker2@gmail.com",
+                            EmailConfirmed = true,
+                            Phone = "01234567891",
+                            UserName = "worker2"
+                        };
+                        await _userManager.CreateAsync(worker2, "Worker123@");
+                        await _userManager.AddToRoleAsync(worker2, SD.ROLE_WORKER);
+                    }
+                    else
+                    {
+                        var token = await _userManager.GeneratePasswordResetTokenAsync(worker2);
+                        await _userManager.ResetPasswordAsync(worker2, token, "Worker123@");
+                    }
 
-                    var worker3 = new User
+                    var worker3 = await _userManager.FindByNameAsync("worker3");
+                    if (worker3 == null)
                     {
-                        FName = "محمود",
-                        LName = "علي",
-                        Email = "worker3@gmail.com",
-                        EmailConfirmed = true,
-                        Phone = "01234567892",
-                        UserName = "worker3"
-                    };
-                    await _userManager.CreateAsync(worker3, demoPassword);
-                    await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
+                        worker3 = new User
+                        {
+                            FName = "محمود",
+                            LName = "علي",
+                            Name = "محمود علي",
+                            Email = "worker3@gmail.com",
+                            EmailConfirmed = true,
+                            Phone = "01234567892",
+                            UserName = "worker3"
+                        };
+                        await _userManager.CreateAsync(worker3, "Worker123@");
+                        await _userManager.AddToRoleAsync(worker3, SD.ROLE_WORKER);
+                    }
+                    else
+                    {
+                        var token = await _userManager.GeneratePasswordResetTokenAsync(worker3);
+                        await _userManager.ResetPasswordAsync(worker3, token, "Worker123@");
+                    }
 
                     _context.Addresses.AddRange(
                         new Address { City = "الإسكندرية", District = "سموحة", Street = "شارع فوزي معاذ", UserId = user3.Id, IsDefault = true, Lat = 31.224, Lng = 29.955 },
@@ -123,6 +187,20 @@ namespace Shtbly.Utilities.Dbintializes
                         new Address { City = "القاهرة", District = "التجمع الخامس", Street = "شارع التسعين", UserId = user4.Id, IsDefault = true, Lat = 30.005, Lng = 31.450 }
                     );
                     
+                    // Ensure at least one Service Category exists for WorkerProfiles
+                    if (!_context.ServiceCategories.Any())
+                    {
+                        _context.ServiceCategories.Add(new ServiceCategory 
+                        { 
+                            NameAr = "صيانة عامة", 
+                            NameEn = "General Maintenance", 
+                            IsActive = true,
+                            Icon = "fas fa-wrench",
+                            Price = 50 
+                        });
+                        await _context.SaveChangesAsync();
+                    }
+
                     // Create worker profiles
                     var workerUsers = new[] { user3, worker2, worker3 };
                     foreach (var wUser in workerUsers)
@@ -312,8 +390,11 @@ namespace Shtbly.Utilities.Dbintializes
 
         private bool ShouldSeedDemoUsers()
         {
-            return _configuration.GetValue<bool>("Seed:CreateDemoUsers") &&
-                   !string.IsNullOrWhiteSpace(_configuration["Seed:DemoPassword"]);
+            var createDemoUsers = _configuration.GetValue<bool>("Seed:CreateDemoUsers");
+            var demoPassword = _configuration["Seed:DemoPassword"];
+            System.Console.WriteLine($"[DbIntialize] ShouldSeedDemoUsers: CreateDemoUsers={createDemoUsers}, DemoPassword={demoPassword}");
+            return createDemoUsers &&
+                   !string.IsNullOrWhiteSpace(demoPassword);
         }
 
         private string GetDemoPassword()

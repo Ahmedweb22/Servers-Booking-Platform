@@ -1,4 +1,4 @@
-﻿@model Shtbly.Models.WorkerProfile
+@model Shtbly.Models.WorkerProfile
 
 @{
     var isRtl = Context.Features.Get<IRequestCultureFeature>()?.RequestCulture?.UICulture?.Name.StartsWith("ar") ?? false;
@@ -15,7 +15,7 @@
         {"Saturday", Localizer["Saturday"].Value}
     };
     var memberYear = Model.CreatedAt.Year;
-    var completedOrders = Model.WorkerBookings?.Count() ?? 0;
+    var completedOrders = Model.WorkerBookings?.Count(b => b.Status == Shtbly.Models.BookingStatus.Completed) ?? 0;
     var rating = Model.RatingAvg;
     var categoryName = isRtl ? (Model.WorkerServices?.Category?.NameAr ?? Localizer["NotSpecified"].Value) : (Model.WorkerServices?.Category?.Name ?? Localizer["NotSpecified"].Value);
     var firstLetter = Model.User?.FName?.Substring(0, Math.Min(3, Model.User.FName.Length)) ?? "م";

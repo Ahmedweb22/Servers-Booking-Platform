@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Identity
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject SignInManager<User> SignInManager
@@ -15,6 +15,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@Localizer["PageTitle"]</title>
+    <link rel="icon" type="image/png" href="~/favicon.png" />
     <link rel="stylesheet" href="~/css/customer.css" asp-append-version="true">
     @if (isRtl)
     {
@@ -32,9 +33,9 @@
 
     <style>
             :root {
-                --primary-color: #0f172a; /* Deep Slate */
-                --secondary-color: #3b82f6; /* Bright Blue */
-                --accent-color: #f59e0b; /* Amber */
+                --primary-color: #0b397b; /* Logo Deep Blue */
+                --secondary-color: #00c3eb; /* Logo Cyan */
+                --accent-color: #ff5700; /* Logo Orange */
                 --success-color: #10b981; /* Emerald */
                 --bg-color: #f8fafc;
                 --surface-color: #ffffff;
@@ -47,8 +48,8 @@
             /* Dark Mode Variables */
             [data-theme="dark"] {
                 --primary-color: #e2e8f0;
-                --secondary-color: #60a5fa;
-                --accent-color: #fbbf24;
+                --secondary-color: #00c3eb;
+                --accent-color: #ff5700;
                 --success-color: #34d399;
                 --bg-color: #0f172a;
                 --surface-color: #1e293b;
@@ -282,10 +283,12 @@
             .brand-logo {
                 font-size: 1.8rem;
                 font-weight: 900;
+                letter-spacing: -0.5px;
+            }
+            .brand-text-gradient {
                 background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
-                letter-spacing: -0.5px;
             }
 
             .nav-link-custom {
@@ -773,7 +776,11 @@
     <!-- 1. Top Navigation -->
     <header class="top-nav justify-content-between">
         <div class="d-flex align-items-center gap-4">
-            <a href="/Customer/Home/Index" class="brand-logo text-decoration-none">SHTBLY <span class="text-dark fs-5 fw-bold ms-1">@Localizer["BrandName"]</span></a>
+            <a href="/Customer/Home/Index" class="brand-logo text-decoration-none d-flex align-items-center gap-2">
+                <img src="~/favicon.png" alt="Shtbly Logo" class="flex-shrink-0" style="height: 40px; width: auto; border-radius: 8px; object-fit: contain;" onerror="this.style.display='none'" />
+                <span class="brand-text-gradient ms-1">SHTBLY</span>
+                <span class="text-dark fs-5 fw-bold" style="color: var(--text-main) !important;">@Localizer["BrandName"]</span>
+            </a>
 
             <nav class="d-none d-lg-flex gap-2 ms-4 border-start ps-4">
                 <a href="/Customer/Home/Index" class="nav-link-custom @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">

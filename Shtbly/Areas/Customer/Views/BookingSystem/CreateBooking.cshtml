@@ -1,4 +1,4 @@
-﻿@model Shtbly.ViewModels.BookingWizardViewModel
+@model Shtbly.ViewModels.BookingWizardViewModel
 @using Shtbly.Models
 @using Stripe
 
@@ -380,6 +380,7 @@
             <input type="hidden" asp-for="PromoCodeText" id="promoCodeTextHidden" />
             <input type="hidden" asp-for="CouponId" id="couponIdHidden" />
             <input type="hidden" asp-for="CouponCode" id="couponCodeHidden" />
+            <input type="hidden" asp-for="IsWorkerLocked" />
             <div asp-validation-summary="ModelOnly" class="banner error"></div>
 
             <div class="steps">
@@ -397,7 +398,7 @@
                 <div class="field-grid">
                     <div class="field">
                         <label asp-for="ServiceId"></label>
-                        @if (ViewBag.IsWorkerLocked == true)
+                        @if (Model.IsWorkerLocked)
                         {
                             <select asp-for="ServiceId" asp-items="Model.ServiceOptions" id="serviceSelect" disabled style="background-color: #f3f4f6; color: #374151; cursor: not-allowed; opacity: 0.85;"></select>
                             <input type="hidden" asp-for="ServiceId" />
@@ -411,9 +412,9 @@
 
                     <div class="field">
                         <label asp-for="WorkerId"></label>
-                        @if (ViewBag.IsWorkerLocked == true)
+                        @if (Model.IsWorkerLocked)
                         {
-                            <select asp-for="WorkerId" asp-items="Model.WorkerOptions" id="workerSelect" disabled style="background-color: #f3f4f6; color: #374151; cursor: not-allowed; opacity: 0.85;"></select>
+                            <select asp-for="WorkerId" asp-items="Model.WorkerOptions" id="workerSelect" disabled name="" style="background-color: #f3f4f6; color: #374151; cursor: not-allowed; opacity: 0.85;"></select>
                             <input type="hidden" asp-for="WorkerId" />
                         }
                         else

@@ -1,0 +1,20 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Headset band -->
+    <path d="M 20 45 A 30 30 0 0 1 80 45" stroke="#1e293b" stroke-width="6" stroke-linecap="round" fill="none"/>
+    
+    <!-- Face -->
+    <circle cx="50" cy="50" r="28" fill="#1e293b"/>
+    
+    <!-- Eyes -->
+    <circle cx="38" cy="48" r="5" fill="#ffffff"/>
+    <circle cx="62" cy="48" r="5" fill="#ffffff"/>
+    
+    <!-- Earpieces -->
+    <rect x="12" y="40" width="12" height="24" rx="6" fill="#1e293b"/>
+    <rect x="76" y="40" width="12" height="24" rx="6" fill="#1e293b"/>
+    
+    <!-- Microphone Arm -->
+    <path d="M 82 52 A 38 38 0 0 1 50 88" stroke="#1e293b" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Mic Tip -->
+    <circle cx="50" cy="88" r="5" fill="#1e293b"/>
+</svg>

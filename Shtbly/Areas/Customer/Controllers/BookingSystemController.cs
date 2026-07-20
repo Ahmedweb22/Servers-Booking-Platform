@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,10 +52,13 @@ namespace Shtbly.Areas.Customer.Controllers
 
             if (!string.IsNullOrEmpty(workerId))
             {
-                ViewBag.IsWorkerLocked = true;
+                model.IsWorkerLocked = true;
 
-                if (int.TryParse(workerId, out var workerProfileId))
+                var decryptedWorkerId = Shtbly.Utilities.UrlObfuscator.Decrypt(workerId);
+
+                if (int.TryParse(workerId, out var workerProfileId) || decryptedWorkerId > 0)
                 {
+                    workerProfileId = workerProfileId > 0 ? workerProfileId : decryptedWorkerId;
                     // It is a worker profile ID, resolve the user ID
                     var workerProfile = await _context.WorkerProfiles
                         .Include(w => w.WorkerServices)
@@ -86,6 +89,7 @@ namespace Shtbly.Areas.Customer.Controllers
                 }
             }
 
+            ModelState.Clear();
             var vm = await _bookingSystemService.BuildCreateViewModelAsync(model);
             return View(vm);
         }
@@ -94,8 +98,10 @@ namespace Shtbly.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateBooking(BookingWizardViewModel model)
         {
+            Console.WriteLine("---- POST CreateBooking WorkerId: '" + model.WorkerId + "' ----");
             if (!ModelState.IsValid)
             {
+                foreach(var val in ModelState.Values) { foreach(var err in val.Errors) { Console.WriteLine("ModelState Error: " + err.ErrorMessage); } }
                 return View(await _bookingSystemService.BuildCreateViewModelAsync(model));
             }
 
@@ -119,6 +125,12 @@ namespace Shtbly.Areas.Customer.Controllers
                 return RedirectToAction(nameof(Pay), new { id = result.BookingId });
             }
             return RedirectToAction(nameof(DetailsBooking), new { id = result.BookingId });
+        }
+
+        [HttpGet("/b/{id}")]
+        public IActionResult DetailsBookingShort(int id)
+        {
+            return RedirectToAction(nameof(DetailsBooking), new { id = id });
         }
 
         [HttpGet]

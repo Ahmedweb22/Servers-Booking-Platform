@@ -1,4 +1,4 @@
-﻿@model Shtbly.ViewModels.BookingDetailsVM
+@model Shtbly.ViewModels.BookingDetailsVM
 
 @{
     ViewData["Title"] = "Booking Details";
@@ -149,7 +149,17 @@
             <div class="col-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fa-brands fa-stripe fa-lg me-2"></i> Payment Details</h5>
+                        <h5 class="mb-0">
+                            @if (Model.Booking.Payment.Method == Shtbly.Models.PaymentMethod.Card)
+                            {
+                                <i class="fa-brands fa-stripe fa-lg me-2"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-money-bill-wave fa-lg me-2"></i>
+                            }
+                            Payment Details
+                        </h5>
                         <span class="badge bg-light text-primary">@Model.Booking.Payment.Status</span>
                     </div>
                     <div class="card-body">

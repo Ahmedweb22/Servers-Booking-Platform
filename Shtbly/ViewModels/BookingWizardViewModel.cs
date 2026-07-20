@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shtbly.Models;
 
@@ -73,5 +73,6 @@ namespace Shtbly.ViewModels
         public decimal ConvenienceFee { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal TotalPrice { get; set; }
+        public bool IsWorkerLocked { get; set; }
     }
 }

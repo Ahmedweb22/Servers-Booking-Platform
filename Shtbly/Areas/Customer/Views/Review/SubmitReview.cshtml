@@ -1,4 +1,4 @@
-﻿@model Shtbly.ViewModels.ReviewVM
+@model Shtbly.ViewModels.ReviewVM
 @{
     ViewData["Title"] = Localizer["PageTitle"];
 }
@@ -340,7 +340,7 @@
  
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-3 border-top pt-4">
-                <a href="/Customer/BookingSystem/DetailsBooking/@Model.OrderId" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">@Localizer["CancelBtn"]</a>
+                <a href="/b/@Shtbly.Utilities.UrlObfuscator.Encrypt(Model.OrderId)" class="btn btn-cancel flex-grow-1 flex-sm-grow-0 text-center">@Localizer["CancelBtn"]</a>
                 <button type="submit" class="btn btn-submit flex-grow-1 flex-sm-grow-0 d-flex align-items-center justify-content-center gap-2">
                     <span>@Localizer["SubmitBtn"]</span>
                     <i class="bi bi-send-fill fs-6"></i>

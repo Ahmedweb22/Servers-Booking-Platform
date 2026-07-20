@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Localization
+@using Microsoft.AspNetCore.Localization
 @{
     var reqCultureFeature = Context.Features.Get<IRequestCultureFeature>();
     var curCulture = reqCultureFeature?.RequestCulture?.UICulture?.Name ?? "en";
@@ -11,6 +11,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@(ViewData["Title"] ?? Localizer["PageTitle"])</title>
+    <link rel="icon" type="image/png" href="~/favicon.png" />
     <link rel="stylesheet" href="~/css/identity.css">
     @if (isRtl)
     {
@@ -26,9 +27,9 @@
 
     <style>
             :root {
-                --primary-color: #0A2647;
-                --secondary-color: #144272;
-                --accent-color: #205295;
+                --primary-color: #0b397b;
+                --secondary-color: #00c3eb;
+                --accent-color: #ff5700;
                 --highlight-color: #2C74B3;
                 --gold-accent: #F2C94C;
                 --bg-color: #F8FAFC;
@@ -36,8 +37,8 @@
 
             [data-theme="dark"] {
                 --primary-color: #1e3a5f;
-                --secondary-color: #2a5a8f;
-                --accent-color: #3b7dcd;
+                --secondary-color: #00c3eb;
+                --accent-color: #ff5700;
                 --highlight-color: #60a5fa;
                 --gold-accent: #fbbf24;
                 --bg-color: #0f172a;

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Order>
+@model IEnumerable<Order>
 @using Shtbly.Models
 
 @{
@@ -797,5 +797,9 @@
         }
 
         document.getElementById('bookingSearchInput')?.addEventListener('input', executeFilters);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.modal').forEach(m => document.body.appendChild(m));
+        });
     </script>
 }
